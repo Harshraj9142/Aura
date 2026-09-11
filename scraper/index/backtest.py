@@ -8,7 +8,7 @@ against published DGCA domestic average reference figures in dgca_reference_fare
 from __future__ import annotations
 
 import csv
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import NamedTuple, Optional
 from loguru import logger
