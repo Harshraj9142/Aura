@@ -2,19 +2,25 @@ import { getFareStats } from "@/lib/services/fares.service";
 import { getTrackedRoutes } from "@/lib/services/routes.service";
 import { getTrackedSources } from "@/lib/services/sources.service";
 import { getIndexTimeSeries } from "@/lib/services/index.service";
+import { getActiveSurgeAlerts } from "@/lib/services/alerts.service";
 import { IndexTrendChart } from "@/components/charts/IndexTrendChart";
+import { CpiSimulator } from "@/components/dashboard/CpiSimulator";
+import { SurgeAlertsBanner } from "@/components/dashboard/SurgeAlertsBanner";
 import Link from "next/link";
 import { Plane, Database, Activity, ShieldCheck, ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function OverviewPage() {
-  const [stats, routes, sources, indexData] = await Promise.all([
+  const [stats, routes, sources, indexData, alerts] = await Promise.all([
     getFareStats(),
     getTrackedRoutes(),
     getTrackedSources(),
     getIndexTimeSeries("daily"),
+    getActiveSurgeAlerts(),
   ]);
+
+  const latestIndexScore = indexData.length > 0 ? indexData[indexData.length - 1].index_value : 105.96;
 
   return (
     <div className="space-y-6">
@@ -104,6 +110,12 @@ export default async function OverviewPage() {
           </p>
         </div>
       </div>
+
+      {/* Surge Alerts Section */}
+      <SurgeAlertsBanner alerts={alerts} />
+
+      {/* CPI Inflation Simulator Component */}
+      <CpiSimulator currentApiScore={latestIndexScore} />
 
       {/* Index Trend Chart Card */}
       <div className="rounded-xl border border-slate-800 bg-slate-950 p-6 shadow-sm">
