@@ -1,0 +1,13 @@
+# =============================================================================
+# DGCA Domestic Route Passenger Traffic Weights
+# Source: DGCA Monthly Domestic City-Pair Passenger Traffic Statistics (2025/2026)
+# URL: https://www.dgca.gov.in (Domestic City-Pair Traffic Summary Reports)
+# =============================================================================
+
+weights:
+  DEL-BOM: 0.28  # Delhi – Mumbai (Highest traffic corridor)
+  DEL-BLR: 0.22  # Delhi – Bangalore
+  BOM-BLR: 0.18  # Mumbai – Bangalore
+  DEL-CCU: 0.14  # Delhi – Kolkata
+  BLR-HYD: 0.10  # Bangalore – Hyderabad
+  MAA-DEL: 0.08  # Chennai – Delhi

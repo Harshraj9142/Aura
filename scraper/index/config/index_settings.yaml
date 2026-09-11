@@ -1,0 +1,15 @@
+# =============================================================================
+# APIx Index Calculation Module Settings
+# =============================================================================
+
+# Number of initial days of data collection used to compute base period price (P_i,0)
+base_period_days: 7
+
+# Minimum proportion of tracked routes required to compute index score (0.5 = 50%)
+min_routes_ratio: 0.5
+
+# Supported calculation frequencies
+frequencies:
+  - daily
+  - weekly
+  - monthly

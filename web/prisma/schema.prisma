@@ -49,20 +49,35 @@ model ScrapeRun {
 }
 
 model IndexValue {
-  id          String   @id @default(uuid()) @db.Uuid
-  date        DateTime @db.Date
-  origin      String?  @db.VarChar(3)
-  destination String?  @db.VarChar(3)
-  frequency   String   @default("daily") @db.VarChar(20)
-  index_value Decimal  @db.Decimal(10, 2)
-  pct_change  Decimal? @db.Decimal(5, 2)
-  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  id                String   @id @default(uuid()) @db.Uuid
+  period_date       DateTime @db.Date
+  origin            String?  @db.VarChar(3)
+  destination       String?  @db.VarChar(3)
+  frequency         String   @default("daily") @db.VarChar(20)
+  index_score       Decimal  @db.Decimal(10, 2)
+  pct_change        Decimal? @db.Decimal(5, 2)
+  computed_at       DateTime @default(now()) @db.Timestamptz(6)
+  routes_included   Int      @default(6)
+  data_quality_note String?
 
   @@map("index_values")
 }
 
 model alembic_version {
   version_num String @id(map: "alembic_version_pkc") @db.VarChar(32)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model route_base_values {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  route_origin      String   @db.VarChar(3)
+  route_destination String   @db.VarChar(3)
+  base_avg_fare     Decimal  @db.Decimal(10, 2)
+  base_period_start DateTime @db.Date
+  base_period_end   DateTime @db.Date
+  computed_at       DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([route_origin, route_destination], map: "uq_route_base_values")
 }
 
 enum SourceType {
