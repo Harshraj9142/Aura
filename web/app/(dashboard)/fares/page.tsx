@@ -1,0 +1,63 @@
+import { getFares } from "@/lib/services/fares.service";
+import { getTrackedRoutes } from "@/lib/services/routes.service";
+import { getTrackedSources } from "@/lib/services/sources.service";
+import { FaresFilterBar } from "@/components/fares/FaresFilterBar";
+import { FaresTable } from "@/components/fares/FaresTable";
+
+interface FaresPageProps {
+  searchParams: Promise<{
+    origin?: string;
+    destination?: string;
+    source?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    isOutlier?: string;
+    page?: string;
+    limit?: string;
+    sortBy?: string;
+    sortOrder?: string;
+  }>;
+}
+
+export default async function FaresPage({ searchParams }: FaresPageProps) {
+  const params = await searchParams;
+
+  const filters = {
+    origin: params.origin,
+    destination: params.destination,
+    source: params.source,
+    dateFrom: params.dateFrom,
+    dateTo: params.dateTo,
+    isOutlier: params.isOutlier === "true" ? true : params.isOutlier === "false" ? false : undefined,
+    page: params.page ? parseInt(params.page, 10) : 1,
+    limit: params.limit ? parseInt(params.limit, 10) : 25,
+    sortBy: (params.sortBy as "travel_date" | "total_fare" | "scraped_at") || "scraped_at",
+    sortOrder: (params.sortOrder as "asc" | "desc") || "desc",
+  };
+
+  const [faresResult, routes, sources] = await Promise.all([
+    getFares(filters),
+    getTrackedRoutes(),
+    getTrackedSources(),
+  ]);
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-100">
+          Raw Fare Explorer
+        </h1>
+        <p className="mt-1 text-sm text-slate-400">
+          Inspect, filter, and analyze granular scraped flight fare records across carriers and OTAs.
+        </p>
+      </div>
+
+      {/* Filter Bar */}
+      <FaresFilterBar routes={routes} sources={sources} />
+
+      {/* Fares Table */}
+      <FaresTable fares={faresResult.data} pagination={faresResult.pagination} />
+    </div>
+  );
+}

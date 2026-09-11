@@ -1,0 +1,70 @@
+# Sources configuration for APIx Scraper
+# Enable/disable individual sources without code changes
+
+airlines:
+  - name: indigo
+    display_name: "IndiGo"
+    base_url: "https://www.goindigo.in"
+    enabled: true
+    scraper_class: "scrapers.airlines.indigo_scraper.IndiGoScraper"
+
+  - name: air_india
+    display_name: "Air India"
+    base_url: "https://www.airindia.com"
+    enabled: true
+    scraper_class: "scrapers.airlines.air_india_scraper.AirIndiaScraper"
+
+  - name: air_india_express
+    display_name: "Air India Express"
+    base_url: "https://www.airindiaexpress.com"
+    enabled: true
+    scraper_class: "scrapers.airlines.air_india_express_scraper.AirIndiaExpressScraper"
+
+  - name: akasa
+    display_name: "Akasa Air"
+    base_url: "https://www.akasaair.com"
+    enabled: true
+    scraper_class: "scrapers.airlines.akasa_scraper.AkasaScraper"
+
+  - name: spicejet
+    display_name: "SpiceJet"
+    base_url: "https://www.spicejet.com"
+    enabled: true
+    scraper_class: "scrapers.airlines.spicejet_scraper.SpiceJetScraper"
+
+otas:
+  - name: makemytrip
+    display_name: "MakeMyTrip"
+    base_url: "https://www.makemytrip.com"
+    enabled: true
+    scraper_class: "scrapers.otas.makemytrip_scraper.MakeMyTripScraper"
+
+  - name: yatra
+    display_name: "Yatra"
+    base_url: "https://www.yatra.com"
+    enabled: true
+    scraper_class: "scrapers.otas.yatra_scraper.YatraScraper"
+
+  - name: easemytrip
+    display_name: "EaseMyTrip"
+    base_url: "https://www.easemytrip.com"
+    enabled: true
+    scraper_class: "scrapers.otas.easemytrip_scraper.EaseMyTripScraper"
+
+  - name: cleartrip
+    display_name: "Cleartrip"
+    base_url: "https://www.cleartrip.com"
+    enabled: true
+    scraper_class: "scrapers.otas.cleartrip_scraper.CleartripScraper"
+
+  - name: ixigo
+    display_name: "Ixigo"
+    base_url: "https://www.ixigo.com"
+    enabled: true
+    scraper_class: "scrapers.otas.ixigo_scraper.IxigoScraper"
+
+  - name: goibibo
+    display_name: "Goibibo"
+    base_url: "https://www.goibibo.com"
+    enabled: true
+    scraper_class: "scrapers.otas.goibibo_scraper.GoibiboScraper"

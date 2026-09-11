@@ -1,0 +1,41 @@
+# Routes configuration for APIx Scraper
+# Add/remove city-pairs here without code changes
+
+routes:
+  - origin: DEL
+    destination: BOM
+    name: "Delhi–Mumbai"
+    enabled: true
+
+  - origin: DEL
+    destination: BLR
+    name: "Delhi–Bangalore"
+    enabled: true
+
+  - origin: BOM
+    destination: BLR
+    name: "Mumbai–Bangalore"
+    enabled: true
+
+  - origin: DEL
+    destination: CCU
+    name: "Delhi–Kolkata"
+    enabled: true
+
+  - origin: BLR
+    destination: HYD
+    name: "Bangalore–Hyderabad"
+    enabled: true
+
+  - origin: MAA
+    destination: DEL
+    name: "Chennai–Delhi"
+    enabled: true
+
+# Advance-purchase windows (days from today)
+advance_purchase_windows:
+  - 1
+  - 7
+  - 15
+  - 30
+  - 45

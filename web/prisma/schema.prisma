@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Fare {
+  id                    String     @id @default(uuid()) @db.Uuid
+  route_origin          String     @db.VarChar(3)
+  route_destination     String     @db.VarChar(3)
+  travel_date           DateTime   @db.Date
+  advance_purchase_days Int
+  source                String     @db.VarChar(50)
+  source_type           SourceType
+  carrier               String?    @db.VarChar(50)
+  flight_number         String?    @db.VarChar(20)
+  fare_class            String?    @db.VarChar(50)
+  base_fare             Decimal?   @db.Decimal(10, 2)
+  taxes_and_fees        Decimal?   @db.Decimal(10, 2)
+  total_fare            Decimal    @db.Decimal(10, 2)
+  currency              String     @default("INR") @db.VarChar(3)
+  scraped_at            DateTime   @default(now()) @db.Timestamptz(6)
+  created_at            DateTime   @default(now()) @db.Timestamptz(6)
+  is_outlier            Boolean    @default(false)
+  validation_warnings   Json?
+
+  @@index([route_origin, route_destination, source, travel_date], map: "ix_fares_route_source_date")
+  @@index([scraped_at], map: "ix_fares_scraped_at")
+  @@index([route_origin, route_destination, source, travel_date, advance_purchase_days, flight_number], map: "ix_fares_dedup")
+  @@map("fares")
+}
+
+model ScrapeRun {
+  run_id          String          @id @default(uuid()) @db.Uuid
+  started_at      DateTime        @default(now()) @db.Timestamptz(6)
+  completed_at    DateTime?       @db.Timestamptz(6)
+  total_attempted Int             @default(0)
+  total_success   Int             @default(0)
+  total_failed    Int             @default(0)
+  total_blocked   Int             @default(0)
+  status          ScrapeRunStatus @default(running)
+  summary         Json?
+
+  @@index([started_at], map: "ix_scrape_runs_started_at")
+  @@map("scrape_runs")
+}
+
+model IndexValue {
+  id          String   @id @default(uuid()) @db.Uuid
+  date        DateTime @db.Date
+  origin      String?  @db.VarChar(3)
+  destination String?  @db.VarChar(3)
+  frequency   String   @default("daily") @db.VarChar(20)
+  index_value Decimal  @db.Decimal(10, 2)
+  pct_change  Decimal? @db.Decimal(5, 2)
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("index_values")
+}
+
+model alembic_version {
+  version_num String @id(map: "alembic_version_pkc") @db.VarChar(32)
+}
+
+enum SourceType {
+  airline
+  ota
+
+  @@map("source_type_enum")
+}
+
+enum ScrapeRunStatus {
+  running
+  completed
+  failed
+
+  @@map("scrape_run_status_enum")
+}

@@ -1,0 +1,38 @@
+# Airfare Scraping Engine (APIx) — Dependencies
+# Python 3.10+
+
+# Browser automation
+playwright==1.49.1
+
+# Database
+sqlalchemy==2.0.36
+psycopg2-binary==2.9.10
+alembic==1.14.0
+
+# Data processing
+pandas==2.2.3
+
+# Scheduling
+apscheduler==3.10.4
+
+# Configuration
+python-dotenv==1.0.1
+pyyaml==6.0.2
+
+# Data validation
+pydantic==2.10.3
+pydantic-settings==2.7.0
+
+# Retry logic
+tenacity==9.0.0
+
+# Logging
+loguru==0.7.3
+
+# HTTP (for robots.txt fetching, lightweight requests)
+httpx==0.28.1
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.24.0
+pytest-cov==6.0.0

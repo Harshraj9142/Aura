@@ -1,0 +1,501 @@
+"""
+APIx Scraper — CLI Entry Point
+
+Provides command-line interface for running the airfare scraper:
+
+  # Run a single route/source
+  python main.py --run-now --route DEL-BOM --source indigo
+
+  # Run full batch (all routes × all sources × all windows)
+  python main.py --run-now
+
+  # Start the scheduled daemon
+  python main.py --schedule
+
+  # List configured routes and sources
+  python main.py --list-routes
+  python main.py --list-sources
+"""
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import importlib
+import sys
+import uuid
+from datetime import date, datetime, timedelta
+from pathlib import Path
+
+from loguru import logger
+
+from config.settings import (
+    LOGS_DIR,
+    get_advance_windows,
+    get_enabled_routes,
+    get_enabled_sources,
+    get_source_by_name,
+    settings,
+)
+from db.models import ScrapeRun, ScrapeRunStatus
+from db.session import create_all_tables, get_session
+from pipeline.cleaner import FareCleaner
+from pipeline.deduplicator import Deduplicator
+from pipeline.models import FareRecord, Route, ScrapeResult, ScrapeStatus, SourceTypeEnum
+from scrapers.base_scraper import BaseScraper
+
+
+# ---------------------------------------------------------------------------
+# Logging setup
+# ---------------------------------------------------------------------------
+def setup_logging() -> None:
+    """Configure loguru with console + rotating file output."""
+    # Remove default handler
+    logger.remove()
+
+    # Console output — colorful, human-readable
+    logger.add(
+        sys.stderr,
+        format=(
+            "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
+            "<level>{message}</level>"
+        ),
+        level=settings.log_level,
+        colorize=True,
+    )
+
+    # Rotating log file — JSON-formatted for structured log analysis
+    logger.add(
+        str(LOGS_DIR / "scraper_{time:YYYY-MM-DD}.log"),
+        format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} | {message}",
+        level="DEBUG",
+        rotation="1 day",
+        retention="30 days",
+        compression="gz",
+        enqueue=True,  # Thread-safe
+    )
+
+
+# ---------------------------------------------------------------------------
+# Scraper loader
+# ---------------------------------------------------------------------------
+def load_scraper(source_config: dict) -> BaseScraper:
+    """
+    Dynamically load a scraper class from its config.
+
+    The scraper_class field in sources.yaml specifies the full
+    module path, e.g. "scrapers.airlines.indigo_scraper.IndiGoScraper".
+    """
+    class_path = source_config["scraper_class"]
+    module_path, class_name = class_path.rsplit(".", 1)
+
+    try:
+        module = importlib.import_module(module_path)
+        scraper_class = getattr(module, class_name)
+        return scraper_class()
+    except (ImportError, AttributeError) as e:
+        logger.error(f"Failed to load scraper '{class_path}': {e}")
+        raise
+
+
+# ---------------------------------------------------------------------------
+# Batch orchestration
+# ---------------------------------------------------------------------------
+async def run_single(
+    route_str: str,
+    source_name: str,
+    advance_days: int | None = None,
+) -> None:
+    """
+    Run a single (route, source, advance_days) scrape.
+
+    If advance_days is None, runs all configured advance windows.
+    """
+    # Parse route
+    parts = route_str.upper().split("-")
+    if len(parts) != 2:
+        logger.error(f"Invalid route format: '{route_str}' — expected 'DEL-BOM'")
+        return
+
+    route = Route(origin=parts[0], destination=parts[1])
+
+    # Load source
+    source_config = get_source_by_name(source_name.lower())
+    if not source_config:
+        logger.error(f"Source '{source_name}' not found in config")
+        return
+
+    scraper = load_scraper(source_config)
+    cleaner = FareCleaner()
+
+    # Determine advance windows
+    windows = [advance_days] if advance_days else get_advance_windows()
+
+    logger.info(
+        f"🚀 Single scrape: {route.pair} via {source_name} | "
+        f"windows: {windows}"
+    )
+
+    for window in windows:
+        travel_date = date.today() + timedelta(days=window)
+
+        result = await scraper.scrape(route, travel_date, window)
+
+        if result.is_success and result.fares:
+            # Clean and validate
+            cleaned = cleaner.clean_batch(result.fares)
+
+            # Deduplicate
+            deduped = Deduplicator.deduplicate_in_memory(cleaned)
+
+            # Insert into database
+            try:
+                with get_session() as session:
+                    count = Deduplicator.upsert_fares(session, deduped)
+                    logger.info(f"💾 Saved {count} fares to database")
+            except Exception as e:
+                logger.error(f"Database insert failed: {e}")
+
+        logger.info(f"Result: {result}")
+
+
+async def run_batch(
+    route_filter: str | None = None,
+    source_filter: str | None = None,
+) -> None:
+    """
+    Run a full batch: all active routes × all active sources × all windows.
+
+    Optionally filter by a specific route or source.
+    """
+    routes_config = get_enabled_routes()
+    sources_config = get_enabled_sources()
+    windows = get_advance_windows()
+
+    # Apply filters
+    if route_filter:
+        parts = route_filter.upper().split("-")
+        routes_config = [
+            r for r in routes_config
+            if r["origin"] == parts[0] and r["destination"] == parts[1]
+        ]
+
+    if source_filter:
+        sources_config = [
+            s for s in sources_config if s["name"] == source_filter.lower()
+        ]
+
+    if not routes_config:
+        logger.error("No routes to scrape (check filter or config)")
+        return
+
+    if not sources_config:
+        logger.error("No sources to scrape (check filter or config)")
+        return
+
+    total_tasks = len(routes_config) * len(sources_config) * len(windows)
+
+    logger.info(
+        f"🚀 Batch scrape starting | "
+        f"{len(routes_config)} routes × {len(sources_config)} sources × "
+        f"{len(windows)} windows = {total_tasks} tasks"
+    )
+
+    # Create scrape run record
+    run_id = uuid.uuid4()
+    started_at = datetime.utcnow()
+
+    try:
+        with get_session() as session:
+            scrape_run = ScrapeRun(
+                run_id=run_id,
+                started_at=started_at,
+                total_attempted=total_tasks,
+                status=ScrapeRunStatus.RUNNING,
+            )
+            session.add(scrape_run)
+    except Exception as e:
+        logger.warning(f"Could not create scrape_run record: {e}")
+
+    # Counters
+    success_count = 0
+    failed_count = 0
+    blocked_count = 0
+    total_fares = 0
+    source_summary: dict[str, dict] = {}
+
+    cleaner = FareCleaner()
+
+    # Iterate: sources → routes → windows
+    for source_config in sources_config:
+        source_name = source_config["name"]
+        source_summary[source_name] = {"success": 0, "failed": 0, "blocked": 0, "fares": 0}
+
+        try:
+            scraper = load_scraper(source_config)
+        except Exception as e:
+            logger.error(f"Cannot load scraper for {source_name}: {e}")
+            failed_count += len(routes_config) * len(windows)
+            source_summary[source_name]["failed"] = len(routes_config) * len(windows)
+            continue
+
+        for route_config in routes_config:
+            route = Route(
+                origin=route_config["origin"],
+                destination=route_config["destination"],
+                name=route_config.get("name"),
+            )
+
+            for window in windows:
+                travel_date = date.today() + timedelta(days=window)
+
+                try:
+                    result = await scraper.scrape(route, travel_date, window)
+
+                    if result.is_success:
+                        success_count += 1
+                        source_summary[source_name]["success"] += 1
+
+                        if result.fares:
+                            cleaned = cleaner.clean_batch(result.fares)
+                            deduped = Deduplicator.deduplicate_in_memory(cleaned)
+
+                            try:
+                                with get_session() as session:
+                                    count = Deduplicator.upsert_fares(session, deduped)
+                                    total_fares += count
+                                    source_summary[source_name]["fares"] += count
+                            except Exception as e:
+                                logger.error(f"DB insert failed for {route.pair}/{source_name}: {e}")
+
+                    elif result.is_blocked:
+                        blocked_count += 1
+                        source_summary[source_name]["blocked"] += 1
+
+                    else:
+                        # FAILED, NO_FLIGHTS, SOLD_OUT, DISALLOWED
+                        if result.status in (ScrapeStatus.NO_FLIGHTS, ScrapeStatus.SOLD_OUT):
+                            success_count += 1  # Not a failure — just no data
+                            source_summary[source_name]["success"] += 1
+                        else:
+                            failed_count += 1
+                            source_summary[source_name]["failed"] += 1
+
+                except Exception as e:
+                    logger.error(
+                        f"Unhandled error for {route.pair}/{source_name}/T+{window}d: {e}"
+                    )
+                    failed_count += 1
+                    source_summary[source_name]["failed"] += 1
+
+    # Update scrape run record
+    completed_at = datetime.utcnow()
+    try:
+        with get_session() as session:
+            run = session.query(ScrapeRun).filter_by(run_id=run_id).first()
+            if run:
+                run.completed_at = completed_at
+                run.total_success = success_count
+                run.total_failed = failed_count
+                run.total_blocked = blocked_count
+                run.status = ScrapeRunStatus.COMPLETED
+                run.summary = source_summary
+    except Exception as e:
+        logger.warning(f"Could not update scrape_run record: {e}")
+
+    # Print summary table
+    duration = (completed_at - started_at).total_seconds()
+    _print_summary(source_summary, success_count, failed_count, blocked_count, total_fares, duration)
+
+
+def _print_summary(
+    source_summary: dict,
+    success: int,
+    failed: int,
+    blocked: int,
+    total_fares: int,
+    duration: float,
+) -> None:
+    """Print a formatted summary table at the end of a batch run."""
+    logger.info("=" * 70)
+    logger.info("📊 BATCH SCRAPE SUMMARY")
+    logger.info("=" * 70)
+    logger.info(f"{'Source':<20} {'Success':>8} {'Failed':>8} {'Blocked':>8} {'Fares':>8}")
+    logger.info("-" * 70)
+
+    for source, stats in source_summary.items():
+        logger.info(
+            f"{source:<20} {stats['success']:>8} {stats['failed']:>8} "
+            f"{stats['blocked']:>8} {stats['fares']:>8}"
+        )
+
+    logger.info("-" * 70)
+    logger.info(
+        f"{'TOTAL':<20} {success:>8} {failed:>8} {blocked:>8} {total_fares:>8}"
+    )
+    logger.info(f"Duration: {duration:.1f}s")
+    logger.info("=" * 70)
+
+
+# ---------------------------------------------------------------------------
+# CLI argument parser
+# ---------------------------------------------------------------------------
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="apix-scraper",
+        description="APIx — Real-time Airfare Price Index Scraper",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Run single route/source
+  python main.py --run-now --route DEL-BOM --source indigo
+
+  # Run all configured routes/sources
+  python main.py --run-now
+
+  # Start scheduled daemon (daily at configured time)
+  python main.py --schedule
+
+  # List configured routes and sources
+  python main.py --list-routes
+  python main.py --list-sources
+
+  # Initialize the database
+  python main.py --init-db
+        """,
+    )
+
+    parser.add_argument(
+        "--run-now",
+        action="store_true",
+        help="Run scraping immediately (batch or filtered)",
+    )
+    parser.add_argument(
+        "--schedule",
+        action="store_true",
+        help="Start APScheduler daemon for daily automated runs",
+    )
+    parser.add_argument(
+        "--route",
+        type=str,
+        default=None,
+        help="Filter by route (e.g. DEL-BOM). If omitted, runs all routes.",
+    )
+    parser.add_argument(
+        "--source",
+        type=str,
+        default=None,
+        help="Filter by source (e.g. indigo). If omitted, runs all sources.",
+    )
+    parser.add_argument(
+        "--advance-days",
+        type=int,
+        default=None,
+        help="Specific advance-purchase window (e.g. 7). If omitted, runs all windows.",
+    )
+    parser.add_argument(
+        "--list-routes",
+        action="store_true",
+        help="List all configured routes",
+    )
+    parser.add_argument(
+        "--list-sources",
+        action="store_true",
+        help="List all configured sources",
+    )
+    parser.add_argument(
+        "--init-db",
+        action="store_true",
+        help="Initialize database tables (development only — use Alembic in production)",
+    )
+
+    return parser
+
+
+# ---------------------------------------------------------------------------
+# Command handlers
+# ---------------------------------------------------------------------------
+def cmd_list_routes() -> None:
+    """Print all configured routes."""
+    routes = get_enabled_routes()
+    print(f"\n{'Route':<12} {'Name':<25} {'Enabled':<8}")
+    print("-" * 45)
+    for r in routes:
+        pair = f"{r['origin']}-{r['destination']}"
+        name = r.get("name", "")
+        enabled = "✅" if r.get("enabled", True) else "❌"
+        print(f"{pair:<12} {name:<25} {enabled:<8}")
+    print(f"\nTotal: {len(routes)} routes\n")
+
+
+def cmd_list_sources() -> None:
+    """Print all configured sources."""
+    sources = get_enabled_sources()
+    print(f"\n{'Name':<20} {'Display':<25} {'Type':<10} {'Enabled':<8}")
+    print("-" * 63)
+    for s in sources:
+        enabled = "✅" if s.get("enabled", True) else "❌"
+        print(
+            f"{s['name']:<20} {s['display_name']:<25} "
+            f"{s['source_type']:<10} {enabled:<8}"
+        )
+    print(f"\nTotal: {len(sources)} sources\n")
+
+
+def cmd_init_db() -> None:
+    """Initialize database tables."""
+    logger.info("Initializing database...")
+    create_all_tables()
+    logger.info("Database initialized successfully")
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+def main() -> None:
+    """Main entry point for the APIx scraper CLI."""
+    setup_logging()
+    parser = build_parser()
+    args = parser.parse_args()
+
+    logger.info("🔧 APIx Scraper starting...")
+
+    # Handle non-scraping commands
+    if args.list_routes:
+        cmd_list_routes()
+        return
+
+    if args.list_sources:
+        cmd_list_sources()
+        return
+
+    if args.init_db:
+        cmd_init_db()
+        return
+
+    # Handle scraping commands
+    if args.run_now:
+        if args.route and args.source:
+            # Single route/source
+            asyncio.run(
+                run_single(args.route, args.source, args.advance_days)
+            )
+        else:
+            # Full or filtered batch
+            asyncio.run(
+                run_batch(args.route, args.source)
+            )
+
+    elif args.schedule:
+        # Import scheduler here to avoid circular imports
+        from scheduler.job_runner import start_scheduler
+        start_scheduler()
+
+    else:
+        parser.print_help()
+
+
+if __name__ == "__main__":
+    main()
