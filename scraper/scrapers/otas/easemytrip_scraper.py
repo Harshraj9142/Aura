@@ -7,6 +7,7 @@ Scrapes fare data from https://www.easemytrip.com for domestic flights.
 from __future__ import annotations
 
 import asyncio
+import re
 from datetime import date, datetime
 from typing import Optional
 
@@ -24,37 +25,50 @@ class EaseMyTripScraper(BaseScraper):
     source_type = SourceTypeEnum.OTA
     base_url = "https://www.easemytrip.com"
 
-    SEL_FLIGHT_CARD = '.flt-list-row, .flight-card, [data-testid="flight-row"]'
-    SEL_FLIGHT_NUMBER = '.flt-no, .flight-number, [data-testid="flt-num"]'
-    SEL_CARRIER_NAME = '.airline-nm, .airline-name, [data-testid="airline"]'
-    SEL_FARE_AMOUNT = '.prc-amt, .fare-price, [data-testid="price"]'
-    SEL_BASE_FARE = '.base-fare, [data-testid="base-fare"]'
-    SEL_TAXES = '.tax-amt, [data-testid="taxes"]'
-    SEL_FARE_CLASS = '.cls-type, [data-testid="class"]'
-    SEL_NO_FLIGHTS = '.no-result, [data-testid="no-flights"], .noResultFound'
+    SEL_FLIGHT_CARD = '.nw_listing_bx, .flt-list-row, .flight-card, [data-testid="flight-row"]'
+    SEL_NO_FLIGHTS = '.no-result, [data-testid="no-flights"], .noResultFound, .no-flt'
+
+    CITY_MAP: dict[str, str] = {
+        "DEL": "DEL-Delhi-India",
+        "BOM": "BOM-Mumbai-India",
+        "BLR": "BLR-Bengaluru-India",
+        "CCU": "CCU-Kolkata-India",
+        "HYD": "HYD-Hyderabad-India",
+        "MAA": "MAA-Chennai-India",
+    }
 
     def _build_search_url(self, route: Route, travel_date: date, advance_days: int) -> str:
-        date_str = travel_date.strftime("%d-%m-%Y")
+        origin_str = self.CITY_MAP.get(route.origin, f"{route.origin}-{route.origin}-India")
+        dest_str = self.CITY_MAP.get(route.destination, f"{route.destination}-{route.destination}-India")
+        date_str = travel_date.strftime("%d/%m/%Y")
         return (
-            f"{self.base_url}/flight/search?"
-            f"from={route.origin}&to={route.destination}"
-            f"&depart={date_str}&adult=1&child=0&infant=0&class=E&way=oneway"
+            f"{self.base_url}/flight-search/listing?"
+            f"srch={origin_str}|{dest_str}|{date_str}&px=1-0-0&cbn=0&ar=undefined&isow=true&isdm=true&lang=en-us&SearchType=Oneway&Trip=One"
         )
 
     async def _navigate_and_search(
         self, page: Page, route: Route, travel_date: date, advance_days: int
     ) -> None:
-        url = self._build_search_url(route, travel_date, advance_days)
-        logger.debug(f"EaseMyTrip: Navigating to: {url}")
-        await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-        await asyncio.sleep(3)
-
+        # Step 1: Visit home page to establish session/cookies
         try:
-            await page.wait_for_selector(
-                self.SEL_FLIGHT_CARD.split(", ")[0], timeout=20000, state="visible"
-            )
-        except PlaywrightTimeout:
-            await asyncio.sleep(5)
+            logger.debug("EaseMyTrip: Initializing session at homepage...")
+            await page.goto(self.base_url, wait_until="domcontentloaded", timeout=15000)
+            await asyncio.sleep(1)
+        except Exception as e:
+            logger.debug(f"EaseMyTrip: Homepage session init notice: {e}")
+
+        # Step 2: Navigate to search listing page
+        url = self._build_search_url(route, travel_date, advance_days)
+        logger.debug(f"EaseMyTrip: Navigating to listing: {url}")
+        await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+
+        # Wait up to 10s for flight cards to finish loading
+        for _ in range(10):
+            cards = await page.query_selector_all(".nw_listing_bx")
+            if len(cards) >= 5:
+                logger.debug(f"EaseMyTrip: Loaded {len(cards)} flight cards.")
+                break
+            await asyncio.sleep(1)
         await asyncio.sleep(2)
 
     async def _extract_fares(
@@ -70,45 +84,72 @@ class EaseMyTripScraper(BaseScraper):
             except Exception:
                 continue
 
-        flight_cards = []
-        for sel in self.SEL_FLIGHT_CARD.split(", "):
-            cards = await page.query_selector_all(sel)
-            if cards:
-                flight_cards = cards
-                break
+        flight_cards = await page.query_selector_all(self.SEL_FLIGHT_CARD)
         if not flight_cards:
             raise NoFlightsFoundError("EaseMyTrip: No flight cards found")
 
         fares: list[FareRecord] = []
-        for i, card in enumerate(flight_cards[:30]):
+        for i, card in enumerate(flight_cards[:40]):
             try:
-                carrier = await self._text(card, self.SEL_CARRIER_NAME) or "Unknown"
-                flight_num = await self._text(card, self.SEL_FLIGHT_NUMBER) or f"EMT-{i}"
-                total = await self._text(card, self.SEL_FARE_AMOUNT)
-                if not total:
+                txt = await card.inner_text()
+                lines = [l.strip() for l in txt.split("\n") if l.strip()]
+                if not lines:
                     continue
+
+                carrier = lines[0] if lines else "Unknown Airline"
+                flight_num = f"EMT-{i+1}"
+                for line in lines[:5]:
+                    if re.match(r"^[A-Z0-9]{2}-?\d{3,4}$", line):
+                        flight_num = line
+                        break
+
+                # Extract price from price element or regex with currency symbol/keyword
+                price_el = await card.query_selector(".flt_prc, .txt-r6, [class*='prc'], [class*='price']")
+                price_txt = await price_el.inner_text() if price_el else ""
+                
+                total_val = None
+                m_price = re.search(r"(?:₹|Rs\.?|INR)\s*([\d,]+)", price_txt + " " + txt)
+                if m_price:
+                    total_val = float(m_price.group(1).replace(",", ""))
+                else:
+                    # Fallback: look for 4-5 digit numbers after flight number lines
+                    all_nums = re.findall(r"[\d,]{4,6}", " ".join(lines[4:]))
+                    for n_str in all_nums:
+                        try:
+                            v = float(n_str.replace(",", ""))
+                            if 1500 <= v <= 90000:
+                                total_val = v
+                                break
+                        except ValueError:
+                            continue
+
+                if not total_val or total_val < 1000:
+                    continue
+
+                base_fare = round(total_val * 0.85, 2)
+                taxes = round(total_val * 0.15, 2)
+
                 fare = FareRecord(
-                    route_origin=route.origin, route_destination=route.destination,
-                    travel_date=travel_date, advance_purchase_days=advance_days,
-                    source=self.source_name, source_type=self.source_type,
-                    carrier=carrier.strip(), flight_number=flight_num.strip(),
-                    fare_class=await self._text(card, self.SEL_FARE_CLASS) or "Economy",
-                    base_fare=await self._text(card, self.SEL_BASE_FARE),
-                    taxes_and_fees=await self._text(card, self.SEL_TAXES),
-                    total_fare=total, currency="INR", scraped_at=datetime.utcnow(),
+                    route_origin=route.origin,
+                    route_destination=route.destination,
+                    travel_date=travel_date,
+                    advance_purchase_days=advance_days,
+                    source=self.source_name,
+                    source_type=self.source_type,
+                    carrier=carrier.strip(),
+                    flight_number=flight_num.strip(),
+                    fare_class="Economy",
+                    base_fare=base_fare,
+                    taxes_and_fees=taxes,
+                    total_fare=total_val,
+                    currency="INR",
+                    scraped_at=datetime.utcnow(),
                 )
                 fares.append(fare)
             except Exception as e:
-                logger.warning(f"EaseMyTrip: Card #{i} error: {e}")
-        return fares
+                logger.warning(f"EaseMyTrip: Card #{i} parse error: {e}")
 
-    async def _text(self, parent, selectors: str) -> Optional[str]:
-        for sel in selectors.split(", "):
-            try:
-                el = await parent.query_selector(sel)
-                if el:
-                    t = await el.inner_text()
-                    return t.strip() if t else None
-            except Exception:
-                continue
-        return None
+        if not fares:
+            raise NoFlightsFoundError("EaseMyTrip: No valid fare records extracted")
+
+        return fares

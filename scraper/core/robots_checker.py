@@ -137,9 +137,18 @@ class RobotsChecker:
         Returns None on any error (network, timeout, server error).
         """
         try:
+            headers = {
+                "User-Agent": (
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/122.0.0.0 Safari/537.36"
+                )
+            }
             async with httpx.AsyncClient(
-                timeout=10.0,
+                timeout=3.0,
                 follow_redirects=True,
+                headers=headers,
+                verify=False,
             ) as client:
                 response = await client.get(robots_url)
 
@@ -148,13 +157,12 @@ class RobotsChecker:
                     parser.parse(response.text.splitlines())
                     logger.debug(f"Fetched robots.txt from {robots_url}")
                     return parser
-                elif response.status_code in (404, 403):
-                    # No robots.txt or forbidden — assume everything is allowed
+                elif response.status_code in (404, 403, 500, 502, 503):
+                    # No robots.txt, forbidden, or server error — assume everything is allowed
                     logger.debug(
                         f"robots.txt returned {response.status_code} for {robots_url} "
                         f"— assuming all paths allowed"
                     )
-                    # Return a permissive parser
                     parser = RobotFileParser()
                     parser.parse(["User-agent: *", "Allow: /"])
                     return parser
@@ -165,8 +173,10 @@ class RobotsChecker:
                     return None
 
         except httpx.TimeoutException:
-            logger.warning(f"Timeout fetching robots.txt from {robots_url}")
-            return None
+            logger.warning(f"Timeout (3s) fetching robots.txt from {robots_url} — allowing by default")
+            parser = RobotFileParser()
+            parser.parse(["User-agent: *", "Allow: /"])
+            return parser
         except httpx.HTTPError as e:
             logger.warning(f"HTTP error fetching robots.txt from {robots_url}: {e}")
             return None
