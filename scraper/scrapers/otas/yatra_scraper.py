@@ -48,7 +48,10 @@ class YatraScraper(BaseScraper):
     ) -> None:
         url = self._build_search_url(route, travel_date, advance_days)
         logger.debug(f"Yatra: Navigating to: {url}")
-        await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+        try:
+            await page.goto(url, wait_until="commit", timeout=12000)
+        except Exception as err:
+            logger.warning(f"Yatra navigation notice: {err}")
         await asyncio.sleep(3)
 
         for sel in self.SEL_POPUP_CLOSE.split(", "):

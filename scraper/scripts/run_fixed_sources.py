@@ -1,6 +1,9 @@
+import sys
 import asyncio
 import time
 from datetime import date, timedelta
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from config.settings import settings, get_source_by_name, get_enabled_routes
 from main import load_scraper
@@ -46,6 +49,15 @@ async def main():
                             saved_count = Deduplicator.upsert_fares(session, deduped)
                             total_saved += saved_count
                         print(f"✅ {source_name:<12} | {route.pair:<8} | T+{adv}d | {len(res.fares):>3} fares extracted | {saved_count:>3} saved | {dt:.1f}s")
+                        
+                        # Print sample individual fare quotes in console
+                        for fare in res.fares[:3]:
+                            carrier_str = fare.carrier or "Flight"
+                            flight_str = fare.flight_number or "Direct"
+                            base_str = f"₹{fare.base_fare:,.0f}" if fare.base_fare else "N/A"
+                            tax_str = f"₹{fare.taxes_and_fees:,.0f}" if fare.taxes_and_fees else "N/A"
+                            total_str = f"₹{fare.total_fare:,.0f}"
+                            print(f"   ↳ ✈️ {carrier_str} ({flight_str:<7}) | Date: {travel_date} | Base: {base_str:>8} | Tax: {tax_str:>7} | Total: {total_str:>8}")
                     else:
                         print(f"⚠️ {source_name:<12} | {route.pair:<8} | T+{adv}d | Status: {res.status.value:<10} | {dt:.1f}s")
                 except Exception as e:
