@@ -153,10 +153,11 @@ class BrowserManager:
         """Start Playwright, launch browser, create stealth context."""
         self._playwright = await async_playwright().start()
 
-        # Browser launch arguments for stealth
+        # Browser launch arguments for stealth & avoiding HTTP/2 resets
         launch_args = [
             "--disable-blink-features=AutomationControlled",
             "--disable-features=IsolateOrigins,site-per-process",
+            "--disable-http2",
             "--disable-infobars",
             "--no-first-run",
             "--no-default-browser-check",

@@ -64,9 +64,29 @@ class MakeMyTripScraper(BaseScraper):
         """Navigate directly to search results via URL (MMT supports this)."""
         url = self._build_search_url(route, travel_date, advance_days)
         logger.debug(f"MakeMyTrip: Navigating to: {url}")
+        
+        # Set realistic browser navigation headers for Akamai edge pass
+        try:
+            await page.set_extra_http_headers({
+                "Accept-Language": "en-US,en;q=0.9,hi;q=0.8",
+                "Sec-Ch-Ua": '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+                "Sec-Ch-Ua-Mobile": "?0",
+                "Sec-Ch-Ua-Platform": '"macOS"',
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "none",
+                "Sec-Fetch-User": "?1",
+                "Upgrade-Insecure-Requests": "1",
+            })
+        except Exception:
+            pass
 
-        await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-        await asyncio.sleep(3)
+        try:
+            await page.goto(url, wait_until="commit", timeout=12000)
+        except Exception as err:
+            logger.warning(f"MakeMyTrip navigation notice: {err}")
+
+        await asyncio.sleep(4)
 
         # Dismiss login popup (MMT shows this aggressively)
         for sel in self.SEL_CLOSE_LOGIN.split(", "):
