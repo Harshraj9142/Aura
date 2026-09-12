@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Zap, Activity, Plane, Terminal } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Zap } from "lucide-react";
 import ScraperControlModal from "@/components/ScraperControlModal";
 
 interface HeaderProps {
@@ -13,10 +12,15 @@ interface HeaderProps {
 }
 
 export default function Header({ onRunScraper, scraperLoading }: HeaderProps) {
+  const pathname = usePathname();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(scraperLoading || false);
 
-  const handleLaunchScraper = async (params: { source: string; route: string; window: string }) => {
+  const handleLaunchScraper = async (params: {
+    source: string;
+    route: string;
+    window: string;
+  }) => {
     setLoading(true);
     try {
       const res = await fetch("/api/demo/scrape", {
@@ -36,71 +40,72 @@ export default function Header({ onRunScraper, scraperLoading }: HeaderProps) {
     }
   };
 
+  const navLinks = [
+    { name: "Price Index", href: "/dashboard" },
+    { name: "Predictions (ML)", href: "/dashboard/predictions" },
+    { name: "Corridor Trends", href: "/dashboard/trends" },
+    { name: "Route Heatmap", href: "/dashboard/heatmap" },
+    { name: "Lead-Time Elasticity", href: "/dashboard/elasticity" },
+    { name: "Customer Grievance", href: "/dashboard/grievance" },
+    { name: "Fares Explorer", href: "/dashboard/fares" },
+  ];
+
   return (
     <>
-      <header className="border-b border-slate-200 bg-white/95 backdrop-blur-md sticky top-0 z-40 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-900 font-black">
-              <Plane className="w-5 h-5 text-indigo-600" />
-            </div>
+      {/* 
+        Header: Fixed at top of viewport over hero image vignette.
+        Uses whitespace-nowrap, wider max-width, and explicit margins to prevent text wrapping or overlapping logo.
+      */}
+      <header className="fixed top-0 left-0 right-0 z-50 pt-5 pb-3 font-body transition-all duration-300">
+        <div className="w-full max-w-[1440px] mx-auto flex items-center justify-between px-6 sm:px-8 lg:px-12">
+          {/* Left: Brand Logo */}
+          <Link href="/" className="group flex items-center gap-2 shrink-0 mr-6 lg:mr-10">
+            <svg
+              className="h-5 w-5 text-white -rotate-45 transition-transform duration-200 group-hover:scale-105"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <polygon points="3 3 21 12 3 21 7 12 3 3" />
+            </svg>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-slate-950 font-black text-lg leading-none tracking-tight">APIx</h1>
-                <Badge variant="outline" className="text-[10px] uppercase py-0 px-1.5 border-indigo-200 text-indigo-900 bg-indigo-50 font-bold">
-                  MoSPI Govt
-                </Badge>
-              </div>
-              <p className="text-slate-600 text-xs font-medium tracking-wide mt-0.5">
-                Real-time Airfare Price Index for India
-              </p>
+              <span className="font-display text-xl sm:text-2xl font-bold tracking-tight text-white drop-shadow-md">
+                AURA
+              </span>
             </div>
-          </div>
+          </Link>
 
-          {/* Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1 font-mono text-xs">
-            <Link href="/dashboard" className="px-2.5 py-1 rounded-lg text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors font-bold">
-              Dashboard
-            </Link>
-            <Link href="/dashboard/console" className="px-2.5 py-1 rounded-lg text-emerald-800 font-bold bg-emerald-50 border border-emerald-200 flex items-center gap-1">
-              <Terminal className="w-3.5 h-3.5 text-emerald-700" />
-              <span>Console</span>
-            </Link>
-            <Link href="/dashboard/trends" className="px-2.5 py-1 rounded-lg text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors font-bold">
-              Trends
-            </Link>
-            <Link href="/dashboard/heatmap" className="px-2.5 py-1 rounded-lg text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors font-bold">
-              Heatmap
-            </Link>
-            <Link href="/dashboard/elasticity" className="px-2.5 py-1 rounded-lg text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors font-bold">
-              Elasticity
-            </Link>
-            <Link href="/dashboard/fares" className="px-2.5 py-1 rounded-lg text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors font-bold">
-              Fares
-            </Link>
+          {/* Center Navigation Links: Single Line (whitespace-nowrap) & Clean Gap Spacing */}
+          <nav className="hidden lg:flex items-center justify-center flex-1 gap-4 xl:gap-6 text-xs sm:text-sm font-semibold text-slate-200 drop-shadow-md whitespace-nowrap mx-4">
+            {navLinks.map((link, idx) => {
+              const isActive = pathname === link.href;
+
+              return (
+                <Link
+                  key={idx}
+                  href={link.href}
+                  className={`relative py-1.5 transition-colors whitespace-nowrap ${
+                    isActive ? "text-white font-bold" : "hover:text-white"
+                  }`}
+                >
+                  <span>{link.name}</span>
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-white rounded-full shadow-xs" />
+                  )}
+                </Link>
+              );
+            })}
           </nav>
 
-          {/* Action button */}
-          <Button
-            onClick={() => setIsModalOpen(true)}
-            disabled={loading}
-            variant="outline"
-            size="sm"
-            className="gap-2 text-xs font-bold border-slate-300 hover:bg-slate-50 text-slate-900 bg-white shadow-xs"
-          >
-            {loading ? (
-              <>
-                <Activity className="w-3.5 h-3.5 animate-spin text-indigo-600" />
-                <span>Scraping Data...</span>
-              </>
-            ) : (
-              <>
-                <Zap className="w-3.5 h-3.5 text-indigo-600" />
-                <span>⚡ Run Scraper</span>
-              </>
-            )}
-          </Button>
+          {/* Right Action: White Pill Scrape Button */}
+          <div className="shrink-0 flex items-center gap-3 ml-6 lg:ml-10">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs sm:text-sm font-bold text-[#08080D] shadow-lg hover:bg-slate-100 active:scale-95 transition cursor-pointer whitespace-nowrap"
+            >
+              <Zap className="h-3.5 w-3.5 text-indigo-600" />
+              <span>Scrape Data</span>
+            </button>
+          </div>
         </div>
       </header>
 

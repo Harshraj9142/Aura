@@ -104,39 +104,20 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header */}
-      <Header onRunScraper={handleRunScraper} scraperLoading={scraperLoading} />
-
       {/* IDLE / LOADING VIEW */}
       {(analyzeState === "idle" || analyzeState === "loading") && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <div className="lg:col-span-4 lg:sticky lg:top-24">
-              <SearchPanel
-                routes={routes}
-                airlines={airlines}
-                origin={origin}
-                destination={destination}
-                airline={airline}
-                onOriginChange={setOrigin}
-                onDestinationChange={setDestination}
-                onAirlineChange={setAirline}
-                onAnalyze={handleAnalyze}
-                loading={analyzeState === "loading"}
-              />
+        <>
+          {analyzeState === "loading" ? (
+            <div className="h-72 rounded-3xl border border-slate-200 bg-white/90 backdrop-blur-md flex flex-col items-center justify-center space-y-4">
+              <Activity className="w-8 h-8 animate-spin text-blue-600" />
+              <p className="text-slate-800 font-medium text-sm">
+                Querying database for {origin} → {destination} ({airline})…
+              </p>
             </div>
-            <div className="lg:col-span-8">
-              {analyzeState === "loading" ? (
-                <div className="h-72 rounded-xl border border-slate-800 bg-slate-950/80 flex flex-col items-center justify-center space-y-4">
-                  <Activity className="w-8 h-8 animate-spin text-emerald-400" />
-                  <p className="text-slate-300 font-medium font-mono animate-pulse text-sm">
-                    Querying PostgreSQL database for {origin} → {destination} ({airline})…
-                  </p>
-                </div>
-              ) : (
-                <DashboardOverview />
-              )}
-            </div>
-          </div>
+          ) : (
+            <DashboardOverview />
+          )}
+        </>
       )}
 
       {/* NO DATA FOUND VIEW (Strict Database Mode Empty State) */}

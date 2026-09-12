@@ -89,7 +89,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-slate-200 bg-white font-body shadow-xs">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-slate-200/80 bg-white/85 backdrop-blur-xl font-body shadow-xs">
       {/* Logo */}
       <Link href="/" className="flex h-20 items-center gap-3 border-b border-slate-200 px-6 hover:opacity-85 transition">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 border border-slate-300 text-slate-950 font-black text-base shadow-xs">
