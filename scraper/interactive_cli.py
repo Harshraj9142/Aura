@@ -288,5 +288,8 @@ async def execute_rich_scrape(selected_sources, route_pair_filter, selected_wind
 
 
 if __name__ == "__main__":
-    sources, route_pair, windows = display_rich_menu()
-    asyncio.run(execute_rich_scrape(sources, route_pair, windows))
+    try:
+        sources, route_pair, windows = display_rich_menu()
+        asyncio.run(execute_rich_scrape(sources, route_pair, windows))
+    except (KeyboardInterrupt, SystemExit, asyncio.CancelledError):
+        console.print("\n[bold yellow]👋 Scraping session interrupted by user. Exiting cleanly...[/bold yellow]")
