@@ -57,6 +57,12 @@ export function LandingFooter() {
                   Lead-Time Elasticity
                 </Link>
               </li>
+              <li>
+                <Link href="/dashboard/predictions" className="text-purple-400 hover:text-purple-300 transition flex items-center gap-1">
+                  <span>AI Price Predictions</span>
+                  <span className="text-[10px] bg-purple-500/20 text-purple-300 px-1 rounded">ML</span>
+                </Link>
+              </li>
             </ul>
           </div>
 

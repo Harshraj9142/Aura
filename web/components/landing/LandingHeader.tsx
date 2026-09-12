@@ -52,6 +52,13 @@ export function LandingHeader() {
             >
               Elasticity
             </Link>
+            <Link
+              href="/dashboard/predictions"
+              className="text-sm font-medium text-purple-300 hover:text-white transition-colors flex items-center gap-1.5"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-pulse" />
+              AI Predictor
+            </Link>
           </nav>
 
           {/* Right Action buttons */}
@@ -126,6 +133,14 @@ export function LandingHeader() {
               className="text-sm font-medium text-slate-300 hover:text-white"
             >
               Lead-Time Elasticity
+            </Link>
+            <Link
+              href="/dashboard/predictions"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-medium text-purple-400 hover:text-white flex items-center gap-1.5"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-purple-400" />
+              AI Price Predictor (ML)
             </Link>
             <div className="pt-2">
               <Link

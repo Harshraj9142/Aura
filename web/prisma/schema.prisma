@@ -80,6 +80,60 @@ model route_base_values {
   @@unique([route_origin, route_destination], map: "uq_route_base_values")
 }
 
+model flight_observations {
+  id               Int     @id @default(autoincrement())
+  airline          String
+  flight_number    String
+  origin           String
+  destination      String
+  departure_time   String
+  arrival_time     String
+  duration_minutes Int
+  stops            Int     @default(0)
+  cabin_class      String  @default("Economy")
+  scraped_at       String
+  price            Float   @db.Real
+  source           String? @default("scraper")
+
+  @@index([departure_time], map: "idx_flight_dep_time")
+  @@index([origin, destination], map: "idx_flight_route")
+  @@index([scraped_at], map: "idx_flight_scraped")
+  @@index([flight_number, departure_time, origin, destination], map: "idx_flight_signature")
+}
+
+model model_registry {
+  model_id      String @id
+  version       String @unique
+  algorithm     String
+  metrics_mae   Float? @db.Real
+  metrics_rmse  Float? @db.Real
+  metrics_mape  Float? @db.Real
+  sample_count  Int?
+  status        String @default("candidate")
+  artifact_path String
+  created_at    String
+
+  @@index([status], map: "idx_model_status")
+}
+
+model predictions {
+  prediction_id        String  @id
+  flight_signature     String
+  predicted_at         String
+  target_horizon_hours Int     @default(24)
+  target_time          String
+  predicted_price      Float   @db.Real
+  model_version        String
+  actual_price         Float?  @db.Real
+  error                Float?  @db.Real
+  percentage_error     Float?  @db.Real
+  evaluated_at         String?
+
+  @@index([evaluated_at], map: "idx_pred_evaluated")
+  @@index([flight_signature], map: "idx_pred_signature")
+  @@index([target_time], map: "idx_pred_target")
+}
+
 enum SourceType {
   airline
   ota
