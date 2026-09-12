@@ -213,9 +213,19 @@ class AirIndiaScraper(BaseScraper):
             raise NoFlightsFoundError("Air India: No flight cards found in DOM")
 
         fares: list[FareRecord] = []
-        for i, card in enumerate(flight_cards):
+        for i, card in enumerate(flight_cards[:100]):
             try:
-                flight_num = await self._get_text(card, self.SEL_FLIGHT_NUMBER) or f"AI-{1000 + i}"
+                raw_flight_num = await self._get_text(card, self.SEL_FLIGHT_NUMBER)
+                dep_time = await self._get_text(card, ".dept-time, [class*='dept'], [class*='time']") or ""
+
+                if raw_flight_num:
+                    clean_code = re.sub(r"\s+", "", raw_flight_num)
+                    if not clean_code.startswith("AI"):
+                        clean_code = f"AI-{clean_code}" if clean_code.isdigit() else clean_code
+                    flight_num = f"{clean_code} ({dep_time})" if dep_time else clean_code
+                else:
+                    flight_num = f"AI-{1000 + i} ({dep_time})" if dep_time else f"AI-{1000 + i}"
+
                 total_text = await self._get_text(card, self.SEL_FARE_AMOUNT)
                 if not total_text:
                     continue

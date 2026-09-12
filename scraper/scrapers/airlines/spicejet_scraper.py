@@ -110,12 +110,16 @@ class SpiceJetScraper(BaseScraper):
         cards = await page.query_selector_all("[data-testid*='flight-card'], [class*='flight-row'], [class*='availFlight'], div.css-1dbjc4n")
         
         fares: list[FareRecord] = []
-        for i, card in enumerate(cards):
+        for i, card in enumerate(cards[:100]):
             try:
                 txt = await card.inner_text()
                 if "SG-" in txt or "SG " in txt or "SpiceJet" in txt or "₹" in txt:
                     m_num = re.search(r"SG[-\s]?\d{3,4}", txt, re.I)
-                    flt_num = m_num.group(0).upper().replace(" ", "-") if m_num else f"SG-{1000 + i}"
+                    flt_code = m_num.group(0).upper().replace(" ", "-") if m_num else f"SG-{1000 + i}"
+
+                    m_time = re.search(r"\b(\d{2}:\d{2})\b", txt)
+                    dep_time = m_time.group(1) if m_time else ""
+                    flt_num = f"{flt_code} ({dep_time})" if dep_time else flt_code
 
                     m_price = re.search(r"₹\s*([\d,]+)", txt)
                     if not m_price:

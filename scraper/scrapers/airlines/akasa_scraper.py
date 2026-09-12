@@ -179,9 +179,19 @@ class AkasaScraper(BaseScraper):
             raise NoFlightsFoundError("Akasa Air: No flight cards found")
 
         fares: list[FareRecord] = []
-        for i, card in enumerate(flight_cards):
+        for i, card in enumerate(flight_cards[:100]):
             try:
-                flight_num = await self._text(card, self.SEL_FLIGHT_NUMBER) or f"QP-{1000 + i}"
+                raw_flight_num = await self._text(card, self.SEL_FLIGHT_NUMBER)
+                dep_time = await self._text(card, ".dept-time, [class*='dept'], [class*='time']") or ""
+                
+                if raw_flight_num:
+                    clean_code = re.sub(r"\s+", "", raw_flight_num)
+                    if not clean_code.startswith("QP"):
+                        clean_code = f"QP-{clean_code}" if clean_code.isdigit() else clean_code
+                    flight_num = f"{clean_code} ({dep_time})" if dep_time else clean_code
+                else:
+                    flight_num = f"QP-{1000 + i} ({dep_time})" if dep_time else f"QP-{1000 + i}"
+
                 total = await self._text(card, self.SEL_FARE_AMOUNT)
                 if not total:
                     continue

@@ -480,16 +480,17 @@ class IndiGoScraper(BaseScraper):
 
         Extracts: flight number, times, fare class, base fare, taxes, total.
         """
-        # Extract flight number
-        flight_number = await self._extract_text(card, self.SEL_FLIGHT_NUMBER)
-        if not flight_number:
-            flight_number = f"6E-{1000 + index}"  # Placeholder if not found
-
-        # Clean flight number
-        flight_number = flight_number.strip()
-        if not flight_number.startswith("6E"):
-            # IndiGo flights always start with 6E
-            flight_number = f"6E-{flight_number}" if flight_number.isdigit() else flight_number
+        # Extract flight number and departure time
+        raw_flight_number = await self._extract_text(card, self.SEL_FLIGHT_NUMBER)
+        dep_time = await self._extract_text(card, self.SEL_DEPARTURE_TIME) or ""
+        
+        if raw_flight_number:
+            clean_code = re.sub(r"\s+", "", raw_flight_number)
+            if not clean_code.startswith("6E"):
+                clean_code = f"6E-{clean_code}" if clean_code.isdigit() else clean_code
+            flight_number = f"{clean_code} ({dep_time})" if dep_time else clean_code
+        else:
+            flight_number = f"6E-{1000 + index} ({dep_time})" if dep_time else f"6E-{1000 + index}"
 
         # Extract fare amount (total fare)
         total_fare_text = await self._extract_text(card, self.SEL_FARE_AMOUNT)
