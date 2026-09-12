@@ -90,22 +90,28 @@ export function VisualStepsGraphic({
                   </ul>
                 )}
 
-                {/* Clause Citation & Contact Chip */}
-                <div className="mt-4 flex flex-wrap items-center gap-2 pt-2">
-                  {/* Exact Clause Link Mention */}
-                  <a
-                    href={step.clauseCitation.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700 transition hover:bg-indigo-100 dark:border-indigo-900/60 dark:bg-indigo-950/60 dark:text-indigo-300 dark:hover:bg-indigo-900"
-                    title={`Read clause in ${step.clauseCitation.docName}`}
-                  >
-                    <span>📜</span>
-                    <span>Clause Mention: {step.clauseCitation.label}</span>
-                    <span>↗</span>
-                  </a>
+                {/* Exact Statutory Mandate for this Step */}
+                <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <span className="text-[11px] font-extrabold uppercase tracking-wide text-indigo-950 dark:text-indigo-300 flex items-center gap-1">
+                      <span>⚖️</span> Statutory Mandate: {step.clauseCitation.label}
+                    </span>
+                    <a
+                      href={step.clauseCitation.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline dark:text-indigo-400 shrink-0"
+                    >
+                      Citation Link ↗
+                    </a>
+                  </div>
+                  <p className="text-xs text-slate-800 leading-relaxed font-mono bg-slate-50 p-2 rounded border border-slate-200/70 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
+                    “{step.clauseCitation.exactText || step.clauseCitation.label}”
+                  </p>
+                </div>
 
-                  {/* Contact Info (if applicable) */}
+                {/* Contact Info (if applicable) */}
+                <div className="mt-3 flex flex-wrap items-center gap-2 pt-1 border-t border-slate-200/60 dark:border-slate-800">
                   {step.contactInfo && (
                     <div className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
                       <span className="font-semibold text-slate-900 dark:text-white">

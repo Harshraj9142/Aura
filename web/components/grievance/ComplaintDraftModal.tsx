@@ -68,11 +68,14 @@ On the date of travel, I experienced the following grievance:
 - Pertinent Airline Contract: ${airline.name} Conditions of Carriage & Passenger Charter
 
 3. STATUTORY ENTITLEMENTS & LEGAL PROVISIONS:
-As per the Directorate General of Civil Aviation (DGCA) Civil Aviation Requirements (CAR) Section 3, Series M, Part IV and the statutory Ministry of Civil Aviation Passenger Charter of Rights, I am legally entitled to:
-- Statutory Compensation / Remedy: ${entitlement.compensationAmount}
+As per the Directorate General of Civil Aviation (DGCA) Civil Aviation Requirements (CAR) and statutory airline contracts:
+- Statutory Remedy / Demand: ${entitlement.compensationAmount}
 - Legal Basis: ${entitlement.compensationBasis}
 - Refund Rights: ${entitlement.refundSummary}
 - Care & Facilities Mandate: ${entitlement.freeCareSummary}
+
+EXACT STATUTORY PROVISIONS QUOTED:
+${entitlement.primaryClauses.map((c) => `• ${c.name} [${c.clause}]:\n  "${c.exactText}"`).join('\n\n')}
 
 4. FORMAL DEMAND:
 In view of the aforementioned facts and clear statutory mandates, I hereby call upon ${airline.name} to:
@@ -114,13 +117,18 @@ Contact Phone: [Your Mobile Number]`;
       <div className="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-          <div>
-            <h3 className="text-base font-bold text-slate-950">
-              Pre-filled Formal Legal Notice & Demand Letter
-            </h3>
-            <p className="text-xs text-slate-600">
-              Ready to send directly to the Nodal Officer of {airline.name} ({airline.nodalOfficer.email})
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 p-1 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-2xs">
+              <img src={airline.logoUrl} alt={airline.shortName} className="max-h-full max-w-full object-contain" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-950">
+                Pre-filled Formal Legal Notice & Demand Letter
+              </h3>
+              <p className="text-xs text-slate-600">
+                Ready to send directly to the Nodal Officer of {airline.name} ({airline.nodalOfficer.email})
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}

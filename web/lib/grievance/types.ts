@@ -35,6 +35,7 @@ export interface ActionStep {
     label: string;
     url: string;
     docName: string;
+    exactText?: string;
   };
   contactInfo?: {
     label: string;
@@ -53,6 +54,7 @@ export interface StatutoryEntitlement {
   primaryClauses: {
     name: string;
     clause: string;
+    exactText: string;
     url: string;
   }[];
   steps: ActionStep[];
@@ -68,6 +70,7 @@ export interface AirlineInfo {
   code: string;
   tagline: string;
   logoBg: string;
+  logoUrl: string;
   officialCocUrl: string;
   officialCharterUrl: string;
   officialSupportUrl: string;

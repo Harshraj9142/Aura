@@ -37,6 +37,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ScraperControlModal from "@/components/ScraperControlModal";
+import AirlineLogo from "@/components/AirlineLogo";
 
 interface LogItem {
   id: string;
@@ -718,7 +719,12 @@ export default function LiveScraperTerminal() {
                     filteredFares.map((row) => (
                       <tr key={row.id} className="hover:bg-slate-900/60 transition-colors">
                         <td className="px-3 py-2 font-bold text-emerald-400 text-[11px]">{row.flight_number || "Direct"}</td>
-                        <td className="px-3 py-2 font-semibold text-slate-200 text-[11px] max-w-[120px] truncate">{row.carrier}</td>
+                        <td className="px-3 py-2 font-semibold text-slate-200 text-[11px] whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <AirlineLogo airline={row.carrier} flightNumber={row.flight_number} size="xs" />
+                            <span className="truncate max-w-[110px]">{row.carrier}</span>
+                          </div>
+                        </td>
                         <td className="px-3 py-2 text-slate-300 font-bold text-[11px]">{row.route_origin}→{row.route_destination}</td>
                         <td className="px-3 py-2 text-slate-400 text-[10px]">{row.travel_date}</td>
                         <td className="px-3 py-2 text-slate-400 text-[10px]">T+{row.advance_purchase_days}d</td>
@@ -833,8 +839,9 @@ export default function LiveScraperTerminal() {
                   const barWidth = (carrier.count / maxCount) * 100;
                   const colors = ["text-emerald-400", "text-cyan-400", "text-blue-400", "text-purple-400", "text-amber-400", "text-pink-400", "text-indigo-400", "text-orange-400", "text-teal-400", "text-lime-400"];
                   return (
-                    <div key={carrier.name} className="flex items-center gap-3">
-                      <span className={`text-[11px] font-mono font-bold w-28 truncate ${colors[idx % colors.length]}`}>
+                    <div key={carrier.name} className="flex items-center gap-2.5">
+                      <AirlineLogo airline={carrier.name} size="xs" />
+                      <span className={`text-[11px] font-mono font-bold w-24 truncate ${colors[idx % colors.length]}`}>
                         {carrier.name}
                       </span>
                       <div className="flex-1 relative h-4 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
@@ -1041,7 +1048,7 @@ export default function LiveScraperTerminal() {
             <div className="space-y-2">
               {stats?.latestFares?.map((fare) => (
                 <div key={fare.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/60 hover:bg-slate-900 transition-colors">
-                  <Plane className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <AirlineLogo airline={fare.carrier} flightNumber={fare.flight_number} size="sm" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-slate-200 truncate">{fare.carrier}</span>

@@ -24,11 +24,12 @@ import { Activity, BarChart2, Terminal, Plane, Info, Clock, AlertTriangle, Arrow
 const DEFAULT_AIRLINES = ["IndiGo", "Air India", "SpiceJet", "Akasa Air", "Air India Express"];
 
 const AIRLINE_LOGOS: Record<string, string> = {
-  "IndiGo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/IndiGo_airlines_logo.svg/200px-IndiGo_airlines_logo.svg.png",
-  "Air India": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Air_India_logo.svg/200px-Air_India_logo.svg.png",
-  "SpiceJet": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/SpiceJet_logo.svg/200px-SpiceJet_logo.svg.png",
-  "Akasa Air": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Akasa_Air_logo.svg/200px-Akasa_Air_logo.svg.png",
-  "Air India Express": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Air_India_logo.svg/200px-Air_India_logo.svg.png",
+  "IndiGo": "/airlines/indigo.png",
+  "Air India": "/airlines/airindia.png",
+  "SpiceJet": "/airlines/spicejet.png",
+  "Akasa Air": "/airlines/akasa.png",
+  "Vistara": "/airlines/vistara.png",
+  "Air India Express": "/airlines/aix.png",
 };
 
 type Tab = "overview" | "chart" | "flights" | "logs";

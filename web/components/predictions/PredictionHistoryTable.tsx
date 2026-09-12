@@ -3,6 +3,7 @@
 import React from "react";
 import { LoggedPrediction } from "@/lib/ml/types";
 import { History, CheckCircle2, Clock, Sparkles } from "lucide-react";
+import AirlineLogo from "@/components/AirlineLogo";
 
 interface PredictionHistoryTableProps {
   predictions: LoggedPrediction[];
@@ -51,8 +52,13 @@ export function PredictionHistoryTable({ predictions }: PredictionHistoryTablePr
                   <tr key={p.predictionId} className="hover:bg-slate-900/40 transition">
                     <td className="py-2.5 font-mono text-slate-400">{p.predictionId}</td>
                     <td className="py-2.5">
-                      <div className="font-medium text-slate-200">{carrierFlight}</div>
-                      {route && <div className="text-[10px] text-slate-500">{route}</div>}
+                      <div className="flex items-center gap-2.5">
+                        <AirlineLogo airline={carrierFlight} flightNumber={carrierFlight} size="xs" />
+                        <div>
+                          <div className="font-medium text-slate-200">{carrierFlight}</div>
+                          {route && <div className="text-[10px] text-slate-500">{route}</div>}
+                        </div>
+                      </div>
                     </td>
                     <td className="py-2.5 font-mono text-slate-400">
                       +{p.targetHorizonHours}h

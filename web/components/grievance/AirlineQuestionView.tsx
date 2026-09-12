@@ -45,11 +45,18 @@ export function AirlineQuestionView({
               }`}
             >
               <div className="flex w-full items-center justify-between">
-                <span
-                  className={`inline-flex h-8 w-12 items-center justify-center rounded-lg text-xs font-black text-white shadow-sm ${airline.logoBg}`}
-                >
-                  {airline.code}
-                </span>
+                <div className="flex items-center gap-2.5">
+                  <div className="h-11 w-11 rounded-xl bg-white border border-slate-200 shadow-xs p-1.5 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
+                    <img
+                      src={airline.logoUrl}
+                      alt={airline.name}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
+                  <span className="inline-flex px-2 py-0.5 rounded-md text-[11px] font-black tracking-wider uppercase bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                    {airline.code}
+                  </span>
+                </div>
                 <span className="text-xs font-bold text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                   Select →
                 </span>

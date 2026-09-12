@@ -26,9 +26,12 @@ export function QuickProblemSelector({
           <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             Step 1: Select Airline
           </span>
-          <span className="text-xs font-medium text-slate-400">
-            {AIRLINE_DIRECTORY[selectedAirline].name}
-          </span>
+          <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">
+            <div className="h-4 w-4 rounded bg-white border border-slate-200 p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0">
+              <img src={AIRLINE_DIRECTORY[selectedAirline].logoUrl} alt="" className="max-h-full max-w-full object-contain" />
+            </div>
+            <span>{AIRLINE_DIRECTORY[selectedAirline].name}</span>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -38,19 +41,19 @@ export function QuickProblemSelector({
               <button
                 key={airline.id}
                 onClick={() => onSelectAirline(airline.id)}
-                className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
+                className={`flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
                   isSelected
                     ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-500/30 dark:bg-indigo-500'
                     : 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:border-slate-700'
                 }`}
               >
-                <span
-                  className={`inline-flex h-4 w-4 items-center justify-center rounded text-[9px] font-extrabold ${
-                    isSelected ? 'bg-white/20 text-white' : `${airline.logoBg} text-white`
-                  }`}
-                >
-                  {airline.code.slice(0, 2)}
-                </span>
+                <div className="h-5 w-5 rounded bg-white border border-slate-200/80 p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-2xs">
+                  <img
+                    src={airline.logoUrl}
+                    alt={airline.shortName}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
                 <span>{airline.shortName}</span>
               </button>
             );

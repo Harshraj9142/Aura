@@ -80,13 +80,23 @@ export function QuestionWizard({
       {/* Top Breadcrumb & Progress Bar */}
       <div className="flex items-center justify-between">
         {currentQuestion > 1 ? (
-          <button
-            onClick={onBack}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition shadow-xs"
-          >
-            <span>←</span>
-            <span>Back</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onBack}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition shadow-xs"
+            >
+              <span>←</span>
+              <span>Back</span>
+            </button>
+            {airline && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-900 shadow-2xs">
+                <div className="h-4 w-4 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden">
+                  <img src={airline.logoUrl} alt="" className="max-h-full max-w-full object-contain" />
+                </div>
+                <span>{airline.shortName}</span>
+              </span>
+            )}
+          </div>
         ) : (
           <div />
         )}
@@ -131,12 +141,19 @@ export function QuestionWizard({
                 onClick={() => onSelectAirline(item.id)}
                 className="group flex flex-col items-start rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs transition-all hover:border-indigo-500 hover:shadow-md"
               >
-                <span
-                  className={`inline-flex h-6 px-2 min-w-9 w-auto items-center justify-center rounded text-[10px] font-black text-white ${item.logoBg}`}
-                >
-                  {item.code}
-                </span>
-                <span className="mt-2.5 text-sm font-extrabold text-slate-950">
+                <div className="flex w-full items-center justify-between">
+                  <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 shadow-2xs p-1 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
+                    <img
+                      src={item.logoUrl}
+                      alt={item.shortName}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
+                  <span className="inline-flex px-2 py-0.5 rounded-md text-[10px] font-black tracking-wider uppercase bg-slate-100 text-slate-700 border border-slate-200">
+                    {item.code}
+                  </span>
+                </div>
+                <span className="mt-3 text-sm font-extrabold text-slate-950">
                   {item.shortName}
                 </span>
                 <span className="mt-1 text-[10px] font-bold text-slate-500 group-hover:text-indigo-600">

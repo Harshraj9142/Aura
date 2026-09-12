@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { FlightPredictionInput, FlightPredictionResult } from "@/lib/ml/types";
+import AirlineLogo from "@/components/AirlineLogo";
 
 interface RouteOption {
   origin: string;
@@ -165,24 +166,29 @@ export function PredictionSimulator({
         {/* Carrier */}
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
-            <Plane className="h-3.5 w-3.5 text-purple-400" />
+            <AirlineLogo airline={airline} size="xs" />
             Operating Carrier
           </label>
-          <select
-            value={airline}
-            onChange={(e) => {
-              const val = e.target.value;
-              setAirline(val);
-              runPrediction(selectedRoute, val, daysToDeparture, currentPrice, stops, durationMinutes);
-            }}
-            className="w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-          >
-            {AIRLINES.map((a) => (
-              <option key={a} value={a}>
-                {a}
-              </option>
-            ))}
-          </select>
+          <div className="relative flex items-center">
+            <div className="absolute left-2.5 pointer-events-none z-10">
+              <AirlineLogo airline={airline} size="xs" />
+            </div>
+            <select
+              value={airline}
+              onChange={(e) => {
+                const val = e.target.value;
+                setAirline(val);
+                runPrediction(selectedRoute, val, daysToDeparture, currentPrice, stops, durationMinutes);
+              }}
+              className="w-full rounded-lg border border-slate-800 bg-slate-900 pl-9 pr-3 py-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+            >
+              {AIRLINES.map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Days to Departure */}

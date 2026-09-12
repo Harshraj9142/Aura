@@ -19,11 +19,11 @@ export function EntitlementBanner({
       {/* Top Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <span className={`inline-flex h-6 items-center justify-center rounded px-2 text-xs font-bold text-white ${airline.logoBg}`}>
-              {airline.code}
-            </span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-white border border-slate-200 p-1 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-2xs">
+              <img src={airline.logoUrl} alt={airline.shortName} className="max-h-full max-w-full object-contain" />
+            </div>
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">
               {airline.name} • Your Legal Entitlement
             </span>
           </div>
@@ -88,24 +88,37 @@ export function EntitlementBanner({
         </div>
       </div>
 
-      {/* Direct Clause Mention Badges */}
-      <div className="mt-4 flex flex-wrap items-center gap-2 pt-2">
-        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-          Statutory Clauses Applicable:
+      {/* Exact Statutory Clauses & Mandates */}
+      <div className="mt-5 pt-4 border-t border-indigo-100 dark:border-indigo-900/50 space-y-2.5">
+        <span className="text-xs font-black uppercase tracking-wider text-indigo-950 dark:text-indigo-300 flex items-center gap-1.5">
+          <span>📜</span> Exact Statutory Clauses Applicable
         </span>
-        {entitlement.primaryClauses.map((item, idx) => (
-          <a
-            key={idx}
-            href={item.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 dark:border-indigo-900/60 dark:bg-indigo-950/50 dark:text-indigo-300"
-          >
-            <span>📜</span>
-            <span>{item.name} — {item.clause}</span>
-            <span>↗</span>
-          </a>
-        ))}
+        <div className="space-y-2">
+          {entitlement.primaryClauses.map((item, idx) => (
+            <div
+              key={idx}
+              className="rounded-xl border border-indigo-100 bg-white/95 p-3 shadow-xs dark:border-indigo-900/60 dark:bg-slate-900/90"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-indigo-50 dark:border-indigo-950 pb-1.5 mb-1.5">
+                <span className="text-xs font-extrabold text-slate-950 dark:text-white">
+                  {item.name} — <span className="text-indigo-800 dark:text-indigo-300 font-bold">{item.clause}</span>
+                </span>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 hover:underline dark:text-indigo-400"
+                >
+                  <span>Citation Link</span>
+                  <span>↗</span>
+                </a>
+              </div>
+              <p className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-mono bg-slate-50 dark:bg-slate-950 p-2 rounded border border-slate-200/70 dark:border-slate-800">
+                “{item.exactText}”
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

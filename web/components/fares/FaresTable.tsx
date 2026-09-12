@@ -1,6 +1,7 @@
 "use client";
 
 import { Fare, PaginationMeta } from "@/types/fare";
+import AirlineLogo from "@/components/AirlineLogo";
 
 interface FaresTableProps {
   fares: Fare[];
@@ -42,8 +43,13 @@ export function FaresTable({ fares, pagination, onPageChange }: FaresTableProps)
                   {fare.route_origin}-{fare.route_destination}
                 </td>
                 <td className="p-3.5 whitespace-nowrap">
-                  <div className="font-bold text-slate-900">{fare.carrier || "N/A"}</div>
-                  <div className="text-[11px] text-slate-500 font-medium">{fare.flight_number || "—"}</div>
+                  <div className="flex items-center gap-2.5">
+                    <AirlineLogo airline={fare.carrier} flightNumber={fare.flight_number} size="sm" />
+                    <div>
+                      <div className="font-bold text-slate-900">{fare.carrier || "N/A"}</div>
+                      <div className="text-[11px] text-slate-500 font-medium">{fare.flight_number || "—"}</div>
+                    </div>
+                  </div>
                 </td>
                 <td className="p-3.5 whitespace-nowrap">
                   <span className="inline-flex items-center rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[11px] font-bold text-slate-800">

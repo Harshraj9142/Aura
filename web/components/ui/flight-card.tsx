@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import AirlineLogo from "@/components/AirlineLogo";
 
 export interface FlightCardProps {
   airline: {
@@ -66,9 +67,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
         {/* Airline Info */}
         <div className="md:col-span-4 flex flex-col">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 flex items-center justify-center rounded-xl bg-[#F3F6F7] border border-black/5 overflow-hidden shrink-0">
-              <img src={airline.logo} alt={`${airline.name} logo`} className="w-full h-full object-contain p-1.5" />
-            </div>
+            <AirlineLogo airline={airline.name} flightNumber={airline.flightNumber} size="lg" />
             <div>
               <p className="font-heading text-base font-bold text-[#08080D]">{airline.name}</p>
               <p className="text-xs text-[#08080D]/60 font-mono">{airline.flightNumber}</p>

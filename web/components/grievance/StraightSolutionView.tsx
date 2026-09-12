@@ -26,10 +26,10 @@ export function StraightSolutionView({
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
             Assessed Claim:
           </span>
-          <span className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-900">
-            <span className={`inline-flex h-3 px-1 min-w-5 items-center justify-center rounded text-[8px] font-black text-white ${airline.logoBg}`}>
-              {airline.code.slice(0, 2)}
-            </span>
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-900 shadow-2xs">
+            <div className="h-5 w-5 rounded bg-white border border-slate-200 p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0">
+              <img src={airline.logoUrl} alt={airline.shortName} className="max-h-full max-w-full object-contain" />
+            </div>
             <span>{airline.shortName}</span>
           </span>
           <span className="rounded-lg bg-indigo-50 border border-indigo-200 px-2.5 py-1 text-xs font-bold text-indigo-800">
@@ -106,24 +106,50 @@ export function StraightSolutionView({
           </div>
         </div>
 
-        {/* Direct Clickable Clause Mentions */}
-        <div className="mt-4 flex flex-wrap items-center gap-2 pt-2 border-t border-indigo-100">
-          <span className="text-xs font-bold text-slate-800">
-            Exact Clauses Applicable:
-          </span>
-          {entitlement.primaryClauses.map((item, idx) => (
-            <a
-              key={idx}
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-white px-2.5 py-1 text-xs font-bold text-indigo-800 transition hover:bg-indigo-50 shadow-xs"
-            >
-              <span>📜</span>
-              <span>{item.name} — {item.clause}</span>
-              <span>↗</span>
-            </a>
-          ))}
+        {/* Exact Statutory Clauses & Mandates Quoted Verbatim */}
+        <div className="mt-5 pt-4 border-t border-indigo-100 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs font-black uppercase tracking-wider text-indigo-950 flex items-center gap-1.5">
+              <span>📜</span> Exact Statutory Provisions Applicable
+            </span>
+            <span className="text-[11px] font-bold text-slate-500">
+              DGCA & Carrier Contract Excerpts
+            </span>
+          </div>
+
+          <div className="space-y-2.5">
+            {entitlement.primaryClauses.map((item, idx) => (
+              <div
+                key={idx}
+                className="rounded-xl border border-indigo-100 bg-white/95 p-3.5 shadow-xs transition hover:border-indigo-300"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-indigo-50 pb-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-indigo-50 text-[10px] font-black text-indigo-700">
+                      §{idx + 1}
+                    </span>
+                    <span className="text-xs font-extrabold text-slate-950">
+                      {item.name} — <span className="text-indigo-900 font-bold">{item.clause}</span>
+                    </span>
+                  </div>
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 hover:text-indigo-900 hover:underline"
+                    title={`Source: ${item.name}`}
+                  >
+                    <span>Citation Source</span>
+                    <span>↗</span>
+                  </a>
+                </div>
+
+                <p className="text-xs text-slate-800 leading-relaxed font-mono bg-slate-50/80 p-2.5 rounded-lg border border-slate-200/80">
+                  “{item.exactText}”
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -172,41 +198,65 @@ export function StraightSolutionView({
                   {step.shortAction}
                 </p>
 
-                {/* Clause link & Contact badge */}
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <a
-                    href={step.clauseCitation.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-md border border-indigo-200 bg-indigo-50/80 px-2 py-0.5 text-[11px] font-bold text-indigo-800 hover:bg-indigo-100"
-                  >
-                    <span>📜</span>
-                    <span>Clause Mention: {step.clauseCitation.label}</span>
-                    <span>↗</span>
-                  </a>
-
-                  {step.contactInfo?.email && (
+                {/* Exact Statutory Mandate Supporting this Step */}
+                <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3 shadow-xs">
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <span className="text-[11px] font-extrabold uppercase tracking-wide text-indigo-950 flex items-center gap-1">
+                      <span>⚖️</span> Statutory Mandate ({step.clauseCitation.label})
+                    </span>
                     <a
-                      href={`mailto:${step.contactInfo.email}`}
-                      className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 hover:text-indigo-700"
-                    >
-                      <span>✉️</span>
-                      <span>{step.contactInfo.email}</span>
-                    </a>
-                  )}
-
-                  {step.contactInfo?.url && (
-                    <a
-                      href={step.contactInfo.url}
+                      href={step.clauseCitation.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 hover:text-indigo-700"
+                      className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline shrink-0"
                     >
-                      <span>🌐</span>
-                      <span>Portal ↗</span>
+                      Citation Link ↗
                     </a>
-                  )}
+                  </div>
+                  <p className="text-xs text-slate-800 leading-relaxed font-mono bg-slate-50 p-2 rounded border border-slate-200/70">
+                    “{step.clauseCitation.exactText || step.clauseCitation.label}”
+                  </p>
                 </div>
+
+                {/* Contact information badges */}
+                {(step.contactInfo?.email || step.contactInfo?.phone || step.contactInfo?.url) && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2 pt-1 border-t border-slate-200/60">
+                    {step.contactInfo?.label && (
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        {step.contactInfo.label}:
+                      </span>
+                    )}
+                    {step.contactInfo?.phone && (
+                      <a
+                        href={`tel:${step.contactInfo.phone}`}
+                        className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 hover:text-indigo-700"
+                      >
+                        <span>📞</span>
+                        <span>{step.contactInfo.phone}</span>
+                      </a>
+                    )}
+                    {step.contactInfo?.email && (
+                      <a
+                        href={`mailto:${step.contactInfo.email}`}
+                        className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 hover:text-indigo-700"
+                      >
+                        <span>✉️</span>
+                        <span>{step.contactInfo.email}</span>
+                      </a>
+                    )}
+                    {step.contactInfo?.url && (
+                      <a
+                        href={step.contactInfo.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 hover:text-indigo-700"
+                      >
+                        <span>🌐</span>
+                        <span>Portal ↗</span>
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ))}

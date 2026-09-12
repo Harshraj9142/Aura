@@ -21,6 +21,7 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
+import AirlineLogo from "@/components/AirlineLogo";
 
 // Chart mock history matching the reference design graph (Jan to Aug, reaching 102.6)
 const INDEX_CHART_DATA = [
@@ -37,30 +38,40 @@ const INDEX_CHART_DATA = [
 const LIVE_ROUTE_FEEDS = [
   {
     route: "DEL → BOM",
+    carrier: "IndiGo",
+    flightNumber: "6E-205",
     fare: "₹4,299",
     tag: "↓ 14%",
     tagType: "green",
   },
   {
     route: "BOM → GOA",
+    carrier: "SpiceJet",
+    flightNumber: "SG-8169",
     fare: "₹2,890",
     tag: "Deal",
     tagType: "blue",
   },
   {
     route: "DEL → BLR",
+    carrier: "Akasa Air",
+    flightNumber: "QP-1351",
     fare: "₹5,450",
     tag: "High",
     tagType: "red",
   },
   {
     route: "BLR → HYD",
+    carrier: "Air India",
+    flightNumber: "AI-512",
     fare: "₹2,690",
     tag: "↓ 11%",
     tagType: "green",
   },
   {
     route: "DEL → CCU",
+    carrier: "Vistara",
+    flightNumber: "UK-705",
     fare: "₹4,680",
     tag: "↓ 8%",
     tagType: "green",
@@ -473,11 +484,16 @@ export default function DashboardOverview() {
                     key={idx}
                     className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/80 transition"
                   >
-                    <div className="flex items-center gap-2.5">
-                      <Plane className="h-3.5 w-3.5 text-slate-700 -rotate-45" />
+                    <div className="flex items-center gap-3">
+                      <AirlineLogo airline={item.carrier} flightNumber={item.flightNumber} size="sm" />
                       <div>
-                        <div className="text-xs font-bold text-[#08080D]">
-                          {item.route}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-[#08080D]">
+                            {item.route}
+                          </span>
+                          <span className="text-[10px] font-semibold text-slate-500">
+                            • {item.carrier}
+                          </span>
                         </div>
                         <div className="text-[11px] font-semibold text-slate-600">
                           {item.fare}
