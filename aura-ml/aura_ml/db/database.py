@@ -94,6 +94,10 @@ class Database:
         values = [tuple(r.get(k) for k in keys) for r in records]
         with self.get_connection() as conn:
             cursor = self._get_cursor(conn)
-            cursor.executemany(sql, values)
+            if self.is_sqlite:
+                cursor.executemany(sql, values)
+            else:
+                import psycopg2.extras
+                psycopg2.extras.execute_batch(cursor, sql, values, page_size=1000)
             conn.commit()
         return len(records)

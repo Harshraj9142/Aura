@@ -35,12 +35,12 @@ export async function getModelRegistryStats(): Promise<ModelPerformanceStats[]> 
     if (records.length === 0) {
       return [
         {
-          championVersion: "v2",
+          championVersion: "v3",
           algorithm: "Gradient Boosting Regressor",
-          mae: 4.89,
-          rmse: 18.55,
-          mape: 0.07,
-          trainingSamples: 2254,
+          mae: 2.83,
+          rmse: 23.79,
+          mape: 0.03,
+          trainingSamples: 8955,
           status: "production",
           lastRetrainedAt: new Date().toISOString(),
         },
@@ -50,10 +50,10 @@ export async function getModelRegistryStats(): Promise<ModelPerformanceStats[]> 
     return records.map((r: any) => ({
       championVersion: r.version,
       algorithm: r.algorithm,
-      mae: r.metrics_mae ?? 4.89,
-      rmse: r.metrics_rmse ?? 18.55,
-      mape: r.metrics_mape ?? 0.07,
-      trainingSamples: r.sample_count ?? 2254,
+      mae: r.metrics_mae ?? 2.83,
+      rmse: r.metrics_rmse ?? 23.79,
+      mape: r.metrics_mape ?? 0.03,
+      trainingSamples: r.sample_count ?? 8955,
       status: r.status as "production" | "candidate" | "archived",
       lastRetrainedAt: r.created_at,
     }));
@@ -61,12 +61,12 @@ export async function getModelRegistryStats(): Promise<ModelPerformanceStats[]> 
     console.warn("Error loading model_registry stats, using fallback defaults:", err);
     return [
       {
-        championVersion: "v2",
+        championVersion: "v3",
         algorithm: "Gradient Boosting Regressor",
-        mae: 4.89,
-        rmse: 18.55,
-        mape: 0.07,
-        trainingSamples: 2254,
+        mae: 2.83,
+        rmse: 23.79,
+        mape: 0.03,
+        trainingSamples: 8955,
         status: "production",
         lastRetrainedAt: new Date().toISOString(),
       },

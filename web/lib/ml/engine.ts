@@ -21,33 +21,24 @@ function loadModel(): ModelMetadata {
     return cachedModel;
   }
 
-  const modelPath = path.join(
-    process.cwd(),
-    "artifacts",
-    "models",
-    "v2_trees.json"
-  );
+  const modelCandidates = ["v3_trees.json", "v2_trees.json"];
+  const searchDirs = [
+    path.join(process.cwd(), "artifacts", "models"),
+    path.join(process.cwd(), "web", "artifacts", "models"),
+  ];
 
-  if (!fs.existsSync(modelPath)) {
-    // Fallback path check if running inside different directory context
-    const fallbackPath = path.join(
-      process.cwd(),
-      "web",
-      "artifacts",
-      "models",
-      "v2_trees.json"
-    );
-    if (fs.existsSync(fallbackPath)) {
-      const raw = fs.readFileSync(fallbackPath, "utf-8");
-      cachedModel = JSON.parse(raw) as ModelMetadata;
-      return cachedModel;
+  for (const filename of modelCandidates) {
+    for (const dir of searchDirs) {
+      const fullPath = path.join(dir, filename);
+      if (fs.existsSync(fullPath)) {
+        const raw = fs.readFileSync(fullPath, "utf-8");
+        cachedModel = JSON.parse(raw) as ModelMetadata;
+        return cachedModel;
+      }
     }
-    throw new Error(`Model artifact not found at ${modelPath}`);
   }
 
-  const raw = fs.readFileSync(modelPath, "utf-8");
-  cachedModel = JSON.parse(raw) as ModelMetadata;
-  return cachedModel;
+  throw new Error(`Model artifact not found in candidates [${modelCandidates.join(", ")}]`);
 }
 
 /**
@@ -175,7 +166,7 @@ export function predictFlight(input: FlightPredictionInput): FlightPredictionRes
     potentialSavings,
     horizonCurve,
     features,
-    modelVersion: "v2 (Production Champion)",
+    modelVersion: `${model.version || "v3"} (Production Champion)`,
     algorithm: "Gradient Boosting Regressor (100 Estimators)",
     evaluatedAt: now.toISOString(),
   };

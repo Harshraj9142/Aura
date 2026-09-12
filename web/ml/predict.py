@@ -13,8 +13,8 @@ import argparse
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-MODEL_PKL = BASE_DIR / "artifacts" / "models" / "v2.pkl"
-MODEL_JSON = BASE_DIR / "artifacts" / "models" / "v2.json"
+MODEL_PKL = BASE_DIR / "artifacts" / "models" / "v3.pkl" if (BASE_DIR / "artifacts" / "models" / "v3.pkl").exists() else BASE_DIR / "artifacts" / "models" / "v2.pkl"
+MODEL_JSON = BASE_DIR / "artifacts" / "models" / "v3.json" if (BASE_DIR / "artifacts" / "models" / "v3.json").exists() else BASE_DIR / "artifacts" / "models" / "v2.json"
 
 AIRLINES_LIST = ["IndiGo", "Air India", "Vistara", "SpiceJet", "Akasa Air", "AirAsia India"]
 ROUTES_TOP = [
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     )
     result = {
         "status": "success",
-        "model_version": "v2",
+        "model_version": "v3",
         "input": vars(args),
         "predicted_price": pred
     }

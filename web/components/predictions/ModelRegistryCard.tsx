@@ -10,12 +10,12 @@ interface ModelRegistryCardProps {
 
 export function ModelRegistryCard({ stats }: ModelRegistryCardProps) {
   const champion = stats.find((s) => s.status === "production") || stats[0] || {
-    championVersion: "v2",
+    championVersion: "v3",
     algorithm: "Gradient Boosting Regressor",
-    mae: 4.89,
-    rmse: 18.55,
-    mape: 0.07,
-    trainingSamples: 2254,
+    mae: 2.83,
+    rmse: 23.79,
+    mape: 0.03,
+    trainingSamples: 8955,
     status: "production",
     lastRetrainedAt: new Date().toISOString(),
   };

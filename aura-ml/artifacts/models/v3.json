@@ -1,0 +1,25 @@
+{
+  "algorithm": "gradient_boosting",
+  "feature_names": [
+    "days_to_departure",
+    "hour_of_day",
+    "day_of_week",
+    "is_weekend",
+    "month",
+    "stops",
+    "duration_minutes",
+    "is_morning",
+    "is_evening",
+    "route_avg_price",
+    "price_ratio_to_route",
+    "airline_idx",
+    "route_idx",
+    "current_price"
+  ],
+  "weights": [],
+  "intercept": 0.0,
+  "scaling_means": [],
+  "scaling_stds": [],
+  "is_fitted": true,
+  "has_sklearn_model": true
+}
