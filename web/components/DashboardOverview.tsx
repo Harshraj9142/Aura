@@ -109,20 +109,26 @@ export default function DashboardOverview() {
   }, []);
 
   return (
-    <div className="w-full font-body pb-12">
+    <div className="w-full font-body pb-16">
       {/* 
         ========================================================================
-        1. FULL VIEWPORT WIDTH HERO BANNER (Edge-to-Edge with Dark Top Vignette)
-        - Starts right from top of viewport under fixed navbar header
-        - Spans 100% width left-to-right
-        - Black top vignette gradient for navbar legibility
-        - White text styling on left ("India in motion.")
-        - White background terminal block T3 on right (reversed black/white)
+        1. HERO BANNER: Full Viewport Width with Blended Bottom Blur Mask
+        - Spans 100% full viewport width edge-to-edge
+        - Dark vignette layers for navbar legibility & text contrast
+        - Fades smoothly at bottom into custom cloud background
         ========================================================================
       */}
-      <div className="relative w-full min-h-[460px] sm:min-h-[500px] lg:min-h-[550px] overflow-hidden shadow-2xl bg-slate-950 flex flex-col justify-between pt-24 sm:pt-28 pb-10 sm:pb-14 px-4 sm:px-8 lg:px-10 border-b border-slate-800/60">
-        {/* Full-width Background Panorama Image */}
-        <div className="absolute inset-0 z-0">
+      <div className="relative w-full min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] flex flex-col justify-between pt-24 sm:pt-28 pb-20 sm:pb-24 px-6 sm:px-10 lg:px-14 xl:px-16">
+        {/* Full-width Background Panorama Image with Smooth Bottom Mask Blend */}
+        <div
+          className="absolute inset-0 z-0 bg-slate-950 pointer-events-none"
+          style={{
+            maskImage:
+              "linear-gradient(to bottom, black 0%, black 45%, rgba(0,0,0,0.85) 65%, rgba(0,0,0,0.3) 85%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 0%, black 45%, rgba(0,0,0,0.85) 65%, rgba(0,0,0,0.3) 85%, transparent 100%)",
+          }}
+        >
           <Image
             src="/dashboard/airport_overview_hero.jpg"
             alt="Airport Runway Sunset"
@@ -132,18 +138,18 @@ export default function DashboardOverview() {
           />
 
           {/* Top Black Vignette Gradient Layer (makes floating white navbar text ultra crisp) */}
-          <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-black/90 via-black/55 to-transparent z-10 pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-black/95 via-black/60 to-transparent z-10" />
 
           {/* Left Dark Vignette Layer (makes white headline and subtitle pop) */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-transparent sm:w-2/3 z-10 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-transparent sm:w-2/3 z-10" />
 
-          {/* Bottom subtle shadow transition */}
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-slate-950/70 to-transparent z-10 pointer-events-none" />
+          {/* Right Dark Vignette Layer (makes DATA / ROUTES / PEOPLE / PROGRESS text 100% visible) */}
+          <div className="absolute inset-y-0 right-0 w-80 bg-gradient-to-l from-black/90 via-black/60 to-transparent z-10" />
         </div>
 
-        {/* Hero Banner Content Layer */}
-        <div className="relative z-20 w-full flex flex-col lg:flex-row items-start lg:items-center justify-between h-full gap-8 px-2 sm:px-4">
-          {/* Left Text Block: Shifted leftwards with scaled-up typography */}
+        {/* Hero Banner Content Layer (Full Viewport Width) */}
+        <div className="relative z-20 w-full flex flex-col lg:flex-row items-start lg:items-center justify-between h-full gap-8">
+          {/* Left Text Block */}
           <div className="max-w-3xl space-y-5 pt-2">
             <h1 className="text-5xl sm:text-7xl lg:text-[84px] font-bold tracking-tight text-white drop-shadow-xl leading-[1.02]">
               India <span className="font-serif italic font-normal text-white">in</span> motion.
@@ -157,27 +163,14 @@ export default function DashboardOverview() {
             </div>
           </div>
 
-          {/* Right Text Block & Reverted White Terminal Block (T3) */}
-          <div className="hidden lg:flex flex-col items-end justify-between self-stretch py-2 text-right gap-8">
-            <div className="space-y-1 text-[11px] font-extrabold tracking-[0.3em] text-slate-200 uppercase leading-snug drop-shadow-md">
+          {/* Right Text Block: Ultra Crisp High-Contrast Text */}
+          <div className="hidden lg:flex flex-col items-end justify-start self-stretch py-2 text-right gap-8">
+            <div className="space-y-1.5 text-xs font-black tracking-[0.35em] text-white uppercase leading-relaxed drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
               <div>DATA</div>
               <div>ROUTES</div>
               <div>PEOPLE</div>
               <div>PROGRESS</div>
-              <div className="pt-1 text-slate-300">—</div>
-            </div>
-
-            {/* Inverted Terminal Block: White background, Dark text */}
-            <div className="bg-white/95 backdrop-blur-xl border border-white/80 text-[#08080D] rounded-2xl p-5 min-w-[140px] text-right shadow-2xl transition hover:scale-105 duration-200">
-              <div className="text-4xl font-extrabold tracking-tight text-[#08080D]">
-                T3
-              </div>
-              <div className="text-[10px] font-extrabold tracking-wider text-slate-800 uppercase mt-1">
-                Departures →
-              </div>
-              <div className="text-[10px] font-extrabold tracking-wider text-slate-600 uppercase">
-                Arrivals →
-              </div>
+              <div className="pt-2 text-white/90">—</div>
             </div>
           </div>
         </div>
@@ -185,106 +178,108 @@ export default function DashboardOverview() {
 
       {/* 
         ========================================================================
-        MAIN CONTENT CONTAINER (Centered Max Width Below Banner)
+        2. GLASSMORPHIC CARDS CONTAINER (100% FULL VIEWPORT WIDTH)
+        - Stretches across entire screen from left edge to right edge
+        - Balanced spacing and margins between all cards
         ========================================================================
       */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-10 space-y-8">
+      <div className="w-full px-6 sm:px-10 lg:px-14 xl:px-16 -mt-14 sm:-mt-20 relative z-30 space-y-8 sm:space-y-10">
         {/* 
           ========================================================================
-          2. ROW 1: 4 TOP METRIC CARDS
+          ROW 1: 4 TOP GLASS METRIC CARDS (Stretched Full Width with Spacings)
           ========================================================================
         */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 xl:gap-10 w-full">
           {/* Metric 1: Routes Tracked */}
-          <div className="rounded-2xl bg-white/90 backdrop-blur-md p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition duration-200">
+          <div className="rounded-3xl bg-white/80 backdrop-blur-xl p-6 sm:p-8 border border-white/90 shadow-xl hover:bg-white/90 hover:shadow-2xl transition-all duration-300 w-full">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-900">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/5 text-slate-900 border border-slate-200/50">
                   <Plane className="h-5 w-5 -rotate-45" />
                 </div>
-                <span className="text-xs font-semibold text-slate-500">
+                <span className="text-xs font-semibold text-slate-600">
                   Routes Tracked
                 </span>
               </div>
             </div>
-            <div className="mt-4 flex items-baseline justify-between">
-              <span className="text-3xl font-bold tracking-tight text-[#08080D]">
+            <div className="mt-5 flex items-baseline justify-between">
+              <span className="text-3xl sm:text-4xl font-bold tracking-tight text-[#08080D]">
                 {stats.totalFares.toLocaleString("en-IN")}
               </span>
-              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
                 <TrendingUp className="h-3 w-3" />
                 12%
-                <span className="text-[10px] font-normal text-slate-400 ml-0.5">vs last month</span>
+                <span className="text-[10px] font-normal text-slate-500 ml-0.5">vs last month</span>
               </span>
             </div>
           </div>
 
           {/* Metric 2: Avg. Domestic Fare */}
-          <div className="rounded-2xl bg-white/90 backdrop-blur-md p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition duration-200">
+          <div className="rounded-3xl bg-white/80 backdrop-blur-xl p-6 sm:p-8 border border-white/90 shadow-xl hover:bg-white/90 hover:shadow-2xl transition-all duration-300 w-full">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-900">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/5 text-slate-900 border border-slate-200/50">
                   <Coins className="h-5 w-5" />
                 </div>
-                <span className="text-xs font-semibold text-slate-500">
+                <span className="text-xs font-semibold text-slate-600">
                   Avg. Domestic Fare
                 </span>
               </div>
             </div>
-            <div className="mt-4 flex items-baseline justify-between">
-              <span className="text-3xl font-bold tracking-tight text-[#08080D]">
+            <div className="mt-5 flex items-baseline justify-between">
+              <span className="text-3xl sm:text-4xl font-bold tracking-tight text-[#08080D]">
                 ₹{stats.avgFare.toLocaleString("en-IN")}
               </span>
-              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
                 <TrendingDown className="h-3 w-3" />
                 3.2%
-                <span className="text-[10px] font-normal text-slate-400 ml-0.5">vs last month</span>
+                <span className="text-[10px] font-normal text-slate-500 ml-0.5">vs last month</span>
               </span>
             </div>
           </div>
 
           {/* Metric 3: OTAs Monitored */}
-          <div className="rounded-2xl bg-white/90 backdrop-blur-md p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition duration-200">
+          <div className="rounded-3xl bg-white/80 backdrop-blur-xl p-6 sm:p-8 border border-white/90 shadow-xl hover:bg-white/90 hover:shadow-2xl transition-all duration-300 w-full">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-900">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/5 text-slate-900 border border-slate-200/50">
                   <Users className="h-5 w-5" />
                 </div>
-                <span className="text-xs font-semibold text-slate-500">
+                <span className="text-xs font-semibold text-slate-600">
                   OTAs Monitored
                 </span>
               </div>
             </div>
-            <div className="mt-4 flex items-baseline justify-between">
-              <span className="text-3xl font-bold tracking-tight text-[#08080D]">
+            <div className="mt-5 flex items-baseline justify-between">
+              <span className="text-3xl sm:text-4xl font-bold tracking-tight text-[#08080D]">
                 {stats.otasCount}+
               </span>
-              <span className="text-xs font-medium text-slate-400">
+              <span className="text-xs font-medium text-slate-500">
                 — No change
               </span>
             </div>
           </div>
 
           {/* Metric 4: Avg. Update Time */}
-          <div className="rounded-2xl bg-white/90 backdrop-blur-md p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition duration-200">
+          <div className="rounded-3xl bg-white/80 backdrop-blur-xl p-6 sm:p-8 border border-white/90 shadow-xl hover:bg-white/90 hover:shadow-2xl transition-all duration-300 w-full">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-900">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/5 text-slate-900 border border-slate-200/50">
                   <Clock className="h-5 w-5" />
                 </div>
-                <span className="text-xs font-semibold text-slate-500">
+                <span className="text-xs font-semibold text-slate-600">
                   Avg. Update Time
                 </span>
               </div>
             </div>
-            <div className="mt-4 flex items-baseline justify-between">
-              <span className="text-3xl font-bold tracking-tight text-[#08080D]">
+            <div className="mt-5 flex items-baseline justify-between">
+              <span className="text-3xl sm:text-4xl font-bold tracking-tight text-[#08080D]">
                 {stats.avgUpdateTime}
               </span>
-              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
                 <TrendingDown className="h-3 w-3" />
                 45%
-                <span className="text-[10px] font-normal text-slate-400 ml-0.5">Faster</span>
+                <span className="text-[10px] font-normal text-slate-500 ml-0.5">Faster</span>
               </span>
             </div>
           </div>
@@ -292,22 +287,22 @@ export default function DashboardOverview() {
 
         {/* 
           ========================================================================
-          3. ROW 2: MAIN CONTENT GRID (3 CARDS)
+          ROW 2: MAIN CONTENT GLASS GRID (3 CARDS - Full Viewport Width)
           ========================================================================
         */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 xl:gap-10 w-full items-stretch">
           {/* 
             CARD 1 (Left 4 Cols): India Airfare Index Chart
           */}
-          <div className="lg:col-span-4 rounded-3xl bg-white/90 backdrop-blur-md p-6 sm:p-7 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+          <div className="lg:col-span-4 rounded-3xl bg-white/80 backdrop-blur-xl p-6 sm:p-8 border border-white/90 shadow-xl flex flex-col justify-between hover:bg-white/85 transition-all duration-300">
             <div>
               {/* Header */}
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-[#08080D]">
+                <h3 className="text-base sm:text-lg font-bold text-[#08080D]">
                   India Airfare Index
                 </h3>
                 <button
-                  className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
                   aria-label="View Index details"
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -315,20 +310,20 @@ export default function DashboardOverview() {
               </div>
 
               {/* Stat */}
-              <div className="mt-4 flex items-baseline gap-3">
-                <span className="text-4xl font-extrabold tracking-tight text-[#08080D]">
+              <div className="mt-5 flex items-baseline gap-3">
+                <span className="text-4xl sm:text-5xl font-extrabold tracking-tight text-[#08080D]">
                   {stats.airfareIndex}
                 </span>
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700">
                   <TrendingUp className="h-3.5 w-3.5" />
                   2.4%
-                  <span className="text-[11px] font-normal text-slate-400">vs last month</span>
+                  <span className="text-[11px] font-normal text-slate-500">vs last month</span>
                 </span>
               </div>
             </div>
 
             {/* Area Chart */}
-            <div className="mt-8 h-48 w-full relative">
+            <div className="mt-8 h-52 w-full relative">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={INDEX_CHART_DATA}
@@ -336,7 +331,7 @@ export default function DashboardOverview() {
                 >
                   <defs>
                     <linearGradient id="indexGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
+                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
                       <stop offset="95%" stopColor="#2563eb" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
@@ -344,14 +339,14 @@ export default function DashboardOverview() {
                     dataKey="month"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 11, fill: "#94a3b8" }}
+                    tick={{ fontSize: 11, fill: "#64748b" }}
                   />
                   <YAxis
                     domain={[75, 125]}
                     ticks={[80, 90, 100, 110, 120]}
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 11, fill: "#94a3b8" }}
+                    tick={{ fontSize: 11, fill: "#64748b" }}
                   />
                   <Tooltip
                     contentStyle={{
@@ -376,7 +371,7 @@ export default function DashboardOverview() {
               </ResponsiveContainer>
 
               {/* Floating marker for latest index 102.6 */}
-              <div className="absolute top-2 right-4 bg-slate-900 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-md">
+              <div className="absolute top-2 right-4 bg-slate-900 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-md">
                 102.6
               </div>
             </div>
@@ -385,14 +380,14 @@ export default function DashboardOverview() {
           {/* 
             CARD 2 (Middle 5 Cols): Live Route Activity (Map + List)
           */}
-          <div className="lg:col-span-5 rounded-3xl bg-white/90 backdrop-blur-md p-6 sm:p-7 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+          <div className="lg:col-span-5 rounded-3xl bg-white/80 backdrop-blur-xl p-6 sm:p-8 border border-white/90 shadow-xl flex flex-col justify-between hover:bg-white/85 transition-all duration-300">
             {/* Header */}
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-[#08080D]">
+              <h3 className="text-base sm:text-lg font-bold text-[#08080D]">
                 Live Route Activity
               </h3>
               <button
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
                 aria-label="Minimize"
               >
                 <Minus className="h-4 w-4" />
@@ -401,16 +396,16 @@ export default function DashboardOverview() {
 
             {/* Inner Grid: Map Graphic Left + Route Feed List Right */}
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              {/* India Map Illustration with Node Arcs */}
-              <div className="sm:col-span-5 relative h-52 w-full flex items-center justify-center bg-slate-50/50 rounded-2xl border border-slate-100 p-2 overflow-hidden">
+              {/* India Map Graphic Container with Pure White India Map Silhouette */}
+              <div className="sm:col-span-5 relative h-56 w-full flex items-center justify-center bg-slate-100/80 rounded-2xl border border-slate-200/60 p-2 overflow-hidden shadow-inner">
                 <svg
                   viewBox="0 0 300 350"
-                  className="h-full w-full object-contain opacity-90"
+                  className="h-full w-full object-contain filter drop-shadow-sm"
                 >
-                  {/* Simplified India Map Silhouette Path */}
+                  {/* Accurate White India Map Vector Silhouette */}
                   <path
-                    d="M150 30 L190 60 L210 110 L250 140 L230 180 L210 240 L160 320 L130 320 L90 250 L70 190 L50 150 L90 110 L120 70 Z"
-                    fill="#E2E8F0"
+                    d="M 152 20 Q 158 10 162 22 C 168 35 178 50 178 62 C 178 72 195 72 205 78 C 215 85 238 88 250 92 C 265 98 275 108 275 120 C 275 130 262 135 250 135 C 240 135 228 142 222 152 C 218 162 222 172 232 178 C 242 185 242 195 232 202 C 220 210 205 228 198 245 C 190 262 178 285 168 310 C 160 328 152 335 145 335 C 138 335 132 322 125 305 C 115 280 102 258 92 238 C 82 218 68 195 62 182 C 55 168 45 158 45 145 C 45 130 65 115 80 110 C 95 105 110 98 120 88 C 130 78 135 62 138 50 Z"
+                    fill="#FFFFFF"
                     stroke="#CBD5E1"
                     strokeWidth="1.5"
                   />
@@ -419,59 +414,59 @@ export default function DashboardOverview() {
                   <path
                     d="M 150 90 Q 115 135 100 200"
                     fill="none"
-                    stroke="#3B82F6"
-                    strokeWidth="2"
+                    stroke="#2563EB"
+                    strokeWidth="2.5"
                     strokeDasharray="4 3"
                   />
                   <path
                     d="M 150 90 Q 195 110 230 150"
                     fill="none"
                     stroke="#10B981"
-                    strokeWidth="2"
+                    strokeWidth="2.5"
                   />
                   <path
                     d="M 100 200 Q 115 235 140 260"
                     fill="none"
                     stroke="#EF4444"
-                    strokeWidth="2"
+                    strokeWidth="2.5"
                   />
                   <path
                     d="M 140 260 Q 155 235 160 210"
                     fill="none"
-                    stroke="#3B82F6"
-                    strokeWidth="2"
+                    stroke="#2563EB"
+                    strokeWidth="2.5"
                   />
                   <path
                     d="M 160 210 Q 165 145 150 90"
                     fill="none"
                     stroke="#10B981"
-                    strokeWidth="1.5"
+                    strokeWidth="2"
                     strokeDasharray="3 3"
                   />
 
                   {/* City Nodes */}
-                  <circle cx="150" cy="90" r="4" fill="#0F172A" />
-                  <text x="158" y="93" fontSize="10" fontWeight="bold" fill="#0F172A">
+                  <circle cx="150" cy="90" r="4.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5" />
+                  <text x="158" y="93" fontSize="10" fontWeight="800" fill="#0F172A">
                     DEL
                   </text>
 
-                  <circle cx="100" cy="200" r="4" fill="#0F172A" />
-                  <text x="75" y="204" fontSize="10" fontWeight="bold" fill="#0F172A">
+                  <circle cx="100" cy="200" r="4.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5" />
+                  <text x="73" y="204" fontSize="10" fontWeight="800" fill="#0F172A">
                     BOM
                   </text>
 
-                  <circle cx="140" cy="260" r="4" fill="#0F172A" />
-                  <text x="148" y="264" fontSize="10" fontWeight="bold" fill="#0F172A">
+                  <circle cx="140" cy="260" r="4.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5" />
+                  <text x="148" y="264" fontSize="10" fontWeight="800" fill="#0F172A">
                     BLR
                   </text>
 
-                  <circle cx="160" cy="210" r="4" fill="#0F172A" />
-                  <text x="168" y="214" fontSize="10" fontWeight="bold" fill="#0F172A">
+                  <circle cx="160" cy="210" r="4.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5" />
+                  <text x="168" y="214" fontSize="10" fontWeight="800" fill="#0F172A">
                     HYD
                   </text>
 
-                  <circle cx="230" cy="150" r="4" fill="#0F172A" />
-                  <text x="238" y="154" fontSize="10" fontWeight="bold" fill="#0F172A">
+                  <circle cx="230" cy="150" r="4.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5" />
+                  <text x="238" y="154" fontSize="10" fontWeight="800" fill="#0F172A">
                     CCU
                   </text>
                 </svg>
@@ -482,7 +477,7 @@ export default function DashboardOverview() {
                 {LIVE_ROUTE_FEEDS.map((item, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/80 transition"
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/90 transition border border-slate-200/40"
                   >
                     <div className="flex items-center gap-3">
                       <AirlineLogo airline={item.carrier} flightNumber={item.flightNumber} size="sm" />
@@ -504,17 +499,17 @@ export default function DashboardOverview() {
                     {/* Dynamic Pill Tag */}
                     <div>
                       {item.tagType === "green" && (
-                        <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                        <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
                           {item.tag}
                         </span>
                       )}
                       {item.tagType === "blue" && (
-                        <span className="text-[11px] font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
+                        <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200/60">
                           {item.tag}
                         </span>
                       )}
                       {item.tagType === "red" && (
-                        <span className="text-[11px] font-bold text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-100">
+                        <span className="text-[11px] font-bold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200/60">
                           {item.tag}
                         </span>
                       )}
@@ -528,7 +523,7 @@ export default function DashboardOverview() {
           {/* 
             CARD 3 (Right 3 Cols): Airplane Wing Media Feature Card
           */}
-          <div className="lg:col-span-3 rounded-3xl overflow-hidden relative shadow-lg min-h-[300px] flex flex-col justify-between p-7 border border-slate-200/80 group">
+          <div className="lg:col-span-3 rounded-3xl overflow-hidden relative shadow-xl min-h-[320px] flex flex-col justify-between p-7 border border-white/90 backdrop-blur-xl group">
             {/* Background Image */}
             <Image
               src="/dashboard/airplane_wing_card.jpg"
@@ -557,33 +552,6 @@ export default function DashboardOverview() {
                 A FAIRER TOMORROW.
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* 
-          ========================================================================
-          4. DASHBOARD FOOTER
-          ========================================================================
-        */}
-        <div className="pt-6 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between text-xs font-semibold text-slate-500 gap-4">
-          <div className="flex items-center gap-4">
-            <span className="font-extrabold tracking-widest text-[#08080D] uppercase">
-              AURA
-            </span>
-            <span>© 2026 AURA. All rights reserved.</span>
-          </div>
-          <div className="flex items-center gap-6 text-slate-600">
-            <Link href="#" className="hover:text-slate-950 transition">
-              Privacy
-            </Link>
-            <span>|</span>
-            <Link href="#" className="hover:text-slate-950 transition">
-              Terms
-            </Link>
-            <span>|</span>
-            <Link href="#" className="hover:text-slate-950 transition">
-              Contact
-            </Link>
           </div>
         </div>
       </div>

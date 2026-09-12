@@ -53,11 +53,11 @@ export default function Header({ onRunScraper, scraperLoading }: HeaderProps) {
   return (
     <>
       {/* 
-        Header: Fixed at top of viewport over hero image vignette.
-        Uses whitespace-nowrap, wider max-width, and explicit margins to prevent text wrapping or overlapping logo.
+        Full Viewport Width Header:
+        Spans 100% width across the entire viewport edge-to-edge.
       */}
       <header className="fixed top-0 left-0 right-0 z-50 pt-5 pb-3 font-body transition-all duration-300">
-        <div className="w-full max-w-[1440px] mx-auto flex items-center justify-between px-6 sm:px-8 lg:px-12">
+        <div className="w-full flex items-center justify-between px-6 sm:px-10 lg:px-14 xl:px-16">
           {/* Left: Brand Logo */}
           <Link href="/" className="group flex items-center gap-2 shrink-0 mr-6 lg:mr-10">
             <svg
@@ -75,7 +75,7 @@ export default function Header({ onRunScraper, scraperLoading }: HeaderProps) {
           </Link>
 
           {/* Center Navigation Links: Single Line (whitespace-nowrap) & Clean Gap Spacing */}
-          <nav className="hidden lg:flex items-center justify-center flex-1 gap-4 xl:gap-6 text-xs sm:text-sm font-semibold text-slate-200 drop-shadow-md whitespace-nowrap mx-4">
+          <nav className="hidden lg:flex items-center justify-center flex-1 gap-5 xl:gap-8 text-xs sm:text-sm font-semibold text-slate-200 drop-shadow-md whitespace-nowrap mx-4">
             {navLinks.map((link, idx) => {
               const isActive = pathname === link.href;
 
@@ -100,7 +100,7 @@ export default function Header({ onRunScraper, scraperLoading }: HeaderProps) {
           <div className="shrink-0 flex items-center gap-3 ml-6 lg:ml-10">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs sm:text-sm font-bold text-[#08080D] shadow-lg hover:bg-slate-100 active:scale-95 transition cursor-pointer whitespace-nowrap"
+              className="flex items-center gap-1.5 rounded-full bg-white px-4.5 py-2 text-xs sm:text-sm font-bold text-[#08080D] shadow-lg hover:bg-slate-100 active:scale-95 transition cursor-pointer whitespace-nowrap"
             >
               <Zap className="h-3.5 w-3.5 text-indigo-600" />
               <span>Scrape Data</span>
