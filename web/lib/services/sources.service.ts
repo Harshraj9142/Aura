@@ -1,7 +1,7 @@
 /**
  * APIx Web — Sources Service
  *
- * Queries distinct data sources (airlines/OTAs) from the fares table.
+ * Queries distinct data sources (airlines/OTAs) strictly from the fares table.
  */
 
 import { prisma } from "@/lib/db/prisma";
@@ -9,6 +9,7 @@ import type { SourceInfo } from "@/types/fare";
 
 /**
  * Get all distinct tracked sources with record counts.
+ * Returns empty array if database has no records (Strict Database Mode).
  */
 export async function getTrackedSources(): Promise<SourceInfo[]> {
   try {
@@ -23,12 +24,7 @@ export async function getTrackedSources(): Promise<SourceInfo[]> {
       recordCount: s._count.id,
     }));
   } catch {
-    return [
-      { source: "indigo", sourceType: "airline", recordCount: 0 },
-      { source: "airindia", sourceType: "airline", recordCount: 0 },
-      { source: "makemytrip", sourceType: "ota", recordCount: 0 },
-      { source: "easemytrip", sourceType: "ota", recordCount: 0 },
-    ];
+    return [];
   }
 }
 
@@ -43,6 +39,6 @@ export async function getSourceOptions(): Promise<string[]> {
 
     return sources.map((s: any) => s.source);
   } catch {
-    return ["indigo", "airindia", "makemytrip", "easemytrip"];
+    return [];
   }
 }

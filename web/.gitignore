@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Frame sequences & raw frame dumps (keep only spritesheets)
+**/frames/
+public/frames/
+public/landing/frames/
+*.zip

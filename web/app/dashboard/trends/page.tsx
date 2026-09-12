@@ -50,7 +50,7 @@ export default async function TrendsPage({ searchParams }: TrendsPageProps) {
               {["daily", "weekly", "monthly"].map((f) => (
                 <Link
                   key={f}
-                  href={`/trends?frequency=${f}${origin ? `&origin=${origin}` : ""}${destination ? `&destination=${destination}` : ""}`}
+                  href={`/dashboard/trends?frequency=${f}${origin ? `&origin=${origin}` : ""}${destination ? `&destination=${destination}` : ""}`}
                   className={`rounded-md px-3 py-1 text-xs font-semibold capitalize transition ${
                     frequency === f
                       ? "bg-blue-600 text-white shadow-sm"
@@ -69,7 +69,7 @@ export default async function TrendsPage({ searchParams }: TrendsPageProps) {
               Corridor:
             </span>
             <Link
-              href={`/trends?frequency=${frequency}`}
+              href={`/dashboard/trends?frequency=${frequency}`}
               className={`rounded-md px-2.5 py-1 text-xs font-mono font-medium transition border ${
                 !origin
                   ? "bg-slate-800 text-blue-400 border-blue-500/50"
@@ -83,7 +83,7 @@ export default async function TrendsPage({ searchParams }: TrendsPageProps) {
               return (
                 <Link
                   key={`${r.origin}-${r.destination}`}
-                  href={`/trends?frequency=${frequency}&origin=${r.origin}&destination=${r.destination}`}
+                  href={`/dashboard/trends?frequency=${frequency}&origin=${r.origin}&destination=${r.destination}`}
                   className={`rounded-md px-2.5 py-1 text-xs font-mono font-medium transition border ${
                     isSelected
                       ? "bg-slate-800 text-blue-400 border-blue-500/50"

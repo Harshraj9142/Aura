@@ -35,25 +35,25 @@ async function _getIndexTimeSeries(
     if (destination) where.destination = destination;
 
     if (dateFrom || dateTo) {
-      where.date = {};
-      if (dateFrom) (where.date as Record<string, Date>).gte = new Date(dateFrom);
-      if (dateTo) (where.date as Record<string, Date>).lte = new Date(dateTo);
+      where.period_date = {};
+      if (dateFrom) (where.period_date as Record<string, Date>).gte = new Date(dateFrom);
+      if (dateTo) (where.period_date as Record<string, Date>).lte = new Date(dateTo);
     }
 
     const records = await prisma.indexValue.findMany({
       where,
-      orderBy: { date: "asc" },
+      orderBy: { period_date: "asc" },
     });
 
     return records.map((r: any) => ({
       id: r.id,
-      date: r.date instanceof Date ? r.date.toISOString().split("T")[0] : String(r.date),
+      date: r.period_date instanceof Date ? r.period_date.toISOString().split("T")[0] : String(r.period_date),
       origin: r.origin,
       destination: r.destination,
       frequency: r.frequency as IndexFrequency,
-      index_value: Number(r.index_value),
+      index_value: Number(r.index_score),
       pct_change: r.pct_change != null ? Number(r.pct_change) : null,
-      created_at: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+      created_at: r.computed_at instanceof Date ? r.computed_at.toISOString() : String(r.computed_at),
     }));
   } catch {
     // index_values table may not exist yet — return empty array

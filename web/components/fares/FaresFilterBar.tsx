@@ -36,7 +36,7 @@ export function FaresFilterBar({ routes, sources }: FaresFilterBarProps) {
     params.set("page", "1"); // Reset to first page
 
     startTransition(() => {
-      router.push(`/fares?${params.toString()}`);
+      router.push(`/dashboard/fares?${params.toString()}`);
     });
   };
 
@@ -49,7 +49,7 @@ export function FaresFilterBar({ routes, sources }: FaresFilterBarProps) {
     setIsOutlier("false");
 
     startTransition(() => {
-      router.push("/fares");
+      router.push("/dashboard/fares");
     });
   };
 

@@ -1,7 +1,7 @@
 /**
  * APIx Web — Routes Service
  *
- * Queries distinct tracked routes from the fares table
+ * Queries distinct tracked routes strictly from the database fares table
  * with first/last seen dates and record counts.
  */
 
@@ -10,6 +10,7 @@ import type { RouteInfo } from "@/types/fare";
 
 /**
  * Get all distinct tracked routes with metadata.
+ * Returns empty array if database has no records (Strict Database Mode).
  */
 export async function getTrackedRoutes(): Promise<RouteInfo[]> {
   try {
@@ -29,15 +30,8 @@ export async function getTrackedRoutes(): Promise<RouteInfo[]> {
       recordCount: r._count.id,
     }));
   } catch (error) {
-    console.warn("Database error in getTrackedRoutes — returning fallback routes", error);
-    return [
-      { origin: "DEL", destination: "BOM", pair: "DEL-BOM", firstSeen: "", lastSeen: "", recordCount: 0 },
-      { origin: "DEL", destination: "BLR", pair: "DEL-BLR", firstSeen: "", lastSeen: "", recordCount: 0 },
-      { origin: "BOM", destination: "BLR", pair: "BOM-BLR", firstSeen: "", lastSeen: "", recordCount: 0 },
-      { origin: "DEL", destination: "CCU", pair: "DEL-CCU", firstSeen: "", lastSeen: "", recordCount: 0 },
-      { origin: "BLR", destination: "HYD", pair: "BLR-HYD", firstSeen: "", lastSeen: "", recordCount: 0 },
-      { origin: "MAA", destination: "DEL", pair: "MAA-DEL", firstSeen: "", lastSeen: "", recordCount: 0 },
-    ];
+    console.warn("Database error or empty table in getTrackedRoutes:", error);
+    return [];
   }
 }
 
@@ -52,6 +46,6 @@ export async function getRouteOptions(): Promise<string[]> {
 
     return routes.map((r: any) => `${r.route_origin}-${r.route_destination}`);
   } catch {
-    return ["DEL-BOM", "DEL-BLR", "BOM-BLR", "DEL-CCU", "BLR-HYD", "MAA-DEL"];
+    return [];
   }
 }

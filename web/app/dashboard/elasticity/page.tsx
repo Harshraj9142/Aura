@@ -43,7 +43,7 @@ export default async function ElasticityPage({ searchParams }: ElasticityPagePro
             return (
               <Link
                 key={`${r.origin}-${r.destination}`}
-                href={`/elasticity?origin=${r.origin}&destination=${r.destination}`}
+                href={`/dashboard/elasticity?origin=${r.origin}&destination=${r.destination}`}
                 className={`rounded-md px-3 py-1.5 text-xs font-mono font-bold transition border ${
                   isSelected
                     ? "bg-blue-600 text-white border-blue-500 shadow-sm"

@@ -1,7 +1,7 @@
 /**
  * Dashboard layout — wraps all dashboard pages with the sidebar.
  *
- * This is a route group layout: (dashboard) doesn't affect the URL.
+ * Route: /dashboard/*
  */
 
 import { Sidebar } from "@/components/layout/Sidebar";
