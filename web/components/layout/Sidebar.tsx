@@ -126,19 +126,8 @@ export function Sidebar() {
               >
                 {item.icon}
               </span>
-              {item.label}
-<<<<<<< Updated upstream
-              {item.badge && (
-                <span className="ml-auto rounded bg-purple-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-purple-400 border border-purple-500/20">
-                  {item.badge}
-                </span>
-              )}
-              {isActive && !item.badge && (
-                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
-=======
               {isActive && (
                 <span className="ml-auto h-1.5 w-1.5 rounded-full bg-white" />
->>>>>>> Stashed changes
               )}
             </Link>
           );

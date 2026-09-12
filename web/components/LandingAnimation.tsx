@@ -145,6 +145,5 @@ export default function LandingAnimation() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

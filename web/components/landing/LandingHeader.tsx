@@ -37,50 +37,9 @@ export function LandingHeader() {
             </span>
           </Link>
 
-<<<<<<< Updated upstream
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8 rounded-full bg-black/20 px-6 py-2 border border-white/10 backdrop-blur-md">
-            <Link
-              href="/dashboard"
-              className="text-sm font-medium text-white/80 hover:text-white transition-colors"
-            >
-              Price Index
-            </Link>
-            <Link
-              href="/dashboard/trends"
-              className="text-sm font-medium text-white/80 hover:text-white transition-colors"
-            >
-              Corridor Trends
-            </Link>
-            <Link
-              href="/dashboard/heatmap"
-              className="text-sm font-medium text-white/80 hover:text-white transition-colors"
-            >
-              Heatmap
-            </Link>
-            <Link
-              href="/dashboard/elasticity"
-              className="text-sm font-medium text-white/80 hover:text-white transition-colors"
-            >
-              Elasticity
-            </Link>
-            <Link
-              href="/dashboard/predictions"
-              className="text-sm font-medium text-purple-300 hover:text-white transition-colors flex items-center gap-1.5"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-pulse" />
-              AI Predictor
-            </Link>
-          </nav>
-
-          {/* Right Action buttons */}
-          <div className="flex items-center gap-3">
-            {/* Mobile menu toggle */}
-=======
           {/* Right Controls: Menu Dropdown & Get Ticket Now Pill */}
           <div className="relative flex items-center gap-4 sm:gap-6 font-display" ref={dropdownRef}>
             {/* Menu Toggle Dropdown Button */}
->>>>>>> Stashed changes
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2 px-2 py-1.5 text-xs sm:text-sm font-semibold text-[#1C222B] hover:text-black transition-colors focus:outline-none cursor-pointer"
@@ -140,71 +99,6 @@ export function LandingHeader() {
           </div>
         </div>
       </div>
-<<<<<<< Updated upstream
-
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-b border-white/10 bg-slate-950/95 px-6 py-6 backdrop-blur-xl animate-in fade-in slide-in-from-top-4 duration-200">
-          <div className="flex flex-col space-y-4">
-            <Link
-              href="/dashboard"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between text-sm font-semibold text-slate-200 hover:text-white"
-            >
-              <span>Airfare Index Dashboard</span>
-              <BarChart3 className="h-4 w-4 text-sky-400" />
-            </Link>
-            <Link
-              href="/dashboard/fares"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-medium text-slate-300 hover:text-white"
-            >
-              Raw Fares Explorer
-            </Link>
-            <Link
-              href="/dashboard/trends"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-medium text-slate-300 hover:text-white"
-            >
-              Route Corridor Trends
-            </Link>
-            <Link
-              href="/dashboard/heatmap"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-medium text-slate-300 hover:text-white"
-            >
-              Route × Date Heatmap
-            </Link>
-            <Link
-              href="/dashboard/elasticity"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-medium text-slate-300 hover:text-white"
-            >
-              Lead-Time Elasticity
-            </Link>
-            <Link
-              href="/dashboard/predictions"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-medium text-purple-400 hover:text-white flex items-center gap-1.5"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-purple-400" />
-              AI Price Predictor (ML)
-            </Link>
-            <div className="pt-2">
-              <Link
-                href="/dashboard"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-sky-500 py-2.5 text-xs font-bold text-white shadow-md shadow-sky-500/30"
-              >
-                <span>Launch Flight Terminal</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-=======
->>>>>>> Stashed changes
     </header>
   );
 }

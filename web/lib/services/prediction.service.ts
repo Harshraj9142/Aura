@@ -28,7 +28,7 @@ export async function getFlightPrediction(
  */
 export async function getModelRegistryStats(): Promise<ModelPerformanceStats[]> {
   try {
-    const records = await prisma.model_registry.findMany({
+    const records = await (prisma as any).model_registry.findMany({
       orderBy: { created_at: "desc" },
     });
 
@@ -79,7 +79,7 @@ export async function getModelRegistryStats(): Promise<ModelPerformanceStats[]> 
  */
 export async function getRecentPredictions(limit: number = 20): Promise<LoggedPrediction[]> {
   try {
-    const rows = await prisma.predictions.findMany({
+    const rows = await (prisma as any).predictions.findMany({
       take: limit,
       orderBy: { predicted_at: "desc" },
     });
@@ -117,7 +117,7 @@ export async function logPrediction(
     const targetDate = new Date(now.getTime() + horizonHours * 3600000);
     const predId = `pred_${Math.random().toString(36).substring(2, 10)}`;
 
-    await prisma.predictions.create({
+    await (prisma as any).predictions.create({
       data: {
         prediction_id: predId,
         flight_signature: flightSignature,
