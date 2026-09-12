@@ -1,0 +1,54 @@
+# Akasa Air - Terms and Conditions
+
+- Source URL: https://www.akasaair.com/quick-links/terms-and-conditions
+- Page Title: Terms and Conditions for online flight booking | Akasa Air
+- HTTP Status: 200
+
+Open main menuBookFlightHotelsCar Rental Akasa HolidaysBookFlightHotelsCar Rental Akasa HolidaysManage BookingChange DateUndo check-inCancel bookingEmail ItineraryUpdate contact detailsTrip ResetFlight StatusSelf-Baggage DropDigi YatraNo show refundRefund statusManage BookingChange DateUndo check-inCancel bookingEmail ItineraryUpdate contact detailsTrip ResetFlight StatusSelf-Baggage DropDigi YatraNo show refundRefund statusCheck-inWeb Check-inApp Check-inAuto Check-inCheck-inWeb Check-inApp Check-inAuto Check-inAdd-OnsSelect Your SeatExtra SeatCafé AkasaSeat & Meal DealExcess BaggageAkasa PriorityPets on AkasaAkasa GetEarlyTravel CertificateLock Your FareVisa ServicesHotelsCar RentalAkasa VIPTrip CoverFlexi CoverFlight Delay CoverAkasa HolidaysLoungeDelayed or Lost BaggageAdd-OnsSelect Your SeatExtra SeatCafé AkasaSeat & Meal DealExcess BaggageAkasa PriorityPets on AkasaAkasa GetEarlyTravel CertificateLock Your FareVisa ServicesHotelsCar RentalAkasa VIPTrip CoverFlexi CoverFlight Delay CoverAkasa HolidaysLoungeDelayed or Lost BaggageTariffContact UsAkasa Elevate About Akasa Elevate Tier BenefitsEarn Elevate PointsRetro Claim Elevate PointsAkasa Elevate T&CsFAQsContact UsAkasa Elevate About Akasa Elevate Tier BenefitsEarn Elevate PointsRetro Claim Elevate PointsAkasa Elevate T&CsFAQsContact UsNewLoginMember LoginAgent LoginSME LoginLoginMember LoginAgent LoginSME LoginHomeBookLoginCheck-inMoreHomeTerms and ConditionsTerms and ConditionsAccess to the website of SNV Aviation Private Limited (“Akasa Air”), www.akasaair.com or any micro site comprised in www.akasaair.com, or any other Akasa Air owned website accessible through the use of www.akasaair.com (“Website”), is offered to customers on the express condition of acceptance of these terms and conditions. These terms and conditions shall be deemed to constitute a legally binding contract between Akasa Air and the customer. If these terms and conditions are not acceptable to the customer, the customer is requested to cease using and exit Akasa Air’s website immediately.
+ 
+Customers agree that by proceeding with a booking on an Akasa Air flight, the customers expressly agree with the applicable Conditions of Carriage of Akasa Air.:
+For Domestic Travel: Conditions of Carriage | Akasa Air
+For International Travel: Conditions of Carriage | Akasa Air
+ 
+Akasa Air authorises the customer to view the content available on the Website. The customer is not permitted to copy, replicate, modify, derivative, display, perform, create derivative works from, transfer or sell any information obtained from the Website, whether in print, visual or electronic form, for any purpose whatsoever, without the prior written permission of Akasa Air, which may be granted at the sole discretion of Akasa Air. Customers may not use the Website for any purpose that is unlawful or that is otherwise prohibited by these conditions of use.
+Customers must not:
+
+resell the services provided on the Website,
+use the Website to make any speculative, false or fraudulent booking
+use the Website so as to interfere with others’ use of the Website.
+
+Akasa Air does not warrant or represent that use of the Website or its online booking facility or any third-party payment systems used for making payments to Akasa Air will be uninterrupted or error-free or that any information, data, content, software or other material accessible through the Website will be free of bugs, viruses, worms, Trojan horses or other harmful components.
+ 
+Customers agree that, unless otherwise specifically permitted by Akasa Air, the Website and all the products and services offered by Akasa Air are meant for personal and non-commercial use only and cannot be redistributed by them to any person not authorised to receive the same.
+ 
+Customers represent that they are of sufficient legal age to use the goods and services offered on the Website and they possess the legal right and ability to create binding obligations for any liability that they may incur as a result of the use of the Website
+Customers understand that they are fully responsible (including financially) for all uses of the Website by them and by those using their login information.Customers hereby warrant that all information supplied by them and members of theirhousehold in using the booking facility through the Website are true and accurate.Akasa Air and its licensors retain all rights (including copyright and patent rights) with respect to all software and underlying information and material available through the Website.Customers must not download or otherwise export or re-export any software or underlying information or material available through the Website except with the written permission of Akasa Air and in full compliance with all Indian and other applicable laws and regulations, provided, however that any downloading that occurs in the normal course of using the Website in accordance with the published written instructions of Akasa Air, is not prohibited.
+The Website may contain hyperlinks to websites operated by parties other than Akasa Air. Such hyperlinks are provided for your reference only. Akasa Air does not control such websites and is not responsible for their content(s). Akasa Air’s inclusion of hyperlinks to such websites does not necessarily imply any endorsement of the material on such websites or any association with their operators.
+ 
+Akasa Air and/or its affiliates may also present advertisements or promotional materials on or through the Website. A customer’s participation in any promotional event is subject to the terms and conditions associated with that event. A customer’s dealings with, or participation in promotions of any third-party advertisers on or through the Website are solely between the customer and such third-party. Customer agrees that Akasa Air and/or its affiliates shall not be responsible or liable for any loss or damage of any sort incurred as a result of any such dealings or as the result of the presence of such third parties’ reference on the Website.
+ 
+Without limiting any of the disclaimers of warranty set forth in these terms and conditions, Akasa Air does not provide or make any representation as to the quality or nature of any of the third-party information, products or services provided through the Website, or any other representation, warranty or guaranty. Furthermore, Akasa Air in particular disclaims any responsibility, if such third party websites:
+
+
+infringe any third party’s intellectual property rights,
+
+
+provide any information which is inaccurate, incomplete or misleading,
+
+
+are not merchantable or fit for a particular purpose,
+
+
+do not undertake adequate security measures,
+
+
+contain viruses or other items of destructive nature, or
+
+
+provide any libellous or defamatory contents or information
+
+
+The information contained and/or provided on the Website is meant solely for information purposes and should not be relied upon for any other use whatsoever.
+ 
+Customer’s use of the Website constitutes customer’s agreement to be bound, without any modifications or reservations whatsoever, by these terms and conditions, which may be updated or modified from time to time without notice to the customer. Any change(s) shall become part of these terms and conditions and shall apply immediately. By continuing to use the Website after such modifications, customer indicates acceptance of those modifications. Customer may also be required to re-accept the substantially revised terms and conditions to continue to use the Website.These terms and conditions are governed by the laws of India. Customer hereby consents to the exclusive jurisdiction and venue of courts in Mumbai for all disputes arising out of or relating to the use of the Website. Use of the Website is unauthorised in any jurisdiction that does not give effect to all provisions of these terms and conditions, including without limitation, this paragraph.
+Any rights or permissions not expressly granted herein are reserved.Never miss an offerSubscribe and be the first to receive Akasa updatesSubscribeTop DestinationsDiscover MoreFly DomesticFly InternationalVisit Abu DhabiVisit JeddahVisit MumbaiVisit DohaVisit KochiVisit BengaluruBlogsFlights from MumbaiFlights from GoaFlights from BengaluruFlights from AyodhyaFlights from SrinagarFlights from KochiMumbai to New DelhiBengaluru to BhubaneshwarBagdogra to MumbaiBengaluru to LucknowNew Delhi to AhmedabadBengaluru to Navi MumbaiGoa to Bengaluru Darbhanga to New DelhiMumbai to DarbhangaGuwahati to MumbaiKochi to MumbaiNew Delhi to DarbhangaAhmedabad to BengaluruSrinagar to MumbaiPune to KolkataDarbhanga to MumbaiKolkata to PuneGorakhpur to BengaluruHyderabad to New DelhiNew Delhi to PuneMumbai to VaranasiNavi Mumbai to BengaluruLucknow to MumbaiBengaluru to VaranasiGuwahati to BengaluruAhmedabad to PuneNew Delhi to MumbaiVaranasi to Navi MumbaiKolkata to Sri Vijaya PuramPune to GoaMumbai to BengaluruSri Vijaya Puram to KolkataAhmedabad to MumbaiLucknow to BengaluruNavi Mumbai to VaranasiBengaluru to New DelhiKolkata to MumbaiBengaluru to Goa Mumbai to KochiNew Delhi to BengaluruMumbai to AhmedabadBengaluru to PuneMumbai to Lucknow Pune to BengaluruGoa to PuneBengaluru to GuwahatiVaranasi to MumbaiMumbai to KolkataPune to AhmedabadBengaluru to MumbaiBagdogra to BengaluruNew Delhi to Goa Pune to New DelhiBengaluru to GorakhpurGoa to MumbaiMumbai to SrinagarAyodhya to MumbaiVaranasi to BengaluruMumbai to BagdograKolkata to BengaluruGoa to New DelhiBengaluru to BagdograMumbai to GuwahatiMumbai to Abu DhabiJeddah to KochiMumbai to PhuketKochi to JeddahBengaluru to JeddahMumbai to HanoiKuwait to MumbaiDoha to KochiPhuket to MumbaiAhmedabad to DohaHanoi to MumbaiMumbai to KuwaitKochi to DohaBengaluru to PhuketMumbai to RiyadhMumbai to DohaAhmedabad to JeddahDelhi to KuwaitMumbai to JeddahRiyadh to MumbaiPhuket to BengaluruJeddah to AhmedabadDoha to MumbaiJeddah to MumbaiAbu Dhabi to BengaluruJeddah to BengaluruFly with AkasaKnow AkasaQuick LinksMedia CenterWhy Fly AkasaOur NetworkFlight ScheduleFare SheetSpecial FaresCafé AkasaCustomer ExperiencePets on AkasaBaggageCargoAbout UsLeadership TeamOur CommitmentOur FleetCareersAkasa SkyCadet ProgrammeEqual Opportunity PolicyAkasa Agents LoginSME LoginConditions of CarriageInternal Privacy PolicyDisclaimerSupplier Code of ConductWhistle Blower PolicyAkasa Air Ethics HelplineOffersSitemapNewsroomSpotlightPress ReleasesCompany StatementsDigital Press KitAdvertise with usFly with AkasaKnow AkasaQuick LinksMedia CenterDownload Our App© Copyright 2026 Akasa Air. All rights reservedTerms and ConditionsPrivacy Policy
