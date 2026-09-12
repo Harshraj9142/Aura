@@ -35,10 +35,23 @@ def load_dgca_weights() -> dict[str, float]:
         return data.get("weights", {})
 
 
+class RouteBreakdownItem(NamedTuple):
+    route: str
+    base_price: float
+    current_price: float
+    price_relative: float
+    weight: float
+    normalized_weight: float
+    weighted_contribution: float
+
+
 class CalculationResult(NamedTuple):
     index_score: Optional[float]
     routes_included: int
     data_quality_note: Optional[str]
+    laspeyres_score: Optional[float] = None
+    paasche_score: Optional[float] = None
+    breakdown: list[RouteBreakdownItem] = []
 
 
 class IndexCalculator:
@@ -59,14 +72,14 @@ class IndexCalculator:
         base_fares: dict[str, float],
     ) -> CalculationResult:
         """
-        Compute the APIx composite index score for a period.
+        Compute the APIx composite index score for a period with full calculation breakdown.
 
         Args:
             current_fares: Dict mapping route (e.g. "DEL-BOM") to P_i,t.
             base_fares: Dict mapping route to P_i,0.
 
         Returns:
-            CalculationResult(index_score, routes_included, data_quality_note)
+            CalculationResult(index_score, routes_included, data_quality_note, laspeyres_score, paasche_score, breakdown)
         """
         if not base_fares:
             return CalculationResult(
@@ -123,11 +136,39 @@ class IndexCalculator:
             r: self.weights[r] / raw_active_weight_sum for r in active_routes
         }
 
-        # Calculate composite APIx index
-        index_score = sum(
-            normalized_weights[r] * price_relatives[r] for r in active_routes
+        # Build detailed breakdown items
+        breakdown_items: list[RouteBreakdownItem] = []
+        laspeyres_sum = 0.0
+
+        for r in active_routes:
+            rel = price_relatives[r]
+            w_orig = self.weights[r]
+            w_norm = normalized_weights[r]
+            contrib = w_norm * rel
+            laspeyres_sum += contrib
+
+            breakdown_items.append(
+                RouteBreakdownItem(
+                    route=r,
+                    base_price=round(base_fares[r], 2),
+                    current_price=round(current_fares[r], 2),
+                    price_relative=round(rel, 2),
+                    weight=round(w_orig, 4),
+                    normalized_weight=round(w_norm, 4),
+                    weighted_contribution=round(contrib, 2),
+                )
+            )
+
+        laspeyres_score = round(laspeyres_sum, 2)
+        
+        # Calculate Paasche index adjustment (using current price relative weighting)
+        paasche_weighted_sum = sum(
+            (current_fares[r] / base_fares[r]) * normalized_weights[r] for r in active_routes
         )
-        index_score = round(index_score, 2)
+        paasche_score = round(paasche_weighted_sum * 100.0, 2)
+
+        # Fisher Ideal Price Index = sqrt(Laspeyres * Paasche)
+        fisher_score = round(math.sqrt(laspeyres_score * paasche_score), 2)
 
         data_quality_note: Optional[str] = None
         if missing_routes:
@@ -138,7 +179,10 @@ class IndexCalculator:
             logger.info(data_quality_note)
 
         return CalculationResult(
-            index_score=index_score,
+            index_score=fisher_score,
             routes_included=routes_included,
             data_quality_note=data_quality_note,
+            laspeyres_score=laspeyres_score,
+            paasche_score=paasche_score,
+            breakdown=breakdown_items,
         )

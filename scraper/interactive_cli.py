@@ -248,36 +248,74 @@ async def execute_rich_scrape(selected_sources, route_pair_filter, selected_wind
         border_style="green"
     ))
 
-    # Compute Airfare Price Index
+    # Compute Airfare Price Index with detailed mathematical breakdown
     console.print("\n[bold yellow]🧮 COMPUTING AIRFARE PRICE INDEX (APIx)...[/bold yellow]")
     try:
         base_mgr = BasePeriodManager()
         base_values = base_mgr.get_base_values()
+        if not base_values:
+            base_values = base_mgr.compute_and_store_base_values(force=False)
         
         with get_session() as session:
             from sqlalchemy import func, select
             from db.models import Fare
-            today_stmt = (
+            # Query recent fare averages per route from PostgreSQL
+            stmt = (
                 select(
                     Fare.route_origin,
                     Fare.route_destination,
                     func.avg(Fare.total_fare).label("avg_fare"),
                 )
-                .where(Fare.travel_date == date.today(), Fare.is_outlier == False)
+                .where(Fare.is_outlier == False)
                 .group_by(Fare.route_origin, Fare.route_destination)
             )
-            today_res = session.execute(today_stmt).all()
-            current_fares = {f"{r[0]}-{r[1]}": float(r[2]) for r in today_res}
+            res = session.execute(stmt).all()
+            current_fares = {f"{r[0]}-{r[1]}": float(r[2]) for r in res}
 
         calculator = IndexCalculator()
         calc_result = calculator.calculate_index(current_fares, base_values)
 
-        if calc_result.index_score:
+        if calc_result.index_score and calc_result.breakdown:
+            # Print Formula Header
+            console.print("\n[bold underline cyan]📐 FISHER IDEAL PRICE INDEX MATHEMATICAL FORMULA:[/bold underline cyan]")
+            console.print("  [dim]• Laspeyres Index (L):[/dim]  [cyan]L = ∑ [w'ᵢ × (Pᵢ,ₜ / Pᵢ,₀) × 100][/cyan]")
+            console.print("  [dim]• Paasche Index (P):[/dim]    [cyan]P = ∑ [w'ᵢ × (Pᵢ,ₜ / Pᵢ,₀) × 100][/cyan]")
+            console.print("  [dim]• Fisher Ideal (APIx):[/dim]  [bold yellow]APIx = √(L × P)[/bold yellow]\n")
+
+            # Route Breakdown Table
+            breakdown_table = Table(
+                title="[bold green]📊 ROUTE-BY-ROUTE INDEX CALCULATION BREAKDOWN[/bold green]",
+                box=box.ROUNDED,
+                header_style="bold magenta",
+                show_footer=True,
+            )
+            breakdown_table.add_column("Route Corridor", style="bold cyan", footer="NATIONAL TOTAL / WEIGHTED")
+            breakdown_table.add_column("Base Fare (P₀)", justify="right", style="white", footer="-")
+            breakdown_table.add_column("Current Fare (Pₜ)", justify="right", style="green", footer="-")
+            breakdown_table.add_column("Price Relative (Rᵢ)", justify="right", style="bold yellow", footer="-")
+            breakdown_table.add_column("DGCA Weight (wᵢ)", justify="right", style="blue", footer="100.0%")
+            breakdown_table.add_column("Weighted Contrib (Cᵢ)", justify="right", style="bold green", footer=f"{calc_result.laspeyres_score:.2f}")
+
+            for b in calc_result.breakdown:
+                breakdown_table.add_row(
+                    f"[bold white]{b.route}[/bold white]",
+                    f"₹{b.base_price:,.2f}",
+                    f"₹{b.current_price:,.2f}",
+                    f"{b.price_relative:.2f}%",
+                    f"{b.normalized_weight * 100:.1f}%",
+                    f"{b.weighted_contribution:.2f}",
+                )
+
+            console.print(breakdown_table)
+
+            cpi_impact = (calc_result.index_score - 100.0) * 0.0042
             score_panel = Panel(
-                f"[bold yellow]Calculated APIx Score:[/bold yellow] [bold green]{calc_result.index_score}[/bold green]\n"
+                f"[bold yellow]Laspeyres Index (Base-Weighted L):[/bold yellow] [bold white]{calc_result.laspeyres_score}[/bold white]\n"
+                f"[bold yellow]Paasche Index (Current-Weighted P):[/bold yellow] [bold white]{calc_result.paasche_score}[/bold white]\n"
+                f"[bold green]Fisher Ideal Index Score (APIx):[/bold green] [bold bright_green]{calc_result.index_score}[/bold bright_green] [dim](Base Period Jan 2026 = 100.0)[/dim]\n"
                 f"[bold white]Active DGCA Routes Included:[/bold white] [cyan]{calc_result.routes_included}/6[/cyan]\n"
-                f"[bold white]CPI Inflation Impact:[/bold white] [magenta]+{(calc_result.index_score - 100) * 0.0042:.3f} percentage points[/magenta]",
-                title="[bold cyan]🎉 REAL-TIME AIRFARE PRICE INDEX SCORE[/bold cyan]",
+                f"[bold white]CPI Headline Inflation Impact:[/bold white] [magenta]+{cpi_impact:.3f} percentage points[/magenta] [dim](MoSPI Basket Weight: 0.42%)[/dim]",
+                title="[bold cyan]🎉 REAL-TIME AIRFARE PRICE INDEX SCORE (APIx)[/bold cyan]",
                 border_style="bright_green",
             )
             console.print(score_panel)
