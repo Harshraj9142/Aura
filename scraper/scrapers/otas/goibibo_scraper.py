@@ -92,10 +92,18 @@ class GoibiboScraper(BaseScraper):
             raise NoFlightsFoundError("Goibibo: No flight cards found")
 
         fares: list[FareRecord] = []
-        for i, card in enumerate(flight_cards[:30]):
+        for i, card in enumerate(flight_cards[:100]):
             try:
                 carrier = await self._text(card, self.SEL_CARRIER_NAME) or "Unknown"
-                flight_num = await self._text(card, self.SEL_FLIGHT_NUMBER) or f"GI-{i}"
+                raw_flight_num = await self._text(card, self.SEL_FLIGHT_NUMBER)
+                dep_time = await self._text(card, ".dept-time, [class*='dept'], [class*='time']") or ""
+
+                if raw_flight_num:
+                    clean_code = re.sub(r"\s+", "", raw_flight_num)
+                    flight_num = f"{clean_code} ({dep_time})" if dep_time else clean_code
+                else:
+                    flight_num = f"GI-{i+1} ({dep_time})" if dep_time else f"GI-{i+1}"
+
                 total = await self._text(card, self.SEL_FARE_AMOUNT)
                 if not total:
                     continue

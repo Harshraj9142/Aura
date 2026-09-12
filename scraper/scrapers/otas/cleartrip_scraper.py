@@ -77,7 +77,7 @@ class CleartripScraper(BaseScraper):
             raise NoFlightsFoundError("Cleartrip: No flight cards found")
 
         fares: list[FareRecord] = []
-        for i, card in enumerate(flight_cards[:40]):
+        for i, card in enumerate(flight_cards[:100]):
             try:
                 total_val = None
                 txt = await card.inner_text()
@@ -91,12 +91,21 @@ class CleartripScraper(BaseScraper):
                         carrier = line
                         break
 
-                flight_num = f"CT-{i+1}"
-                for line in lines[:6]:
-                    m = re.search(r"([A-Z0-9]{2}-?\d{3,4})", line)
+                dep_time = ""
+                flight_code = None
+                for line in lines[:8]:
+                    if not dep_time and re.match(r"^\d{2}:\d{2}$", line):
+                        dep_time = line
+
+                    norm = re.sub(r"\s+", "", line)
+                    m = re.search(r"([A-Z0-9]{2}-?\d{3,4})", norm)
                     if m and m.group(1) not in ("DEL", "BOM", "BLR", "CCU", "HYD", "MAA"):
-                        flight_num = m.group(1)
-                        break
+                        flight_code = m.group(1)
+
+                if not flight_code:
+                    flight_code = f"CT-{i+1}"
+
+                flight_num = f"{flight_code} ({dep_time})" if dep_time else flight_code
 
                 m_price = re.search(r"₹\s*([\d,]+)", txt)
                 if not m_price:

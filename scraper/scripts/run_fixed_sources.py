@@ -51,7 +51,7 @@ async def main():
                         print(f"✅ {source_name:<12} | {route.pair:<8} | T+{adv}d | {len(res.fares):>3} fares extracted | {saved_count:>3} saved | {dt:.1f}s")
                         
                         # Print sample individual fare quotes in console
-                        for fare in res.fares[:3]:
+                        for fare in res.fares:
                             carrier_str = fare.carrier or "Flight"
                             flight_str = fare.flight_number or "Direct"
                             base_str = f"₹{fare.base_fare:,.0f}" if fare.base_fare else "N/A"

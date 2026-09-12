@@ -137,10 +137,18 @@ class MakeMyTripScraper(BaseScraper):
             raise NoFlightsFoundError("MakeMyTrip: No flight cards in DOM")
 
         fares: list[FareRecord] = []
-        for i, card in enumerate(flight_cards[:30]):  # Cap at 30 results
+        for i, card in enumerate(flight_cards[:100]):
             try:
                 carrier = await self._text(card, self.SEL_CARRIER_NAME) or "Unknown"
-                flight_num = await self._text(card, self.SEL_FLIGHT_NUMBER) or f"MMT-{i}"
+                raw_flight_num = await self._text(card, self.SEL_FLIGHT_NUMBER)
+                dep_time = await self._text(card, "[data-testid='departure-time'], .dept-time, .appendBottom2, [class*='dept']") or ""
+
+                if raw_flight_num:
+                    clean_code = re.sub(r"\s+", "", raw_flight_num)
+                    flight_num = f"{clean_code} ({dep_time})" if dep_time else clean_code
+                else:
+                    flight_num = f"MMT-{i+1} ({dep_time})" if dep_time else f"MMT-{i+1}"
+
                 total = await self._text(card, self.SEL_FARE_AMOUNT)
                 if not total:
                     continue

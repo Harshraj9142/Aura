@@ -77,7 +77,7 @@ class IxigoScraper(BaseScraper):
             raise NoFlightsFoundError("Ixigo: No flight cards found")
 
         fares: list[FareRecord] = []
-        for i, card in enumerate(flight_cards[:40]):
+        for i, card in enumerate(flight_cards[:100]):
             try:
                 txt = await card.inner_text()
                 lines = [l.strip() for l in txt.split("\n") if l.strip()]
@@ -90,14 +90,23 @@ class IxigoScraper(BaseScraper):
                         carrier = line
                         break
 
-                flight_num = f"IXI-{i+1}"
-                for line in lines[:5]:
-                    m = re.search(r"([A-Z0-9]{2}-?\d{3,4})", line)
+                dep_time = ""
+                flight_code = None
+                for line in lines[:8]:
+                    if not dep_time and re.match(r"^\d{2}:\d{2}$", line):
+                        dep_time = line
+
+                    norm = re.sub(r"\s+", "", line)
+                    m = re.search(r"([A-Z0-9]{2}-?\d{3,4})", norm)
                     if m:
                         candidate = m.group(1)
                         if candidate not in ("DEL", "BOM", "BLR", "CCU", "HYD", "MAA"):
-                            flight_num = candidate
-                            break
+                            flight_code = candidate
+
+                if not flight_code:
+                    flight_code = f"IXI-{i+1}"
+
+                flight_num = f"{flight_code} ({dep_time})" if dep_time else flight_code
 
                 m_price = re.search(r"₹\s*([\d,]+)", txt)
                 if not m_price:

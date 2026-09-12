@@ -211,7 +211,7 @@ async def execute_rich_scrape(selected_sources, route_pair_filter, selected_wind
                             saved_count = Deduplicator.upsert_fares(session, deduped)
                             total_saved += saved_count
 
-                        for fare in res.fares[:2]:
+                        for fare in res.fares:
                             carrier_str = fare.carrier or "Flight"
                             flight_str = fare.flight_number or "Direct"
                             base_str = f"₹{fare.base_fare:,.0f}" if fare.base_fare else "N/A"

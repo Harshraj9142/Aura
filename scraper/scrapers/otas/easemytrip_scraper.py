@@ -89,7 +89,7 @@ class EaseMyTripScraper(BaseScraper):
             raise NoFlightsFoundError("EaseMyTrip: No flight cards found")
 
         fares: list[FareRecord] = []
-        for i, card in enumerate(flight_cards[:40]):
+        for i, card in enumerate(flight_cards[:100]):
             try:
                 txt = await card.inner_text()
                 lines = [l.strip() for l in txt.split("\n") if l.strip()]
@@ -97,11 +97,24 @@ class EaseMyTripScraper(BaseScraper):
                     continue
 
                 carrier = lines[0] if lines else "Unknown Airline"
-                flight_num = f"EMT-{i+1}"
-                for line in lines[:5]:
-                    if re.match(r"^[A-Z0-9]{2}-?\d{3,4}$", line):
-                        flight_num = line
-                        break
+                
+                # Extract departure time and unique flight number/code
+                flight_code = None
+                dep_time = ""
+
+                for line in lines[:10]:
+                    if not dep_time and re.match(r"^\d{2}:\d{2}$", line):
+                        dep_time = line
+
+                    normalized = re.sub(r"\s+", "", line)
+                    m_code = re.match(r"^([A-Z0-9]{2})-?(\d{3,4})$", normalized)
+                    if m_code:
+                        flight_code = f"{m_code.group(1)}-{m_code.group(2)}"
+
+                if not flight_code:
+                    flight_code = f"EMT-{i+1}"
+
+                flight_num = f"{flight_code} ({dep_time})" if dep_time else flight_code
 
                 # Extract price from price element or regex with currency symbol/keyword
                 price_el = await card.query_selector(".flt_prc, .txt-r6, [class*='prc'], [class*='price']")
