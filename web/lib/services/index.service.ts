@@ -31,8 +31,17 @@ async function _getIndexTimeSeries(
   try {
     const where: Record<string, unknown> = { frequency };
 
-    if (origin) where.origin = origin;
-    if (destination) where.destination = destination;
+    if (origin) {
+      where.origin = origin;
+    } else {
+      where.origin = null;
+    }
+
+    if (destination) {
+      where.destination = destination;
+    } else {
+      where.destination = null;
+    }
 
     if (dateFrom || dateTo) {
       where.period_date = {};
@@ -55,11 +64,8 @@ async function _getIndexTimeSeries(
       pct_change: r.pct_change != null ? Number(r.pct_change) : null,
       created_at: r.computed_at instanceof Date ? r.computed_at.toISOString() : String(r.computed_at),
     }));
-  } catch {
-    // index_values table may not exist yet — return empty array
-    console.warn(
-      "index_values table not available — returning empty time series"
-    );
+  } catch (err) {
+    console.error("Error in getIndexTimeSeries:", err);
     return [];
   }
 }

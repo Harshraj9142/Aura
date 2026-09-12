@@ -13,19 +13,23 @@ async def main():
         )
         page = await context.new_page()
 
+        print("Visiting Air India Express homepage...")
         await page.goto("https://www.airindiaexpress.com", wait_until="domcontentloaded", timeout=30000)
-        await asyncio.sleep(4)
+        await asyncio.sleep(3)
 
-        # Dump div/span elements containing From/To/Origin/Destination
-        for keyword in ["From", "To", "Where from", "Where to", "Delhi", "Mumbai", "DEL", "BOM"]:
-            els = await page.query_selector_all(f"div:has-text('{keyword}'), span:has-text('{keyword}')")
-            print(f"Keyword '{keyword}': {len(els)} elements found")
-            for el in els[:3]:
-                txt = (await el.inner_text()).replace('\n', ' ').strip()
-                if len(txt) < 80:
-                    cls = await el.get_attribute("class") or ""
-                    tag = await el.evaluate("e => e.tagName")
-                    print(f"   <{tag} class='{cls[:40]}'> {txt}")
+        url = "https://www.airindiaexpress.com/booking/search?from=DEL&to=BOM&date=18-09-2026&adults=1&trip=oneway"
+        print("Navigating to search URL:", url)
+        await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+        await asyncio.sleep(6)
+
+        print("Final URL:", page.url)
+        print("Final Title:", await page.title())
+
+        # Check flight cards or prices
+        body_txt = await page.inner_text("body")
+        import re
+        prices = re.findall(r"₹\s*([\d,]+)", body_txt)
+        print("Prices found:", prices[:10])
 
         await browser.close()
 
