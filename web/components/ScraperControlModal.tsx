@@ -16,12 +16,14 @@ const PLATFORMS = [
   { id: "1", name: "EaseMyTrip", type: "OTA", status: "Operational" },
   { id: "2", name: "Ixigo", type: "OTA", status: "Operational" },
   { id: "3", name: "Cleartrip", type: "OTA", status: "Operational" },
+  { id: "6", name: "Yatra", type: "OTA", status: "Operational" },
   { id: "7", name: "IndiGo", type: "Airline", status: "Operational" },
   { id: "9", name: "Air India Express", type: "Airline", status: "Operational" },
   { id: "10", name: "Akasa Air", type: "Airline", status: "Operational" },
   { id: "11", name: "SpiceJet", type: "Airline", status: "Operational" },
-  { id: "4", name: "MakeMyTrip", type: "OTA", status: "Bot Protected", protected: true },
-  { id: "5", name: "Goibibo", type: "OTA", status: "Bot Protected", protected: true },
+  { id: "4", name: "MakeMyTrip", type: "OTA", status: "Bot Protected" },
+  { id: "5", name: "Goibibo", type: "OTA", status: "Bot Protected" },
+  { id: "8", name: "Air India", type: "Airline", status: "Bot Protected" },
 ];
 
 const CORRIDORS = [

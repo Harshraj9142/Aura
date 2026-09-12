@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import random
 from typing import Optional
+import os
 
 from loguru import logger
 from playwright.async_api import (
@@ -23,6 +24,11 @@ from playwright.async_api import (
     Playwright,
     async_playwright,
 )
+
+try:
+    from browserbase import Browserbase
+except ImportError:
+    Browserbase = None
 
 from config.settings import settings
 
@@ -135,10 +141,13 @@ class BrowserManager:
         proxy: Optional[str] = None,
         user_agent: Optional[str] = None,
         headless: Optional[bool] = None,
+        use_browserbase: Optional[bool] = None,
     ) -> None:
         self._playwright: Optional[Playwright] = None
         self._browser: Optional[Browser] = None
         self._context: Optional[BrowserContext] = None
+        self._bb_client = None
+        self._bb_session = None
 
         # Configuration
         self._headless = headless if headless is not None else settings.headless
@@ -146,14 +155,64 @@ class BrowserManager:
         self._user_agent = user_agent or random.choice(USER_AGENTS)
         self._viewport = random.choice(VIEWPORT_SIZES)
 
+        # Check Browserbase availability
+        bb_key = getattr(settings, "browserbase_api_key", None) or os.getenv("BROWSERBASE_API_KEY")
+        bb_enabled = getattr(settings, "use_browserbase", True)
+        self._use_browserbase = (
+            (use_browserbase if use_browserbase is not None else bb_enabled)
+            and bool(bb_key)
+            and Browserbase is not None
+        )
+
     # -----------------------------------------------------------------------
     # Async context manager
     # -----------------------------------------------------------------------
     async def __aenter__(self) -> "BrowserManager":
-        """Start Playwright, launch browser, create stealth context."""
+        """Start Playwright, launch browser (Browserbase cloud or local), create stealth context."""
         self._playwright = await async_playwright().start()
 
-        # Browser launch arguments for stealth & avoiding HTTP/2 resets
+        # Attempt Browserbase cloud session if enabled
+        if self._use_browserbase:
+            bb_key = getattr(settings, "browserbase_api_key", None) or os.getenv("BROWSERBASE_API_KEY")
+            bb_project = getattr(settings, "browserbase_project_id", None) or os.getenv(
+                "BROWSERBASE_PROJECT_ID", "92c0385a-1030-4cba-8694-efbc2285bb2c"
+            )
+            try:
+                self._bb_client = Browserbase(api_key=bb_key)
+                self._bb_session = self._bb_client.sessions.create(
+                    project_id=bb_project,
+                    browser_settings={
+                        "solve_captchas": True,
+                        "block_ads": True,
+                    },
+                )
+                self._browser = await self._playwright.chromium.connect_over_cdp(
+                    self._bb_session.connect_url
+                )
+                self._context = (
+                    self._browser.contexts[0]
+                    if self._browser.contexts
+                    else await self._browser.new_context(
+                        viewport=self._viewport,
+                        user_agent=self._user_agent,
+                        locale="en-IN",
+                        timezone_id="Asia/Kolkata",
+                    )
+                )
+                await self._context.add_init_script(STEALTH_SCRIPT)
+                logger.info(
+                    f"☁️ Browserbase Cloud Browser connected | Session {self._bb_session.id[:8]}... | "
+                    f"solve_captchas=True | block_ads=True"
+                )
+                return self
+            except Exception as e:
+                logger.warning(
+                    f"⚠️ Browserbase connection failed ({e}), falling back to local Chromium..."
+                )
+                self._bb_client = None
+                self._bb_session = None
+
+        # Fallback / Local: Launch local Chromium
         launch_args = [
             "--disable-blink-features=AutomationControlled",
             "--disable-features=IsolateOrigins,site-per-process",
@@ -182,11 +241,9 @@ class BrowserManager:
             user_agent=self._user_agent,
             locale="en-IN",
             timezone_id="Asia/Kolkata",
-            # Permissions that a real browser would have
             permissions=["geolocation"],
             geolocation={"latitude": 28.6139, "longitude": 77.2090},  # New Delhi
             color_scheme="light",
-            # Prevent download prompts
             accept_downloads=False,
         )
 
@@ -194,7 +251,7 @@ class BrowserManager:
         await self._context.add_init_script(STEALTH_SCRIPT)
 
         logger.info(
-            f"Browser started | headless={self._headless} | "
+            f"Local Browser started | headless={self._headless} | "
             f"viewport={self._viewport['width']}x{self._viewport['height']} | "
             f"UA={self._user_agent[:60]}..."
         )
@@ -202,13 +259,30 @@ class BrowserManager:
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        """Gracefully close context, browser, and Playwright."""
+        """Gracefully close context, browser, Playwright, and release Browserbase session."""
         if self._context:
-            await self._context.close()
+            try:
+                await self._context.close()
+            except Exception:
+                pass
         if self._browser:
-            await self._browser.close()
+            try:
+                await self._browser.close()
+            except Exception:
+                pass
         if self._playwright:
-            await self._playwright.stop()
+            try:
+                await self._playwright.stop()
+            except Exception:
+                pass
+
+        if self._bb_client and self._bb_session:
+            try:
+                self._bb_client.sessions.update(self._bb_session.id, status="REQUEST_RELEASE")
+                logger.debug(f"Browserbase session {self._bb_session.id[:8]} released")
+            except Exception as e:
+                logger.debug(f"Notice releasing Browserbase session: {e}")
+
         logger.debug("Browser session closed")
 
     # -----------------------------------------------------------------------

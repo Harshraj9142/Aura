@@ -93,27 +93,28 @@ class Deduplicator:
 
         inserted = 0
 
+        # Batch pre-fetch existing records for this route/source/date in 1 single query
+        scraped_date = fares[0].scraped_at.date()
+        first = fares[0]
+        existing_records = (
+            session.query(Fare)
+            .filter(
+                and_(
+                    Fare.route_origin == first.route_origin,
+                    Fare.route_destination == first.route_destination,
+                    Fare.source == first.source,
+                    Fare.travel_date == first.travel_date,
+                    Fare.advance_purchase_days == first.advance_purchase_days,
+                    func.date(Fare.scraped_at) == scraped_date,
+                )
+            )
+            .all()
+        )
+        existing_map = {r.flight_number: r for r in existing_records}
+
         for fare in fares:
             try:
-                # Check for existing record with the same dedup key on the same day
-                scraped_date = fare.scraped_at.date()
-
-                existing = (
-                    session.query(Fare)
-                    .filter(
-                        and_(
-                            Fare.route_origin == fare.route_origin,
-                            Fare.route_destination == fare.route_destination,
-                            Fare.source == fare.source,
-                            Fare.travel_date == fare.travel_date,
-                            Fare.advance_purchase_days == fare.advance_purchase_days,
-                            Fare.flight_number == fare.flight_number,
-                            func.date(Fare.scraped_at) == scraped_date,
-                        )
-                    )
-                    .first()
-                )
-
+                existing = existing_map.get(fare.flight_number)
                 if existing:
                     # Update existing record with newer data
                     existing.base_fare = fare.base_fare

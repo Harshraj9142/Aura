@@ -84,19 +84,39 @@ class EaseMyTripScraper(BaseScraper):
             except Exception:
                 continue
 
-        flight_cards = await page.query_selector_all(self.SEL_FLIGHT_CARD)
-        if not flight_cards:
+        # Bulk extract card data in a single evaluate call using exact selector registry
+        cards_data = await page.evaluate(f"""() => {{
+            const cards = Array.from(document.querySelectorAll('{self.SEL_FLIGHT_CARD}'));
+            return cards.slice(0, 100).map(c => {{
+                const prc = c.querySelector('.flt_prc, .txt-r6, [class*="prc"], [class*="price"]');
+                return {{
+                    text: c.innerText || '',
+                    priceText: prc ? (prc.innerText || '') : ''
+                }};
+            }});
+        }}""")
+
+        if not cards_data:
             raise NoFlightsFoundError("EaseMyTrip: No flight cards found")
 
         fares: list[FareRecord] = []
-        for i, card in enumerate(flight_cards[:100]):
+        for i, card_item in enumerate(cards_data):
             try:
-                txt = await card.inner_text()
+                txt = card_item.get("text", "")
+                price_txt = card_item.get("priceText", "")
                 lines = [l.strip() for l in txt.split("\n") if l.strip()]
                 if not lines:
                     continue
 
-                carrier = lines[0] if lines else "Unknown Airline"
+                carrier = "Unknown Airline"
+                for line in lines[:4]:
+                    if any(c in line.lower() for c in ["indigo", "air india express", "air india", "akasa", "spicejet", "vistara"]):
+                        carrier = line
+                        break
+                if carrier == "Unknown Airline" and lines:
+                    # Filter out promo badges
+                    cand = [l for l in lines[:3] if not any(w in l.lower() for w in ["meal", "cashback", "lock", "fastest", "cheapest", "special"])]
+                    carrier = cand[0] if cand else lines[0]
                 
                 # Extract departure time and unique flight number/code
                 flight_code = None
@@ -117,9 +137,6 @@ class EaseMyTripScraper(BaseScraper):
                 flight_num = f"{flight_code} ({dep_time})" if dep_time else flight_code
 
                 # Extract price from price element or regex with currency symbol/keyword
-                price_el = await card.query_selector(".flt_prc, .txt-r6, [class*='prc'], [class*='price']")
-                price_txt = await price_el.inner_text() if price_el else ""
-                
                 total_val = None
                 m_price = re.search(r"(?:₹|Rs\.?|INR)\s*([\d,]+)", price_txt + " " + txt)
                 if m_price:

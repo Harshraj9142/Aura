@@ -3,6 +3,7 @@
 
 # Browser automation
 playwright==1.49.1
+browserbase==1.19.0
 
 # Database
 sqlalchemy==2.0.36
