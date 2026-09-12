@@ -3,6 +3,7 @@
 import React from 'react';
 import { AirlineId } from '@/lib/grievance/types';
 import { AIRLINE_DIRECTORY } from '@/lib/grievance/airline-contacts';
+import { Landmark } from 'lucide-react';
 
 interface AirlineQuestionViewProps {
   selectedAirline: AirlineId | null;
@@ -72,8 +73,8 @@ export function AirlineQuestionView({
               </div>
 
               <div className="mt-4 w-full border-t border-slate-100 pt-3 dark:border-slate-800/80">
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                  <span>🏛️</span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  <Landmark className="h-3.5 w-3.5 text-slate-400" />
                   <span>Nodal: {airline.nodalOfficer.email.split('@')[0]}@...</span>
                 </span>
               </div>

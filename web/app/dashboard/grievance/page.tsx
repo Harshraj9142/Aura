@@ -7,6 +7,7 @@ import { getStraightSolution } from '@/lib/grievance/grievance-rules';
 import { QuestionWizard } from '@/components/grievance/QuestionWizard';
 import { StraightSolutionView } from '@/components/grievance/StraightSolutionView';
 import { ComplaintDraftModal } from '@/components/grievance/ComplaintDraftModal';
+import { Scale } from 'lucide-react';
 
 export default function GrievanceDashboardPage() {
   // Questions 1 to 5, or 6 for Solution
@@ -86,8 +87,8 @@ export default function GrievanceDashboardPage() {
       <div className="flex items-center justify-between border-b border-slate-200 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-sm text-white shadow-sm">
-              ⚖️
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
+              <Scale className="h-4 w-4" />
             </span>
             <h1 className="text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
               Customer Grievance & Passenger Rights

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ActionStep } from '@/lib/grievance/types';
+import { Scale } from 'lucide-react';
 
 interface VisualStepsGraphicProps {
   steps: ActionStep[];
@@ -93,8 +94,9 @@ export function VisualStepsGraphic({
                 {/* Exact Statutory Mandate for this Step */}
                 <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                   <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-[11px] font-extrabold uppercase tracking-wide text-indigo-950 dark:text-indigo-300 flex items-center gap-1">
-                      <span>⚖️</span> Statutory Mandate: {step.clauseCitation.label}
+                    <span className="text-[11px] font-extrabold uppercase tracking-wide text-indigo-950 dark:text-indigo-300 flex items-center gap-1.5">
+                      <Scale className="h-3.5 w-3.5 text-indigo-900 dark:text-indigo-300" />
+                      <span>Statutory Mandate: {step.clauseCitation.label}</span>
                     </span>
                     <a
                       href={step.clauseCitation.url}

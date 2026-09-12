@@ -4,6 +4,7 @@ import React from 'react';
 import { AirlineId, GrievanceCategory } from '@/lib/grievance/types';
 import { AIRLINE_DIRECTORY } from '@/lib/grievance/airline-contacts';
 import { PROBLEM_LIST } from '@/lib/grievance/grievance-rules';
+import { getCategoryIcon } from './QuestionWizard';
 
 interface QuickProblemSelectorProps {
   selectedAirline: AirlineId;
@@ -82,9 +83,11 @@ export function QuickProblemSelector({
                     : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700'
                 }`}
               >
-                <div>
-                  <span className="text-2xl">{problem.icon}</span>
-                  <h4 className="mt-2 text-xs font-extrabold text-slate-900 dark:text-white">
+                <div className="space-y-2">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                    {getCategoryIcon(problem.id)}
+                  </div>
+                  <h4 className="text-xs font-extrabold text-slate-950 dark:text-white">
                     {problem.title}
                   </h4>
                 </div>

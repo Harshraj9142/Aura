@@ -4,6 +4,37 @@ import React from 'react';
 import { AirlineId, GrievanceCategory } from '@/lib/grievance/types';
 import { AIRLINE_DIRECTORY } from '@/lib/grievance/airline-contacts';
 import { PROBLEM_LIST } from '@/lib/grievance/grievance-rules';
+import {
+  Clock,
+  Ban,
+  UserX,
+  Luggage,
+  CreditCard,
+  AlertCircle,
+  Zap,
+  Plane,
+  Globe,
+  XCircle,
+  Coffee,
+  Building2,
+} from 'lucide-react';
+
+export function getCategoryIcon(id: GrievanceCategory) {
+  switch (id) {
+    case 'delay':
+      return <Clock className="h-5 w-5 text-amber-600" />;
+    case 'cancellation':
+      return <Ban className="h-5 w-5 text-rose-600" />;
+    case 'denied_boarding':
+      return <UserX className="h-5 w-5 text-indigo-600" />;
+    case 'baggage':
+      return <Luggage className="h-5 w-5 text-amber-700" />;
+    case 'refund':
+      return <CreditCard className="h-5 w-5 text-emerald-600" />;
+    default:
+      return <AlertCircle className="h-5 w-5 text-indigo-600" />;
+  }
+}
 
 export interface QuestionWizardProps {
   currentQuestion: number; // 1 to 5
@@ -182,18 +213,22 @@ export function QuestionWizard({
               <button
                 key={problem.id}
                 onClick={() => onSelectCategory(problem.id)}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs transition-all hover:border-indigo-500 hover:shadow-md"
+                className="group flex items-center gap-3.5 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs transition-all hover:border-indigo-500 hover:shadow-md"
               >
-                <span className="text-2xl">{problem.icon}</span>
-                <div className="flex-1">
-                  <div className="text-sm font-extrabold text-slate-950">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 border border-slate-200/80 shadow-2xs group-hover:bg-indigo-50 group-hover:border-indigo-200 transition-colors">
+                  {getCategoryIcon(problem.id)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-extrabold text-slate-950 truncate">
                     {problem.title}
                   </div>
-                  <div className="text-[11px] font-bold text-emerald-700">
+                  <div className="text-[11px] font-bold text-emerald-700 mt-0.5">
                     {problem.badge}
                   </div>
                 </div>
-                <span className="text-xs font-bold text-slate-500">→</span>
+                <span className="text-xs font-bold text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all">
+                  →
+                </span>
               </button>
             ))}
           </div>
@@ -260,21 +295,21 @@ export function QuestionWizard({
             {[
               {
                 id: '<1hr' as const,
-                icon: '⚡',
+                icon: <Zap className="h-5 w-5 text-amber-500" />,
                 title: 'Under 1 Hour',
                 desc: 'Short domestic routes (e.g., Mumbai to Pune / Delhi to Jaipur)',
                 comp: '₹5,000 Statutory Tier',
               },
               {
                 id: '1-2hr' as const,
-                icon: '✈️',
+                icon: <Plane className="h-5 w-5 text-indigo-500" />,
                 title: '1 to 2 Hours',
                 desc: 'Standard domestic routes (e.g., Delhi to Mumbai / Bangalore to Hyderabad)',
                 comp: '₹7,500 Statutory Tier',
               },
               {
                 id: '>2hr' as const,
-                icon: '🌐',
+                icon: <Globe className="h-5 w-5 text-blue-500" />,
                 title: 'Over 2 Hours',
                 desc: 'Long domestic / Cross-country (e.g., Delhi to Bangalore / Kolkata to Mumbai)',
                 comp: '₹10,000 Statutory Tier',
@@ -285,8 +320,10 @@ export function QuestionWizard({
                 onClick={() => onSelectFlightTime(opt.id)}
                 className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs transition-all hover:border-indigo-500 hover:shadow-md"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{opt.icon}</span>
+                <div className="flex items-center gap-3.5">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 shadow-2xs">
+                    {opt.icon}
+                  </div>
                   <div>
                     <div className="text-sm font-extrabold text-slate-950">
                       {opt.title}
@@ -321,19 +358,19 @@ export function QuestionWizard({
             {[
               {
                 id: 'none' as const,
-                icon: '❌',
+                icon: <XCircle className="h-5 w-5 text-rose-600" />,
                 title: 'No assistance provided (Left stranded)',
                 desc: 'Airline offered no meals, hotel stay, or acceptable alternate flight.',
               },
               {
                 id: 'refreshments' as const,
-                icon: '🥪',
+                icon: <Coffee className="h-5 w-5 text-amber-600" />,
                 title: 'Light snacks or beverages only',
                 desc: 'Provided small water bottle or biscuit pack, but no full meal or stay.',
               },
               {
                 id: 'hotel_alternate' as const,
-                icon: '🏨',
+                icon: <Building2 className="h-5 w-5 text-indigo-600" />,
                 title: 'Hotel or alternate flight offered',
                 desc: 'Airline arranged accommodation or rebooked onto another flight.',
               },
@@ -343,8 +380,10 @@ export function QuestionWizard({
                 onClick={() => onSelectAssistance(opt.id)}
                 className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs transition-all hover:border-indigo-500 hover:shadow-md"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{opt.icon}</span>
+                <div className="flex items-center gap-3.5">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 shadow-2xs">
+                    {opt.icon}
+                  </div>
                   <div>
                     <div className="text-sm font-extrabold text-slate-950">
                       {opt.title}

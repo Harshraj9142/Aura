@@ -2,6 +2,19 @@
 
 import React from 'react';
 import { StatutoryEntitlement, AirlineInfo, GrievanceAnswers } from '@/lib/grievance/types';
+import {
+  RotateCcw,
+  FileText,
+  Coins,
+  Coffee,
+  CreditCard,
+  Scale,
+  Clock,
+  Phone,
+  Mail,
+  Globe,
+  ExternalLink,
+} from 'lucide-react';
 
 interface StraightSolutionViewProps {
   entitlement: StatutoryEntitlement;
@@ -43,9 +56,9 @@ export function StraightSolutionView({
 
         <button
           onClick={onReset}
-          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition shadow-xs"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition shadow-xs"
         >
-          <span>↺</span>
+          <RotateCcw className="h-3.5 w-3.5 text-slate-600" />
           <span>Retake Quiz</span>
         </button>
       </div>
@@ -72,15 +85,16 @@ export function StraightSolutionView({
             className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-500 transition"
           >
             <span>Copy Pre-Filled Legal Notice</span>
-            <span>📋</span>
+            <FileText className="h-3.5 w-3.5" />
           </button>
         </div>
 
         {/* 3 Crisp Entitlement Highlights (No wall of text) */}
         <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="rounded-xl border border-emerald-200 bg-white/90 p-3.5 shadow-xs">
-            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800">
-              💰 Cash Compensation
+            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+              <Coins className="h-3.5 w-3.5 text-emerald-700" />
+              Cash Compensation
             </span>
             <p className="mt-1 text-xs font-bold text-slate-900">
               {entitlement.cashHighlight}
@@ -88,8 +102,9 @@ export function StraightSolutionView({
           </div>
 
           <div className="rounded-xl border border-indigo-200 bg-white/90 p-3.5 shadow-xs">
-            <span className="text-[10px] font-black uppercase tracking-wider text-indigo-800">
-              🥪 Duty of Care
+            <span className="text-[10px] font-black uppercase tracking-wider text-indigo-800 flex items-center gap-1.5">
+              <Coffee className="h-3.5 w-3.5 text-indigo-700" />
+              Duty of Care
             </span>
             <p className="mt-1 text-xs font-bold text-slate-900">
               {entitlement.careHighlight}
@@ -97,8 +112,9 @@ export function StraightSolutionView({
           </div>
 
           <div className="rounded-xl border border-purple-200 bg-white/90 p-3.5 shadow-xs">
-            <span className="text-[10px] font-black uppercase tracking-wider text-purple-800">
-              🎫 100% Refund Right
+            <span className="text-[10px] font-black uppercase tracking-wider text-purple-800 flex items-center gap-1.5">
+              <CreditCard className="h-3.5 w-3.5 text-purple-700" />
+              100% Refund Right
             </span>
             <p className="mt-1 text-xs font-bold text-slate-900">
               {entitlement.refundHighlight}
@@ -186,8 +202,9 @@ export function StraightSolutionView({
                   <span className="text-xs font-black uppercase tracking-wider text-indigo-800">
                     {step.stage}
                   </span>
-                  <span className="rounded-full bg-slate-200/80 border border-slate-300 px-2 py-0.5 text-[10px] font-bold text-slate-800">
-                    ⏱️ {step.timeframe}
+                  <span className="rounded-full bg-slate-200/80 border border-slate-300 px-2 py-0.5 text-[10px] font-bold text-slate-800 flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    <span>{step.timeframe}</span>
                   </span>
                 </div>
 
@@ -201,8 +218,9 @@ export function StraightSolutionView({
                 {/* Exact Statutory Mandate Supporting this Step */}
                 <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3 shadow-xs">
                   <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-[11px] font-extrabold uppercase tracking-wide text-indigo-950 flex items-center gap-1">
-                      <span>⚖️</span> Statutory Mandate ({step.clauseCitation.label})
+                    <span className="text-[11px] font-extrabold uppercase tracking-wide text-indigo-950 flex items-center gap-1.5">
+                      <Scale className="h-3.5 w-3.5 text-indigo-900" />
+                      <span>Statutory Mandate ({step.clauseCitation.label})</span>
                     </span>
                     <a
                       href={step.clauseCitation.url}
@@ -231,7 +249,7 @@ export function StraightSolutionView({
                         href={`tel:${step.contactInfo.phone}`}
                         className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 hover:text-indigo-700"
                       >
-                        <span>📞</span>
+                        <Phone className="h-3 w-3" />
                         <span>{step.contactInfo.phone}</span>
                       </a>
                     )}
@@ -240,7 +258,7 @@ export function StraightSolutionView({
                         href={`mailto:${step.contactInfo.email}`}
                         className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 hover:text-indigo-700"
                       >
-                        <span>✉️</span>
+                        <Mail className="h-3 w-3" />
                         <span>{step.contactInfo.email}</span>
                       </a>
                     )}
@@ -251,7 +269,7 @@ export function StraightSolutionView({
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 hover:text-indigo-700"
                       >
-                        <span>🌐</span>
+                        <Globe className="h-3 w-3" />
                         <span>Portal ↗</span>
                       </a>
                     )}
