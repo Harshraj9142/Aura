@@ -69,6 +69,11 @@ class Settings(BaseSettings):
     headless: bool = True
     browser_timeout: int = 30000  # milliseconds
 
+    # Browserbase Cloud Browser integration
+    browserbase_api_key: Optional[str] = None
+    browserbase_project_id: Optional[str] = "92c0385a-1030-4cba-8694-efbc2285bb2c"
+    use_browserbase: bool = True
+
     # robots.txt cache TTL (seconds)
     robots_cache_ttl: int = 86400  # 24 hours
 

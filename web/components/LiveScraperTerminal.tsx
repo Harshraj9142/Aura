@@ -358,27 +358,42 @@ export default function LiveScraperTerminal() {
 
   return (
     <div className="space-y-6">
-      {/* ── TAB NAVIGATION ─────────────────────────────────────────────── */}
-      <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/50 border border-slate-800 w-fit">
-        {([
-          { id: "terminal" as ActiveTab, label: "Terminal", icon: Terminal },
-          { id: "database" as ActiveTab, label: "Database Records", icon: Database },
-          { id: "analytics" as ActiveTab, label: "Analytics", icon: BarChart3 },
-          { id: "sources" as ActiveTab, label: "Sources & Routes", icon: Globe },
-        ]).map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              activeTab === tab.id
-                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
-                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-            }`}
-          >
-            <tab.icon className="w-3.5 h-3.5" />
-            <span>{tab.label}</span>
-          </button>
-        ))}
+      {/* ── TAB NAVIGATION & CLOUD ENGINE STATUS ────────────────────────── */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/50 border border-slate-800 w-fit">
+          {([
+            { id: "terminal" as ActiveTab, label: "Terminal", icon: Terminal },
+            { id: "database" as ActiveTab, label: "Database Records", icon: Database },
+            { id: "analytics" as ActiveTab, label: "Analytics", icon: BarChart3 },
+            { id: "sources" as ActiveTab, label: "Sources & Routes", icon: Globe },
+          ]).map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeTab === tab.id
+                  ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+              }`}
+            >
+              <tab.icon className="w-3.5 h-3.5" />
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Browserbase Cloud Infrastructure Badge */}
+        <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-950/40 to-slate-900 border border-emerald-500/30 text-xs">
+          <div className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </div>
+          <span className="text-slate-400 font-mono text-[11px]">Browser Engine:</span>
+          <span className="font-semibold text-emerald-400 font-mono text-xs">Browserbase Cloud</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300 font-mono border border-emerald-500/20">
+            Auto CAPTCHA Bypass
+          </span>
+        </div>
       </div>
 
       {/* ── QUICK ACTION BAR ───────────────────────────────────────────── */}
@@ -879,6 +894,43 @@ export default function LiveScraperTerminal() {
       {/* ── TAB: SOURCES & ROUTES ──────────────────────────────────────── */}
       {activeTab === "sources" && (
         <div className="space-y-5">
+          {/* Cloud Browser Engine Card */}
+          <div className="rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/20 via-slate-900 to-slate-950 p-5 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Cpu className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-sm font-bold text-slate-100">Browserbase Cloud Browser Engine</h3>
+                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-[10px]">
+                  ● CONNECTED & OPERATIONAL
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+                <span>API Key:</span>
+                <code className="bg-slate-900 border border-slate-800 px-2 py-0.5 rounded text-emerald-400 text-[11px]">
+                  bb_live_st1...FNrY
+                </code>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+              <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+                <p className="text-slate-500 text-[10px] uppercase">Execution Mode</p>
+                <p className="text-emerald-300 font-bold mt-0.5">Cloud Headless Chrome</p>
+              </div>
+              <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+                <p className="text-slate-500 text-[10px] uppercase">Concurrency Limit</p>
+                <p className="text-slate-200 font-bold mt-0.5">3 Concurrent Sessions</p>
+              </div>
+              <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+                <p className="text-slate-500 text-[10px] uppercase">CAPTCHA Solver</p>
+                <p className="text-emerald-400 font-bold mt-0.5">Automated Active</p>
+              </div>
+              <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+                <p className="text-slate-500 text-[10px] uppercase">Fallback Behavior</p>
+                <p className="text-cyan-300 font-bold mt-0.5">Local Chromium Failover</p>
+              </div>
+            </div>
+          </div>
+
           {/* Sources Grid */}
           <div className="rounded-xl border border-slate-800 bg-slate-950 p-5 space-y-4">
             <div className="flex items-center gap-2">

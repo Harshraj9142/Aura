@@ -72,15 +72,19 @@ class CleartripScraper(BaseScraper):
             except Exception:
                 continue
 
-        flight_cards = await page.query_selector_all(self.SEL_FLIGHT_CARD)
-        if not flight_cards:
+        # Bulk extract card texts in a single evaluate call using selector registry
+        cards_texts = await page.evaluate(f"""() => {{
+            const cards = Array.from(document.querySelectorAll('{self.SEL_FLIGHT_CARD}'));
+            return cards.slice(0, 100).map(c => c.innerText || '');
+        }}""")
+
+        if not cards_texts:
             raise NoFlightsFoundError("Cleartrip: No flight cards found")
 
         fares: list[FareRecord] = []
-        for i, card in enumerate(flight_cards[:100]):
+        for i, txt in enumerate(cards_texts):
             try:
                 total_val = None
-                txt = await card.inner_text()
                 lines = [l.strip() for l in txt.split("\n") if l.strip()]
                 if not lines or "AIRLINES" in lines[0] or "Clear" in lines[0]:
                     continue
