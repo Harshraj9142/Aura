@@ -201,12 +201,6 @@ export function HeroSection() {
             pointerEvents: headlineOpacity < 0.1 ? "none" : "auto",
           }}
         >
-          {/* Tag badge: FLIGHT BOOKING */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-[11px] font-bold tracking-[0.25em] text-white/90 uppercase backdrop-blur-md shadow-sm mb-6 animate-in fade-in zoom-in duration-500">
-            <Sparkles className="h-3 w-3 text-sky-400" />
-            <span>FLIGHT BOOKING</span>
-          </div>
-
           {/* Primary Headline */}
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-white drop-shadow-[0_4px_30px_rgba(0,0,0,0.6)]">
             Fly Smarter,

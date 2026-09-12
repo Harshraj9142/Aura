@@ -79,24 +79,24 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-black/5 bg-white font-body">
       {/* Logo */}
-      <Link href="/" className="flex h-16 items-center gap-2 border-b border-slate-200 px-6 dark:border-slate-800 hover:opacity-80 transition">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-sm">
-          AP
+      <Link href="/" className="flex h-20 items-center gap-3 border-b border-black/5 px-6 hover:opacity-80 transition">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#08080D] text-white font-bold text-sm">
+          A
         </div>
         <div>
-          <h1 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">
-            APIx
+          <h1 className="font-heading text-lg font-bold tracking-tight text-[#08080D]">
+            Aura <span className="text-xs text-[#08080D]/60 uppercase tracking-widest">APIx</span>
           </h1>
-          <p className="text-[10px] -mt-0.5 font-medium text-slate-500 dark:text-slate-400 tracking-wider uppercase">
+          <p className="text-[10px] -mt-0.5 font-medium text-[#08080D]/60 tracking-wider uppercase">
             Airfare Price Index
           </p>
         </div>
       </Link>
 
       {/* Navigation */}
-      <nav className="flex flex-col gap-1 p-4">
+      <nav className="flex flex-col gap-1.5 p-4">
         {navItems.map((item) => {
           const isActive =
             item.href === "/dashboard"
@@ -108,25 +108,26 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={`
-                flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium
+                flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold
                 transition-all duration-150
                 ${
                   isActive
-                    ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white"
+                    ? "bg-[#08080D] text-white shadow-xs"
+                    : "text-[#08080D]/70 hover:bg-[#F3F6F7] hover:text-[#08080D]"
                 }
               `}
             >
               <span
                 className={
                   isActive
-                    ? "text-indigo-600 dark:text-indigo-400"
-                    : "text-slate-400 dark:text-slate-500"
+                    ? "text-white"
+                    : "text-[#08080D]/60"
                 }
               >
                 {item.icon}
               </span>
               {item.label}
+<<<<<<< Updated upstream
               {item.badge && (
                 <span className="ml-auto rounded bg-purple-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-purple-400 border border-purple-500/20">
                   {item.badge}
@@ -134,6 +135,10 @@ export function Sidebar() {
               )}
               {isActive && !item.badge && (
                 <span className="ml-auto h-1.5 w-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+=======
+              {isActive && (
+                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-white" />
+>>>>>>> Stashed changes
               )}
             </Link>
           );
@@ -141,11 +146,11 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 border-t border-slate-200 p-4 dark:border-slate-800">
-        <p className="text-xs text-slate-400 dark:text-slate-500">
+      <div className="absolute bottom-0 left-0 right-0 border-t border-black/5 p-5">
+        <p className="text-xs text-[#08080D]/60 font-semibold">
           India Domestic Routes
         </p>
-        <p className="text-xs text-slate-400 dark:text-slate-500">
+        <p className="text-[11px] text-[#08080D]/50 font-mono mt-0.5">
           Data updated daily at 06:00 IST
         </p>
       </div>

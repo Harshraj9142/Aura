@@ -86,27 +86,27 @@ const corridorList: CorridorItem[] = [
 
 export function CorridorsSection() {
   return (
-    <section className="bg-slate-950 py-20 px-6 sm:px-10 lg:px-14 border-t border-slate-900">
+    <section className="bg-[#F3F6F7] py-20 px-6 sm:px-10 lg:px-14 border-t border-black/5">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-0.5 text-xs font-semibold text-indigo-400 uppercase tracking-wider mb-3">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-[#08080D]/10 bg-[#08080D]/5 px-3.5 py-1 text-xs font-semibold text-[#08080D] uppercase tracking-wider mb-3">
               <Plane className="h-3 w-3" />
               Corridor Watch
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h2 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight text-[#08080D]">
               Primary High-Density Corridors
             </h2>
-            <p className="mt-2 text-sm sm:text-base text-slate-400">
+            <p className="font-body mt-2 text-sm sm:text-base text-[#08080D]/70">
               Live pricing dynamics across India&apos;s busiest commercial aviation sectors.
             </p>
           </div>
           <Link
             href="/dashboard/heatmap"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-sky-400 hover:text-sky-300 transition"
+            className="group inline-flex items-center gap-2 rounded-full bg-[#08080D] px-6 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-[#1A1F2B] transition"
           >
             <span>View Full Route Heatmap</span>
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
           </Link>
         </div>
 
@@ -114,69 +114,71 @@ export function CorridorsSection() {
           {corridorList.map((item, index) => (
             <div
               key={index}
-              className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 backdrop-blur-sm transition-all hover:border-slate-700 hover:bg-slate-900/80"
+              className="rounded-3xl border border-black/5 bg-white p-7 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                <div className="flex items-center gap-3">
-                  <div className="font-mono text-xl font-extrabold text-white">
-                    {item.origin}
+              <div>
+                <div className="flex items-center justify-between pb-4 border-b border-black/5">
+                  <div className="flex items-center gap-3">
+                    <div className="font-mono text-xl font-bold text-[#08080D]">
+                      {item.origin}
+                    </div>
+                    <Plane className="h-4 w-4 text-[#08080D]/40" />
+                    <div className="font-mono text-xl font-bold text-[#08080D]">
+                      {item.destination}
+                    </div>
                   </div>
-                  <Plane className="h-4 w-4 text-sky-400" />
-                  <div className="font-mono text-xl font-extrabold text-white">
-                    {item.destination}
+                  <div
+                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                      item.isDrop
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : "bg-amber-50 text-amber-700 border border-amber-200"
+                    }`}
+                  >
+                    <TrendingDown className="h-3 w-3" />
+                    <span>{item.change}</span>
                   </div>
                 </div>
-                <div
-                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold ${
-                    item.isDrop
-                      ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                      : "bg-amber-500/15 text-amber-400 border border-amber-500/30"
-                  }`}
-                >
-                  <TrendingDown className="h-3 w-3" />
-                  <span>{item.change}</span>
+
+                <div className="mt-5 space-y-2.5 text-xs text-[#08080D]/70 font-body">
+                  <div className="flex justify-between">
+                    <span>Routing:</span>
+                    <span className="text-[#08080D] font-semibold">
+                      {item.originName} → {item.destinationName}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Benchmark Fare:</span>
+                    <span className="text-xl font-bold font-mono text-[#08080D]">
+                      {item.avgFare}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Price Index (APIx):</span>
+                    <span className="font-mono font-bold text-[#08080D]">
+                      {item.baseIndex}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="flex items-center gap-1 text-[11px] text-[#08080D]/60">
+                      <Clock className="h-3 w-3 text-[#08080D]" /> Optimal Window:
+                    </span>
+                    <span className="text-[11px] text-[#08080D] font-semibold">
+                      {item.leadTimeDeal}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-4 space-y-2 text-xs text-slate-400">
-                <div className="flex justify-between">
-                  <span>Routing:</span>
-                  <span className="text-slate-300 font-medium">
-                    {item.originName} → {item.destinationName}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Benchmark Fare:</span>
-                  <span className="text-base font-bold font-mono text-white">
-                    {item.avgFare}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Price Index (APIx):</span>
-                  <span className="font-mono font-semibold text-sky-400">
-                    {item.baseIndex}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="flex items-center gap-1 text-[11px] text-slate-400">
-                    <Clock className="h-3 w-3 text-indigo-400" /> Optimal Window:
-                  </span>
-                  <span className="text-[11px] text-indigo-300 font-medium">
-                    {item.leadTimeDeal}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+              <div className="mt-6 pt-4 border-t border-black/5 flex items-center justify-between">
                 <Link
                   href={`/dashboard/fares?origin=${item.origin}&destination=${item.destination}`}
-                  className="text-xs font-semibold text-sky-400 hover:text-sky-300 transition"
+                  className="text-xs font-semibold text-[#08080D] hover:underline"
                 >
                   Browse Fares →
                 </Link>
                 <Link
                   href={`/dashboard/trends?origin=${item.origin}&destination=${item.destination}`}
-                  className="rounded bg-slate-800 px-3 py-1 text-xs font-medium text-slate-200 hover:bg-slate-700 transition"
+                  className="rounded-full bg-[#F3F6F7] border border-black/5 px-4 py-1.5 text-xs font-semibold text-[#08080D] hover:bg-[#08080D] hover:text-white transition-colors"
                 >
                   Trend
                 </Link>

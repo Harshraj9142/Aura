@@ -1,31 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Menu, X, Plane, ArrowRight, BarChart3 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Menu, X, LineChart, TrendingUp, Grid, Activity } from "lucide-react";
 
 export function LandingHeader() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close menu dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
-          {/* Brand Logo matching LuxFly / Aura aesthetics */}
-          <Link href="/" className="group flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-sky-400 to-blue-600 text-white shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform duration-200">
-              <Plane className="h-5 w-5 -rotate-45 text-white" />
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-xl font-extrabold tracking-tight text-white drop-shadow-md">
-                Aura
-              </span>
-              <span className="text-xs font-semibold uppercase tracking-widest text-sky-400">
-                Fly
-              </span>
-            </div>
+      <div className="mx-auto max-w-7xl px-6 sm:px-12 pt-6 sm:pt-8">
+        <div className="flex items-center justify-between">
+          {/* Brand Logo matching reference image */}
+          <Link href="/" className="group flex items-center gap-2">
+            <svg
+              className="h-5 w-5 text-[#1C222B] -rotate-45 transition-transform duration-200 group-hover:scale-105"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <polygon points="3 3 21 12 3 21 7 12 3 3" />
+            </svg>
+            <span className="font-display text-xl font-bold tracking-tight text-[#1C222B]">
+              AURA
+            </span>
           </Link>
 
+<<<<<<< Updated upstream
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8 rounded-full bg-black/20 px-6 py-2 border border-white/10 backdrop-blur-md">
             <Link
@@ -64,35 +76,71 @@ export function LandingHeader() {
           {/* Right Action buttons */}
           <div className="flex items-center gap-3">
             {/* Mobile menu toggle */}
+=======
+          {/* Right Controls: Menu Dropdown & Get Ticket Now Pill */}
+          <div className="relative flex items-center gap-4 sm:gap-6 font-display" ref={dropdownRef}>
+            {/* Menu Toggle Dropdown Button */}
+>>>>>>> Stashed changes
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden flex items-center gap-1.5 rounded-full bg-black/30 px-3.5 py-2 text-xs font-medium text-white border border-white/15 backdrop-blur-md hover:bg-black/50 transition"
-              aria-label="Toggle menu"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="flex items-center gap-2 px-2 py-1.5 text-xs sm:text-sm font-semibold text-[#1C222B] hover:text-black transition-colors focus:outline-none cursor-pointer"
+              aria-label="Toggle Navigation Menu"
             >
-              {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-              <span>Menu</span>
+              {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              <span className="tracking-wide">Menu</span>
             </button>
 
-            {/* Desktop Menu indicator */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="hidden lg:flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white border border-white/15 backdrop-blur-md hover:bg-white/20 transition"
-            >
-              <Menu className="h-3.5 w-3.5" />
-              <span>Menu</span>
-            </button>
+            {/* Menu Dropdown Popover */}
+            {menuOpen && (
+              <div className="absolute right-36 sm:right-40 top-12 w-56 rounded-2xl bg-white/95 p-3 shadow-xl border border-black/5 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150 z-50">
+                <div className="flex flex-col space-y-1">
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#1C222B] hover:bg-[#F3F6F7] transition-colors"
+                  >
+                    <LineChart className="h-4 w-4 text-[#1C222B]/70" />
+                    <span>Price Index</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/trends"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#1C222B] hover:bg-[#F3F6F7] transition-colors"
+                  >
+                    <TrendingUp className="h-4 w-4 text-[#1C222B]/70" />
+                    <span>Corridor Trends</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/heatmap"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#1C222B] hover:bg-[#F3F6F7] transition-colors"
+                  >
+                    <Grid className="h-4 w-4 text-[#1C222B]/70" />
+                    <span>Heatmap</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/elasticity"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#1C222B] hover:bg-[#F3F6F7] transition-colors"
+                  >
+                    <Activity className="h-4 w-4 text-[#1C222B]/70" />
+                    <span>Elasticity</span>
+                  </Link>
+                </div>
+              </div>
+            )}
 
-            {/* CTA Pill button matching the image's "Get Ticket Now" */}
+            {/* CTA Pill button matching exact white pill from image */}
             <Link
               href="/dashboard"
-              className="group inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-xs font-bold text-slate-950 shadow-lg shadow-white/15 hover:bg-slate-100 hover:shadow-white/25 active:scale-95 transition-all duration-200"
+              className="inline-flex items-center justify-center rounded-full bg-white px-6 py-2.5 text-xs sm:text-sm font-semibold text-[#1C222B] shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-white/80 hover:bg-slate-50 active:scale-95 transition-all duration-200"
             >
-              <span>Get Ticket Now</span>
-              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+              Get Ticket Now
             </Link>
           </div>
         </div>
       </div>
+<<<<<<< Updated upstream
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
@@ -155,6 +203,8 @@ export function LandingHeader() {
           </div>
         </div>
       )}
+=======
+>>>>>>> Stashed changes
     </header>
   );
 }

@@ -131,12 +131,6 @@ export default function LandingAnimation() {
         />
 
         {/* CONTENT */}
-        <div ref={contentRef} className="landing-stage">
-          <div className="landing-eyebrow">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1" />
-            REAL-TIME AIRFARE PRICE INDEX
-          </div>
-          
           <div className="landing-wordmark">
             API<span className="x">x</span>
           </div>

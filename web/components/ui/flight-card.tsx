@@ -52,12 +52,12 @@ export const FlightCard: React.FC<FlightCardProps> = ({
   return (
     <div
       className={cn(
-        "w-full rounded-xl border border-slate-800 bg-slate-950/80 text-slate-100 shadow-sm hover:border-slate-700 transition-all p-5",
+        "w-full rounded-2xl border border-black/5 bg-white text-[#08080D] shadow-xs hover:shadow-md transition-all p-6",
         className
       )}
     >
       <div className="flex justify-between items-start mb-4">
-        <Badge variant="outline" className="bg-slate-900 border-slate-800 text-slate-300 text-[11px]">
+        <Badge variant="outline" className="bg-[#F3F6F7] border-black/5 text-[#08080D]/70 text-[11px] font-medium rounded-full px-3 py-0.5">
           {refundableType}
         </Badge>
       </div>
@@ -66,17 +66,17 @@ export const FlightCard: React.FC<FlightCardProps> = ({
         {/* Airline Info */}
         <div className="md:col-span-4 flex flex-col">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 flex items-center justify-center rounded-md bg-slate-900 border border-slate-800 overflow-hidden shrink-0">
-              <img src={airline.logo} alt={`${airline.name} logo`} className="w-full h-full object-contain p-1" />
+            <div className="w-11 h-11 flex items-center justify-center rounded-xl bg-[#F3F6F7] border border-black/5 overflow-hidden shrink-0">
+              <img src={airline.logo} alt={`${airline.name} logo`} className="w-full h-full object-contain p-1.5" />
             </div>
             <div>
-              <p className="font-semibold text-slate-100">{airline.name}</p>
-              <p className="text-xs text-slate-400 font-mono">{airline.flightNumber}</p>
+              <p className="font-heading text-base font-bold text-[#08080D]">{airline.name}</p>
+              <p className="text-xs text-[#08080D]/60 font-mono">{airline.flightNumber}</p>
             </div>
           </div>
           <button
             type="button"
-            className="text-left text-xs text-emerald-400 hover:text-emerald-300 mt-2 font-medium"
+            className="text-left text-xs text-[#08080D] hover:underline mt-2 font-medium"
             onClick={onFlightDetails}
           >
             Flight Details
@@ -86,28 +86,28 @@ export const FlightCard: React.FC<FlightCardProps> = ({
         {/* Timeline */}
         <div className="md:col-span-4 flex items-center gap-3">
           <div className="text-center">
-            <p className="font-bold text-lg text-slate-100 font-mono">{departureTime}</p>
+            <p className="font-bold text-xl text-[#08080D] font-mono">{departureTime}</p>
           </div>
           <div className="flex-grow text-center">
-            <p className="text-xs text-slate-400">{duration}</p>
-            <div className="relative w-full h-px bg-slate-800 my-1">
+            <p className="text-xs text-[#08080D]/60 font-medium">{duration}</p>
+            <div className="relative w-full h-px bg-slate-200 my-1.5">
               <div className="absolute top-1/2 left-0 w-full h-px flex items-center justify-center -translate-y-1/2">
-                {stops > 0 && <div className="w-2 h-2 rounded-full bg-emerald-400 border border-slate-950"></div>}
+                {stops > 0 && <div className="w-2.5 h-2.5 rounded-full bg-[#08080D] border-2 border-white"></div>}
               </div>
             </div>
-            <p className="text-[11px] font-medium text-emerald-400">{stopText}</p>
+            <p className="text-[11px] font-semibold text-[#08080D]">{stopText}</p>
           </div>
           <div className="text-center">
-            <p className="font-bold text-lg text-slate-100 font-mono">{arrivalTime}</p>
+            <p className="font-bold text-xl text-[#08080D] font-mono">{arrivalTime}</p>
           </div>
         </div>
 
         {/* Pricing and Booking */}
         <div className="md:col-span-4 flex flex-col md:items-end gap-1.5">
-          <p className="text-2xl font-black text-slate-100 font-mono">{formatCurrency(price, currency)}</p>
-          {offer && <p className="text-xs text-emerald-400 font-medium text-right">{offer}</p>}
-          <Button onClick={onBook} className="w-full md:w-auto mt-1" size="sm">
-            Book Flight
+          <p className="text-2xl font-black text-[#08080D] font-mono">{formatCurrency(price, currency)}</p>
+          {offer && <p className="text-xs text-emerald-700 font-medium text-right">{offer}</p>}
+          <Button variant="darkPill" onClick={onBook} className="w-full md:w-auto mt-2" size="sm">
+            <span>Book Flight</span>
             <ArrowRight className="ml-2 h-3.5 w-3.5" />
           </Button>
         </div>

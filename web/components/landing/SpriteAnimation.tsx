@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { LandingHeader } from "./LandingHeader";
+import { HowItWorksCarousel } from "./HowItWorksCarousel";
 
 interface FrameMeta {
   frame: number;
@@ -163,7 +165,7 @@ export function SpriteAnimation() {
     };
   }, [isLoaded]);
 
-  // Track scroll progress for smooth text fading
+  // Track scroll progress for smooth text fading & canvas frame updates
   const [scrollProgress, setScrollProgress] = useState(0);
 
   // 4. Scroll tracking and ultra-smooth animation loop (lerp)
@@ -217,223 +219,87 @@ export function SpriteAnimation() {
   const heroOpacity = Math.max(1 - scrollProgress * 2.8, 0);
   const heroTranslateY = -scrollProgress * 60;
 
-  // Features section appears while the plane leaves (scrollProgress 0.52 -> 0.82)
-  const featuresProgress = Math.min(Math.max((scrollProgress - 0.52) / 0.28, 0), 1);
+  // Features section appears while the plane leaves (scrollProgress 0.48 -> 0.85)
+  const featuresProgress = Math.min(Math.max((scrollProgress - 0.48) / 0.32, 0), 1);
   const featuresOpacity = featuresProgress;
   const featuresTranslateY = (1 - featuresProgress) * 40;
 
   return (
-    <div ref={containerRef} className="relative h-[420vh] bg-[#e4e9ef] w-full">
-      {/* Sticky fullscreen canvas viewport */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between items-center select-none">
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full object-cover z-0 pointer-events-none" />
+    <div className="relative w-full bg-[#e4e9ef]">
+      {/* 
+        Fixed Fullscreen Canvas Background:
+        Stays fixed in background z-0 for the entire landing page.
+        Once the flight finishes (last frame), this exact final scene remains static 
+        as the background for all lower sections.
+      */}
+      <div className="fixed inset-0 h-screen w-full overflow-hidden pointer-events-none z-0 select-none">
+        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full object-cover" />
+      </div>
 
-        {/* Top Header Bar */}
-        <header
-          className="relative z-30 w-full max-w-7xl px-6 sm:px-12 pt-6 sm:pt-8 flex items-center justify-between transition-all duration-300 ease-out"
-        >
-          {/* Brand Logo matching LuxFly */}
-          <div className="flex items-center gap-2">
-            <svg
-              className="h-5 w-5 text-slate-900 -rotate-45"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polygon points="3 3 21 12 3 21 7 12 3 3" fill="currentColor" />
-            </svg>
-            <span className="font-display text-xl font-bold tracking-tight text-slate-900">
-              Aura
-            </span>
-          </div>
+      {/* Fixed Top Header Bar */}
+      <LandingHeader />
 
-          {/* Top-right dashboard link */}
-          <div className="flex items-center gap-4">
-            <a
-              href="/dashboard"
-              className="font-display text-xs font-semibold text-slate-600 hover:text-slate-950 transition-colors"
-            >
-              Dashboard →
-            </a>
-          </div>
-        </header>
+      {/* Hero Flight Animation & Procedure Carousel Container */}
+      <div ref={containerRef} className="relative z-10 w-full h-[360vh] select-none">
+        {/* Layer 1: Hero Center Block */}
+        <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-between pointer-events-none">
+          <div
+            className="mx-auto max-w-4xl px-6 text-center transition-all duration-300 ease-out flex flex-col items-center pt-44 sm:pt-52 md:pt-60 lg:pt-64 pointer-events-auto"
+            style={{
+              opacity: heroOpacity,
+              transform: `translateY(${heroTranslateY}px)`,
+              pointerEvents: heroOpacity < 0.1 ? "none" : "auto",
+            }}
+          >
+            <h1 className="font-display-hero text-4xl sm:text-6xl md:text-7xl lg:text-[78px] font-normal text-[#08080D] leading-[1.04]">
+              Real-time airfare,
+              <br />
+              intelligence, indexed.
+            </h1>
 
-        {/* Layer 1: Hero Center Block (Visible at start, fades out as plane accelerates) */}
-        <div
-          className="relative z-10 mx-auto max-w-4xl px-6 text-center transition-all duration-300 ease-out mt-12 sm:mt-16 md:mt-24 lg:mt-28 flex flex-col items-center mb-auto"
-          style={{
-            opacity: heroOpacity,
-            transform: `translateY(${heroTranslateY}px)`,
-            pointerEvents: heroOpacity < 0.1 ? "none" : "auto",
-          }}
-        >
-          {/* Tag Pill: matches "FLIGHT BOOKING" */}
-          <div className="inline-flex items-center justify-center rounded-full bg-white/60 px-4 py-1 border border-white/80 shadow-xs mb-4 sm:mb-5">
-            <span className="font-display text-[10px] sm:text-[11px] font-semibold tracking-[0.25em] text-slate-600 uppercase">
-              AURA — Airfare Price Index
-            </span>
-          </div>
+            <p className="font-body mt-4 sm:mt-5 text-sm sm:text-base md:text-lg text-[#08080D]/70 font-normal max-w-lg leading-relaxed">
+              Tracking India&apos;s skies, one fare at a time.
+            </p>
 
-          {/* Big Center Headline: matches "Fly Smarter, Explore Further." */}
-          <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-normal tracking-[-0.035em] text-[#1c222b] leading-[1.05]">
-            Real-time airfare,
-            <br />
-            intelligence, indexed.
-          </h1>
-
-          {/* Subtext: matches reference subtitle */}
-          <p className="font-display mt-4 sm:mt-5 text-sm sm:text-base md:text-lg text-slate-500 font-normal tracking-[-0.01em] max-w-lg leading-relaxed">
-            Tracking India&apos;s skies, one fare at a time.
-          </p>
-
-          {/* CTA Button: matches "Get Ticket Now" */}
-          <div className="mt-6 sm:mt-8">
-            <a
-              href="/dashboard"
-              className="font-display group inline-flex items-center gap-2 rounded-full bg-white px-8 py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-slate-900 shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-white/80 hover:bg-slate-50 hover:shadow-[0_8px_25px_rgba(0,0,0,0.1)] active:scale-95 transition-all duration-200"
-            >
-              <span>Enter</span>
-              <span className="text-slate-400 transition-transform duration-200 group-hover:translate-x-0.5">→</span>
-            </a>
-          </div>
-        </div>
-
-        {/* Layer 2: Features Section (Appears ON TOP OF THE FRAMES as the plane leaves!) */}
-        <div
-          className="absolute inset-0 z-20 flex items-center justify-center px-4 sm:px-6 lg:px-8 transition-all duration-300 ease-out pt-16 pb-8"
-          style={{
-            opacity: featuresOpacity,
-            transform: `translateY(${featuresTranslateY}px)`,
-            pointerEvents: featuresOpacity > 0.4 ? "auto" : "none",
-          }}
-        >
-          <div className="w-full max-w-5xl rounded-3xl border border-white/70 bg-white/70 backdrop-blur-2xl p-6 sm:p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] text-slate-900">
-            {/* Features Header */}
-            <div className="text-center max-w-2xl mx-auto mb-8">
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/80 px-3.5 py-1 text-[10px] sm:text-xs font-mono font-semibold tracking-wider text-slate-700 uppercase mb-3">
-                Intelligence Platform
-              </div>
-              <h2 className="font-display text-2xl sm:text-4xl font-normal tracking-tight text-slate-900">
-                Precision Airfare Monitoring, At Scale
-              </h2>
-              <p className="font-display text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed">
-                AURA indexes India&apos;s commercial aviation corridors in real-time, delivering clean statistical benchmarking and elasticity models.
-              </p>
-            </div>
-
-            {/* 4 Feature Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Card 1 */}
-              <div className="rounded-2xl border border-white/80 bg-white/60 p-4 sm:p-5 backdrop-blur-md shadow-xs hover:shadow-md transition">
-                <div className="text-xs font-mono font-bold uppercase tracking-wider text-sky-600 mb-2">
-                  01 / Index Engine
-                </div>
-                <h3 className="font-display font-semibold text-sm sm:text-base text-slate-900">
-                  Laspeyres Benchmark
-                </h3>
-                <p className="font-display text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  DGCA passenger volume-weighted price relatives computed across daily, weekly, and monthly windows.
-                </p>
-              </div>
-
-              {/* Card 2 */}
-              <div className="rounded-2xl border border-white/80 bg-white/60 p-4 sm:p-5 backdrop-blur-md shadow-xs hover:shadow-md transition">
-                <div className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-600 mb-2">
-                  02 / Price Arbitrage
-                </div>
-                <h3 className="font-display font-semibold text-sm sm:text-base text-slate-900">
-                  Multi-OTA Tracking
-                </h3>
-                <p className="font-display text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Continuous price collection across 5 airlines and 6 OTAs to isolate true base fares from platform markups.
-                </p>
-              </div>
-
-              {/* Card 3 */}
-              <div className="rounded-2xl border border-white/80 bg-white/60 p-4 sm:p-5 backdrop-blur-md shadow-xs hover:shadow-md transition">
-                <div className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-600 mb-2">
-                  03 / Elasticity
-                </div>
-                <h3 className="font-display font-semibold text-sm sm:text-base text-slate-900">
-                  Lead-Time Curves
-                </h3>
-                <p className="font-display text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Dynamic surge modeling comparing 0–3 day departure windows against 14–30 day advance bookings.
-                </p>
-              </div>
-
-              {/* Card 4 */}
-              <div className="rounded-2xl border border-white/80 bg-white/60 p-4 sm:p-5 backdrop-blur-md shadow-xs hover:shadow-md transition">
-                <div className="text-xs font-mono font-bold uppercase tracking-wider text-purple-600 mb-2">
-                  04 / Data Hygiene
-                </div>
-                <h3 className="font-display font-semibold text-sm sm:text-base text-slate-900">
-                  99.8% Outlier Guard
-                </h3>
-                <p className="font-display text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Automated IQR statistical validation removes crawler anomalies, promotional glitches, and bad records.
-                </p>
-              </div>
-            </div>
-
-            {/* Bottom Actions Row */}
-            <div className="mt-8 pt-6 border-t border-slate-900/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mr-1">
-                  Active Corridors:
-                </span>
-                <a
-                  href="/dashboard/fares?origin=DEL&destination=BOM"
-                  className="rounded-full bg-slate-900/5 hover:bg-slate-900/10 px-2.5 py-1 text-xs font-mono font-medium text-slate-700 transition"
-                >
-                  DEL-BOM
-                </a>
-                <a
-                  href="/dashboard/fares?origin=DEL&destination=BLR"
-                  className="rounded-full bg-slate-900/5 hover:bg-slate-900/10 px-2.5 py-1 text-xs font-mono font-medium text-slate-700 transition"
-                >
-                  DEL-BLR
-                </a>
-                <a
-                  href="/dashboard/fares?origin=BOM&destination=GOA"
-                  className="rounded-full bg-slate-900/5 hover:bg-slate-900/10 px-2.5 py-1 text-xs font-mono font-medium text-slate-700 transition"
-                >
-                  BOM-GOA
-                </a>
-              </div>
-
+            <div className="mt-6 sm:mt-8">
               <a
                 href="/dashboard"
-                className="font-display group inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-slate-800 transition"
+                className="font-display group inline-flex items-center gap-2 rounded-full bg-[#08080D] px-8 py-3 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-[#1A1F2B] active:scale-95 transition-all duration-200"
               >
-                <span>Launch Dashboard Terminal</span>
-                <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+                <span>Enter Terminal</span>
+                <span className="text-white/70 transition-transform duration-200 group-hover:translate-x-0.5">→</span>
               </a>
             </div>
           </div>
+
+          {/* Layer 2: How It Works Carousel */}
+          <div
+            className="absolute inset-0 z-20 flex items-center justify-center transition-all duration-300 ease-out pt-16 pb-8 overflow-hidden pointer-events-auto"
+            style={{
+              opacity: featuresOpacity,
+              transform: `translateY(${featuresTranslateY}px)`,
+              pointerEvents: featuresOpacity > 0.4 ? "auto" : "none",
+            }}
+          >
+            <HowItWorksCarousel isVisible={featuresOpacity > 0.2} />
+          </div>
         </div>
-
-        {/* Bottom breathing space to let the jet soar unobstructed */}
-        <div className="h-16 w-full pointer-events-none" />
-
-        {/* Loading state indicator */}
-        {!isLoaded && !loadError && (
-          <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#dbe1e8] text-slate-600">
-            <div className="flex flex-col items-center gap-3">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-400 border-t-slate-900" />
-            </div>
-          </div>
-        )}
-
-        {loadError && (
-          <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#dbe1e8] text-rose-500 text-sm">
-            Failed to load animation assets.
-          </div>
-        )}
       </div>
+
+      {/* Loading state indicator */}
+      {!isLoaded && !loadError && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#dbe1e8] text-slate-600">
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-400 border-t-slate-900" />
+          </div>
+        </div>
+      )}
+
+      {loadError && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#dbe1e8] text-rose-500 text-sm">
+          Failed to load animation assets.
+        </div>
+      )}
     </div>
   );
 }

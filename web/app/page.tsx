@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SpriteAnimation } from "@/components/landing/SpriteAnimation";
+import { PrimaryCorridorsSection } from "@/components/landing/PrimaryCorridorsSection";
 
 export const metadata: Metadata = {
   title: "AURA — Airfare Price Index",
@@ -9,8 +10,9 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-slate-950">
+    <main className="min-h-screen bg-[#F3F6F7]">
       <SpriteAnimation />
+      <PrimaryCorridorsSection />
     </main>
   );
 }
