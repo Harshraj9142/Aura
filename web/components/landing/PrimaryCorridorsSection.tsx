@@ -190,60 +190,52 @@ export function PrimaryCorridorsSection() {
                   <span>Flights</span>
                 </div>
 
-                <span className="text-[11px] font-mono font-medium text-white/90 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                <span className="text-[11px] font-body font-medium text-white/90 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
                   {item.flightCount}
                 </span>
               </div>
 
               {/* Bottom Card Content: Benchmark, Index, Optimal Days & Inflation/Deflation */}
               <div className="relative z-10 pt-4">
-                {/* Route Code & City Pair */}
+                {/* Route Code */}
                 <div className="flex items-baseline justify-between mb-1.5">
                   <h3 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-xs">
                     {item.code}
                   </h3>
-                  <span className="text-xs font-medium text-white/80 font-body">{item.cities}</span>
                 </div>
 
                 {/* Benchmark & Index Parameters */}
-                <div className="font-mono text-xs sm:text-sm text-white/90 font-medium mb-1.5 flex items-center gap-2">
-                  <span>Benchmark <strong className="text-white font-bold">{item.benchmark}</strong></span>
-                  <span className="text-white/40">•</span>
-                  <span>Index <strong className="text-white font-bold">{item.index}</strong></span>
+                <div className="font-body text-xs sm:text-sm text-white/90 font-normal mb-1.5 flex items-center gap-2 tracking-normal">
+                  <span>Benchmark <strong className="text-white font-medium">{item.benchmark}</strong></span>
+                  <span className="text-white/40">|</span>
+                  <span>Index <strong className="text-white font-medium">{item.index}</strong></span>
                 </div>
 
                 {/* Optimal Days Window */}
-                <div className="font-body text-xs sm:text-sm text-white/85 mb-2 flex items-center gap-2">
-                  <span>Optimal: <strong className="text-white">{item.optimalAdvance}</strong></span>
-                  <span className="font-mono font-bold text-emerald-400">({item.savings})</span>
-                </div>
-
-                {/* Inflation / Deflation Parameter Tag */}
-                <div className="flex items-center gap-2 text-xs font-mono pt-2 border-t border-white/15">
-                  <span className="text-white/70">Price Dynamics:</span>
-                  <span
-                    className={`inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-md ${
-                      item.trendType === "deflation"
-                        ? "bg-emerald-950/70 text-emerald-400 border border-emerald-500/30"
-                        : "bg-rose-950/70 text-rose-400 border border-rose-500/30"
-                    }`}
-                  >
-                    {item.trendType === "deflation" ? (
-                      <>
-                        <TrendingDown className="h-3 w-3" />
-                        <span>Deflation ({item.trendValue})</span>
-                      </>
-                    ) : (
-                      <>
-                        <TrendingUp className="h-3 w-3" />
-                        <span>Inflation ({item.trendValue})</span>
-                      </>
-                    )}
-                  </span>
+                <div className="font-body text-xs sm:text-sm text-white/85 font-normal flex items-center gap-2 tracking-normal">
+                  <span>Optimal: <strong className="text-white font-medium">{item.optimalAdvance}</strong></span>
+                  <span className="font-medium text-emerald-400">({item.savings})</span>
                 </div>
               </div>
             </a>
           ))}
+        </div>
+
+        {/* Action Banner Card matching exact reference design */}
+        <div className="mt-16 sm:mt-24 rounded-[32px] sm:rounded-[36px] bg-[#08080D] text-white p-10 sm:p-16 text-center flex flex-col items-center justify-center shadow-2xl border border-white/10">
+          <h3 className="font-heading text-2xl sm:text-4xl lg:text-5xl font-normal tracking-tight text-white max-w-2xl leading-[1.1] mb-4">
+            Ready to explore live airline fare matrices?
+          </h3>
+          <p className="font-body text-sm sm:text-base text-white/75 font-normal max-w-xl leading-relaxed mb-8">
+            Access the full terminal with granular fare records, interactive route heatmaps, and historical trend comparisons.
+          </p>
+          <a
+            href="/dashboard"
+            className="font-display group inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-xs sm:text-sm font-semibold text-[#08080D] shadow-xs hover:bg-[#F3F6F7] active:scale-95 transition-all duration-200"
+          >
+            <span>Launch Dashboard Terminal</span>
+            <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
+          </a>
         </div>
       </div>
     </section>

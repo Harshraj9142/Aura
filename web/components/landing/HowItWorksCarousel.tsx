@@ -81,13 +81,13 @@ export function HowItWorksCarousel({ isVisible = true }: { isVisible?: boolean }
     }
   }, [isVisible]);
 
-  // Auto-play timer: ONLY ticks when visible AND isAutoPlaying is true
+  // Auto-play timer: ONLY ticks when visible AND isAutoPlaying is true (doubled speed: 1.6s)
   useEffect(() => {
     if (!isVisible || !isAutoPlaying) return;
 
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % procedureSteps.length);
-    }, 3200);
+    }, 1600);
 
     return () => clearInterval(interval);
   }, [isVisible, isAutoPlaying]);
@@ -132,7 +132,7 @@ export function HowItWorksCarousel({ isVisible = true }: { isVisible?: boolean }
       {/* Carousel Track Viewport */}
       <div className="relative w-full overflow-hidden py-6 h-[400px] sm:h-[420px] flex items-center justify-center">
         <div
-          className="absolute flex items-center transition-transform duration-500 ease-out"
+          className="absolute flex items-center transition-transform duration-250 ease-out"
           style={{
             left: "50%",
             transform: `translateX(calc(-${activeIndex * stepDistance + cardWidth / 2}px))`,
@@ -149,7 +149,7 @@ export function HowItWorksCarousel({ isVisible = true }: { isVisible?: boolean }
                   width: `${cardWidth}px`,
                   marginRight: `${gap}px`,
                 }}
-                className={`shrink-0 min-h-[330px] sm:min-h-[360px] rounded-[28px] p-7 sm:p-9 flex flex-col justify-between cursor-pointer transition-all duration-500 ease-out ${
+                className={`shrink-0 min-h-[330px] sm:min-h-[360px] rounded-[28px] p-7 sm:p-9 flex flex-col justify-between cursor-pointer transition-all duration-250 ease-out ${
                   isActive
                     ? "bg-[#08080D] text-white shadow-[0_20px_50px_rgba(0,0,0,0.3)] scale-100 opacity-100 z-20 border border-white/10"
                     : "bg-[#D9E1E8] text-[#08080D] scale-95 opacity-40 hover:opacity-60 z-10 border border-black/5"
