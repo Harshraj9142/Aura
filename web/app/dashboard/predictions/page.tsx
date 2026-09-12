@@ -23,15 +23,15 @@ export default async function PredictionsPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-100 flex items-center gap-2.5">
-              <BrainCircuit className="h-7 w-7 text-purple-400" />
+            <h1 className="text-2xl font-black tracking-tight text-slate-950 flex items-center gap-2.5">
+              <BrainCircuit className="h-7 w-7 text-purple-600" />
               Airfare Price Prediction & Forecasting
             </h1>
-            <span className="rounded-full bg-purple-500/15 border border-purple-500/30 px-2.5 py-0.5 text-xs font-semibold text-purple-300">
+            <span className="rounded-full bg-purple-100 border border-purple-200 px-2.5 py-0.5 text-xs font-bold text-purple-900">
               ML Engine
             </span>
           </div>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-600 font-medium">
             Gradient Boosting Machine Learning model trained on domestic flight corridors, delivering real-time fare projections and buy/wait recommendations.
           </p>
         </div>

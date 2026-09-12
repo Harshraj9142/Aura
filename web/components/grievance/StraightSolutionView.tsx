@@ -1,0 +1,217 @@
+'use client';
+
+import React from 'react';
+import { StatutoryEntitlement, AirlineInfo, GrievanceAnswers } from '@/lib/grievance/types';
+
+interface StraightSolutionViewProps {
+  entitlement: StatutoryEntitlement;
+  airline: AirlineInfo;
+  answers: GrievanceAnswers;
+  onOpenDraftModal: () => void;
+  onReset: () => void;
+}
+
+export function StraightSolutionView({
+  entitlement,
+  airline,
+  answers,
+  onOpenDraftModal,
+  onReset,
+}: StraightSolutionViewProps) {
+  return (
+    <div className="mx-auto max-w-3xl space-y-6 animate-in fade-in duration-300">
+      {/* Top Claim Summary & Retake Button */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-xs">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            Assessed Claim:
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-900">
+            <span className={`inline-flex h-3 px-1 min-w-5 items-center justify-center rounded text-[8px] font-black text-white ${airline.logoBg}`}>
+              {airline.code.slice(0, 2)}
+            </span>
+            <span>{airline.shortName}</span>
+          </span>
+          <span className="rounded-lg bg-indigo-50 border border-indigo-200 px-2.5 py-1 text-xs font-bold text-indigo-800">
+            {answers.flightTimeOption === '<1hr'
+              ? '< 1 Hr Flight'
+              : answers.flightTimeOption === '1-2hr'
+              ? '1–2 Hr Flight'
+              : '> 2 Hr Flight'}
+          </span>
+        </div>
+
+        <button
+          onClick={onReset}
+          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition shadow-xs"
+        >
+          <span>↺</span>
+          <span>Retake Quiz</span>
+        </button>
+      </div>
+
+      {/* STRAIGHT SOLUTION HERO CARD */}
+      <div className="relative overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/90 via-white to-purple-50/70 p-6 shadow-xs">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-black text-emerald-900">
+                STATUTORY ENTITLEMENT
+              </span>
+              <span className="text-xs font-bold text-slate-600">
+                Under DGCA CAR Rules
+              </span>
+            </div>
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+              {entitlement.headline}
+            </h2>
+          </div>
+
+          <button
+            onClick={onOpenDraftModal}
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-500 transition"
+          >
+            <span>Copy Pre-Filled Legal Notice</span>
+            <span>📋</span>
+          </button>
+        </div>
+
+        {/* 3 Crisp Entitlement Highlights (No wall of text) */}
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-emerald-200 bg-white/90 p-3.5 shadow-xs">
+            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800">
+              💰 Cash Compensation
+            </span>
+            <p className="mt-1 text-xs font-bold text-slate-900">
+              {entitlement.cashHighlight}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-indigo-200 bg-white/90 p-3.5 shadow-xs">
+            <span className="text-[10px] font-black uppercase tracking-wider text-indigo-800">
+              🥪 Duty of Care
+            </span>
+            <p className="mt-1 text-xs font-bold text-slate-900">
+              {entitlement.careHighlight}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-purple-200 bg-white/90 p-3.5 shadow-xs">
+            <span className="text-[10px] font-black uppercase tracking-wider text-purple-800">
+              🎫 100% Refund Right
+            </span>
+            <p className="mt-1 text-xs font-bold text-slate-900">
+              {entitlement.refundHighlight}
+            </p>
+          </div>
+        </div>
+
+        {/* Direct Clickable Clause Mentions */}
+        <div className="mt-4 flex flex-wrap items-center gap-2 pt-2 border-t border-indigo-100">
+          <span className="text-xs font-bold text-slate-800">
+            Exact Clauses Applicable:
+          </span>
+          {entitlement.primaryClauses.map((item, idx) => (
+            <a
+              key={idx}
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-white px-2.5 py-1 text-xs font-bold text-indigo-800 transition hover:bg-indigo-50 shadow-xs"
+            >
+              <span>📜</span>
+              <span>{item.name} — {item.clause}</span>
+              <span>↗</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* VISUAL STEPS GRAPHIC: WHAT TO DO */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-black tracking-tight text-slate-950">
+              What You Need To Do (Step-by-Step)
+            </h3>
+            <p className="mt-0.5 text-xs text-slate-600 font-medium">
+              Follow these sequential steps to legally claim your money from {airline.shortName}.
+            </p>
+          </div>
+        </div>
+
+        {/* Vertical Connected Stepper Flow */}
+        <div className="space-y-4">
+          {entitlement.steps.map((step, idx) => (
+            <div key={idx} className="relative flex gap-4">
+              {/* Connector line and number circle */}
+              <div className="flex flex-col items-center">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-sm font-black text-white shadow-sm">
+                  {step.stepNumber}
+                </div>
+                {idx < entitlement.steps.length - 1 && (
+                  <div className="my-1.5 h-full w-0.5 bg-slate-200" />
+                )}
+              </div>
+
+              {/* Step Card Content */}
+              <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50/70 p-4 transition hover:bg-white shadow-xs">
+                <div className="flex flex-wrap items-center justify-between gap-1.5 border-b border-slate-200 pb-2">
+                  <span className="text-xs font-black uppercase tracking-wider text-indigo-800">
+                    {step.stage}
+                  </span>
+                  <span className="rounded-full bg-slate-200/80 border border-slate-300 px-2 py-0.5 text-[10px] font-bold text-slate-800">
+                    ⏱️ {step.timeframe}
+                  </span>
+                </div>
+
+                <h4 className="mt-2 text-sm font-extrabold text-slate-950">
+                  {step.title}
+                </h4>
+                <p className="mt-1 text-xs text-slate-700 leading-relaxed font-medium">
+                  {step.shortAction}
+                </p>
+
+                {/* Clause link & Contact badge */}
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <a
+                    href={step.clauseCitation.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 rounded-md border border-indigo-200 bg-indigo-50/80 px-2 py-0.5 text-[11px] font-bold text-indigo-800 hover:bg-indigo-100"
+                  >
+                    <span>📜</span>
+                    <span>Clause Mention: {step.clauseCitation.label}</span>
+                    <span>↗</span>
+                  </a>
+
+                  {step.contactInfo?.email && (
+                    <a
+                      href={`mailto:${step.contactInfo.email}`}
+                      className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 hover:text-indigo-700"
+                    >
+                      <span>✉️</span>
+                      <span>{step.contactInfo.email}</span>
+                    </a>
+                  )}
+
+                  {step.contactInfo?.url && (
+                    <a
+                      href={step.contactInfo.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 hover:text-indigo-700"
+                    >
+                      <span>🌐</span>
+                      <span>Portal ↗</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

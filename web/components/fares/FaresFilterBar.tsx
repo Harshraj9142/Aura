@@ -54,17 +54,17 @@ export function FaresFilterBar({ routes, sources }: FaresFilterBarProps) {
   };
 
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-950 p-4 shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
         {/* Origin */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
             Origin
           </label>
           <select
             value={origin}
             onChange={(e) => setOrigin(e.target.value)}
-            className="w-full rounded-md border border-slate-800 bg-slate-900 px-2.5 py-1.5 text-xs text-slate-200 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
           >
             <option value="">All Origins</option>
             {origins.map((o) => (
@@ -77,13 +77,13 @@ export function FaresFilterBar({ routes, sources }: FaresFilterBarProps) {
 
         {/* Destination */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
             Destination
           </label>
           <select
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
-            className="w-full rounded-md border border-slate-800 bg-slate-900 px-2.5 py-1.5 text-xs text-slate-200 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
           >
             <option value="">All Destinations</option>
             {destinations.map((d) => (
@@ -96,13 +96,13 @@ export function FaresFilterBar({ routes, sources }: FaresFilterBarProps) {
 
         {/* Source */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
             Source
           </label>
           <select
             value={source}
             onChange={(e) => setSource(e.target.value)}
-            className="w-full rounded-md border border-slate-800 bg-slate-900 px-2.5 py-1.5 text-xs text-slate-200 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
           >
             <option value="">All Sources</option>
             {sources.map((s) => (
@@ -115,41 +115,41 @@ export function FaresFilterBar({ routes, sources }: FaresFilterBarProps) {
 
         {/* Date From */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
             Date From
           </label>
           <input
             type="date"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
-            className="w-full rounded-md border border-slate-800 bg-slate-900 px-2.5 py-1.5 text-xs text-slate-200 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
           />
         </div>
 
         {/* Date To */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
             Date To
           </label>
           <input
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
-            className="w-full rounded-md border border-slate-800 bg-slate-900 px-2.5 py-1.5 text-xs text-slate-200 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
           />
         </div>
 
         {/* Outliers */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
             Outliers
           </label>
           <select
             value={isOutlier}
             onChange={(e) => setIsOutlier(e.target.value)}
-            className="w-full rounded-md border border-slate-800 bg-slate-900 px-2.5 py-1.5 text-xs text-slate-200 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
           >
-            <option value="false font-normal">Exclude Outliers</option>
+            <option value="false">Exclude Outliers</option>
             <option value="true">Only Outliers</option>
             <option value="all">Include All</option>
           </select>
@@ -160,14 +160,14 @@ export function FaresFilterBar({ routes, sources }: FaresFilterBarProps) {
       <div className="mt-3 flex items-center justify-end space-x-2">
         <button
           onClick={handleReset}
-          className="rounded-md border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800 transition"
+          className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-xs"
         >
           Reset
         </button>
         <button
           onClick={handleApplyFilters}
           disabled={isPending}
-          className="rounded-md bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 disabled:opacity-50 transition"
+          className="rounded-lg bg-blue-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-blue-500 disabled:opacity-50 transition shadow-xs"
         >
           {isPending ? "Applying..." : "Apply Filters"}
         </button>

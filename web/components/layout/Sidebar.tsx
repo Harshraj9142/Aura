@@ -89,24 +89,24 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-black/5 bg-white font-body">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-slate-200 bg-white font-body shadow-xs">
       {/* Logo */}
-      <Link href="/" className="flex h-20 items-center gap-3 border-b border-black/5 px-6 hover:opacity-80 transition">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#08080D] text-white font-bold text-sm">
+      <Link href="/" className="flex h-20 items-center gap-3 border-b border-slate-200 px-6 hover:opacity-85 transition">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 border border-slate-300 text-slate-950 font-black text-base shadow-xs">
           A
         </div>
         <div>
-          <h1 className="font-heading text-lg font-bold tracking-tight text-[#08080D]">
-            Aura <span className="text-xs text-[#08080D]/60 uppercase tracking-widest">APIx</span>
+          <h1 className="font-heading text-lg font-extrabold tracking-tight text-slate-950">
+            Aura <span className="text-xs text-slate-500 uppercase tracking-widest font-bold">APIx</span>
           </h1>
-          <p className="text-[10px] -mt-0.5 font-medium text-[#08080D]/60 tracking-wider uppercase">
+          <p className="text-[10px] -mt-0.5 font-bold text-slate-500 tracking-wider uppercase">
             Airfare Price Index
           </p>
         </div>
       </Link>
 
       {/* Navigation */}
-      <nav className="flex flex-col gap-1.5 p-4">
+      <nav className="flex flex-col gap-1 p-3">
         {navItems.map((item) => {
           const isActive =
             item.href === "/dashboard"
@@ -118,26 +118,32 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={`
-                flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold
+                flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-bold
                 transition-all duration-150
                 ${
                   isActive
-                    ? "bg-[#08080D] text-white shadow-xs"
-                    : "text-[#08080D]/70 hover:bg-[#F3F6F7] hover:text-[#08080D]"
+                    ? "bg-slate-100 border border-slate-300 text-slate-950 shadow-xs"
+                    : "text-slate-700 hover:bg-slate-50 hover:text-slate-950 border border-transparent"
                 }
               `}
             >
               <span
                 className={
                   isActive
-                    ? "text-white"
-                    : "text-[#08080D]/60"
+                    ? "text-slate-950"
+                    : "text-slate-500"
                 }
               >
                 {item.icon}
               </span>
+              <span className="flex-1 text-slate-900 font-bold">{item.label}</span>
+              {item.badge && (
+                <span className="rounded-md bg-slate-200/80 border border-slate-300 px-1.5 py-0.5 text-[10px] font-extrabold text-slate-800">
+                  {item.badge}
+                </span>
+              )}
               {isActive && (
-                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-white" />
+                <span className="h-1.5 w-1.5 rounded-full bg-slate-950" />
               )}
             </Link>
           );
@@ -145,11 +151,11 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 border-t border-black/5 p-5">
-        <p className="text-xs text-[#08080D]/60 font-semibold">
+      <div className="absolute bottom-0 left-0 right-0 border-t border-slate-200 p-5 bg-white">
+        <p className="text-xs text-slate-950 font-extrabold">
           India Domestic Routes
         </p>
-        <p className="text-[11px] text-[#08080D]/50 font-mono mt-0.5">
+        <p className="text-[11px] text-slate-600 font-mono mt-0.5 font-medium">
           Data updated daily at 06:00 IST
         </p>
       </div>

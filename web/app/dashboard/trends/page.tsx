@@ -32,10 +32,10 @@ export default async function TrendsPage({ searchParams }: TrendsPageProps) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-100">
+          <h1 className="text-2xl font-black tracking-tight text-slate-950">
             Airfare Price Index Trends
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-600 font-medium">
             Time-series analysis of domestic airfare indices across Indian corridors (Daily, Weekly, Monthly).
           </p>
         </div>
@@ -43,15 +43,15 @@ export default async function TrendsPage({ searchParams }: TrendsPageProps) {
       </div>
 
       {/* Control Bar */}
-      <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-4">
           {/* Frequency selector */}
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center space-x-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
                 Frequency:
               </span>
-              <div className="inline-flex rounded-lg bg-slate-900 p-1 border border-slate-800">
+              <div className="inline-flex rounded-lg bg-slate-100 p-1 border border-slate-200">
                 {[
                   { label: "1 Day (Daily)", value: "daily" },
                   { label: "7 Days (Weekly)", value: "weekly" },
@@ -60,10 +60,10 @@ export default async function TrendsPage({ searchParams }: TrendsPageProps) {
                   <Link
                     key={f.value}
                     href={`/dashboard/trends?frequency=${f.value}${origin ? `&origin=${origin}` : ""}${destination ? `&destination=${destination}` : ""}`}
-                    className={`rounded-md px-3 py-1 text-xs font-semibold capitalize transition ${
+                    className={`rounded-md px-3 py-1 text-xs font-bold capitalize transition ${
                       frequency === f.value
-                        ? "bg-blue-600 text-white shadow-sm"
-                        : "text-slate-400 hover:text-slate-200"
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "text-slate-700 hover:text-slate-950"
                     }`}
                   >
                     {f.label}
@@ -74,10 +74,10 @@ export default async function TrendsPage({ searchParams }: TrendsPageProps) {
 
             {/* Time Horizon Quick Filters (1 Day, 7 Days, 30 Days) */}
             <div className="flex items-center space-x-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
                 Range:
               </span>
-              <div className="inline-flex rounded-lg bg-slate-900 p-1 border border-slate-800">
+              <div className="inline-flex rounded-lg bg-slate-100 p-1 border border-slate-200">
                 {[
                   { label: "1 Day", days: 1 },
                   { label: "7 Days", days: 7 },
@@ -97,10 +97,10 @@ export default async function TrendsPage({ searchParams }: TrendsPageProps) {
                     <Link
                       key={range.label}
                       href={href}
-                      className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                      className={`rounded-md px-2.5 py-1 text-xs font-bold transition ${
                         isSelected
-                          ? "bg-slate-800 text-emerald-400 font-bold border border-emerald-500/40"
-                          : "text-slate-400 hover:text-slate-200"
+                          ? "bg-white text-emerald-800 font-black border border-emerald-300 shadow-xs"
+                          : "text-slate-700 hover:text-slate-950"
                       }`}
                     >
                       {range.label}
@@ -113,15 +113,15 @@ export default async function TrendsPage({ searchParams }: TrendsPageProps) {
 
           {/* Route selector links */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Corridor:
             </span>
             <Link
               href={`/dashboard/trends?frequency=${frequency}`}
-              className={`rounded-md px-2.5 py-1 text-xs font-mono font-medium transition border ${
+              className={`rounded-lg px-2.5 py-1 text-xs font-mono font-bold transition border ${
                 !origin
-                  ? "bg-slate-800 text-blue-400 border-blue-500/50"
-                  : "bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700"
+                  ? "bg-blue-50 text-blue-800 border-blue-300"
+                  : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
               }`}
             >
               All Routes
@@ -132,10 +132,10 @@ export default async function TrendsPage({ searchParams }: TrendsPageProps) {
                 <Link
                   key={`${r.origin}-${r.destination}`}
                   href={`/dashboard/trends?frequency=${frequency}&origin=${r.origin}&destination=${r.destination}`}
-                  className={`rounded-md px-2.5 py-1 text-xs font-mono font-medium transition border ${
+                  className={`rounded-lg px-2.5 py-1 text-xs font-mono font-bold transition border ${
                     isSelected
-                      ? "bg-slate-800 text-blue-400 border-blue-500/50"
-                      : "bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700"
+                      ? "bg-blue-50 text-blue-800 border-blue-300"
+                      : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                   }`}
                 >
                   {r.origin}-{r.destination}
@@ -147,12 +147,12 @@ export default async function TrendsPage({ searchParams }: TrendsPageProps) {
       </div>
 
       {/* Chart Section */}
-      <div className="rounded-xl border border-slate-800 bg-slate-950 p-6 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
         <div className="mb-4">
-          <h2 className="text-lg font-bold text-slate-100">
+          <h2 className="text-lg font-black text-slate-950">
             {origin && destination ? `${origin} → ${destination} Index` : "National Airfare Price Index"}
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-600 font-medium">
             {frequency.charAt(0).toUpperCase() + frequency.slice(1)} weighted average price index values
           </p>
         </div>

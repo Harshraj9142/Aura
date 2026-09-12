@@ -1,81 +1,151 @@
 'use client';
 
 import React, { useState } from 'react';
-import { WizardAnswers } from '@/lib/grievance/types';
-import { GrievanceWizard } from '@/components/grievance/GrievanceWizard';
-import { EntitlementResults } from '@/components/grievance/EntitlementResults';
-import { LegalEscalationGuide } from '@/components/grievance/LegalEscalationGuide';
+import { AirlineId, GrievanceCategory, GrievanceAnswers } from '@/lib/grievance/types';
+import { AIRLINE_DIRECTORY } from '@/lib/grievance/airline-contacts';
+import { getStraightSolution } from '@/lib/grievance/grievance-rules';
+import { QuestionWizard } from '@/components/grievance/QuestionWizard';
+import { StraightSolutionView } from '@/components/grievance/StraightSolutionView';
 import { ComplaintDraftModal } from '@/components/grievance/ComplaintDraftModal';
-import { AirlineQuickDirectory } from '@/components/grievance/AirlineQuickDirectory';
-import { DGCACharterReference } from '@/components/grievance/DGCACharterReference';
 
 export default function GrievanceDashboardPage() {
-  const [completedAnswers, setCompletedAnswers] = useState<WizardAnswers | null>(null);
-  const [isDraftModalOpen, setIsDraftModalOpen] = useState(false);
+  // Questions 1 to 5, or 6 for Solution
+  const [currentQuestion, setCurrentQuestion] = useState<number>(1);
+  const [airlineId, setAirlineId] = useState<AirlineId | null>(null);
+  const [category, setCategory] = useState<GrievanceCategory | null>(null);
+  const [durationOption, setDurationOption] = useState<string | null>(null);
+  const [flightTimeOption, setFlightTimeOption] = useState<'<1hr' | '1-2hr' | '>2hr' | null>(null);
+  const [assistanceOption, setAssistanceOption] = useState<'none' | 'refreshments' | 'hotel_alternate' | null>(null);
+  const [isDraftModalOpen, setIsDraftModalOpen] = useState<boolean>(false);
 
-  const handleWizardComplete = (answers: WizardAnswers) => {
-    setCompletedAnswers(answers);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Handlers for each question
+  const handleSelectAirline = (id: AirlineId) => {
+    setAirlineId(id);
+    setCurrentQuestion(2);
+  };
+
+  const handleSelectCategory = (cat: GrievanceCategory) => {
+    setCategory(cat);
+    setCurrentQuestion(3);
+  };
+
+  const handleSelectDuration = (dur: string) => {
+    setDurationOption(dur);
+    setCurrentQuestion(4);
+  };
+
+  const handleSelectFlightTime = (time: '<1hr' | '1-2hr' | '>2hr') => {
+    setFlightTimeOption(time);
+    setCurrentQuestion(5);
+  };
+
+  const handleSelectAssistance = (ast: 'none' | 'refreshments' | 'hotel_alternate') => {
+    setAssistanceOption(ast);
+    setCurrentQuestion(6); // 6 is the Straight Solution!
+  };
+
+  const handleBack = () => {
+    if (currentQuestion > 1) {
+      setCurrentQuestion((prev) => prev - 1);
+    }
   };
 
   const handleReset = () => {
-    setCompletedAnswers(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setCurrentQuestion(1);
+    setAirlineId(null);
+    setCategory(null);
+    setDurationOption(null);
+    setFlightTimeOption(null);
+    setAssistanceOption(null);
   };
 
+  const isSolutionReady =
+    currentQuestion === 6 &&
+    airlineId &&
+    category &&
+    durationOption &&
+    flightTimeOption &&
+    assistanceOption;
+
+  const answers: GrievanceAnswers | null = isSolutionReady
+    ? {
+        airlineId,
+        category,
+        durationOption,
+        flightTimeOption,
+        assistanceOption,
+      }
+    : null;
+
+  const entitlement = answers ? getStraightSolution(answers) : null;
+  const activeAirline = airlineId ? AIRLINE_DIRECTORY[airlineId] : null;
+
   return (
-    <div className="space-y-8 pb-16">
+    <div className="space-y-6 pb-16">
       {/* Page Header */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-sm text-white shadow-sm">
               ⚖️
             </span>
-            <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-              Passenger Rights & Grievance Engine
+            <h1 className="text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
+              Customer Grievance & Passenger Rights
             </h1>
-            <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-xs font-bold text-indigo-600 border border-indigo-500/20 dark:text-indigo-400">
-              DGCA Compliant
+            <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-bold text-emerald-900">
+              DGCA Protected
             </span>
           </div>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Diagnose your airline dispute, verify exact compensation and refund entitlements under Indian civil aviation law, access official policy links, and generate formal legal notices.
+          <p className="mt-1 text-xs text-slate-600 font-medium">
+            Answer 5 quick questions to get an exact statutory solution and step-by-step enforcement plan.
           </p>
         </div>
+
+        {currentQuestion < 6 && (
+          <div className="hidden sm:block text-right">
+            <span className="text-xs font-bold text-slate-600">
+              Step {currentQuestion} of 5
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Main Interactive Flow */}
-      {completedAnswers ? (
-        <div className="space-y-8 animate-fadeIn">
-          {/* Entitlement Assessment Results */}
-          <EntitlementResults
-            answers={completedAnswers}
-            onReset={handleReset}
-            onOpenDraftModal={() => setIsDraftModalOpen(true)}
-          />
-
-          {/* 4-Tier Legal Escalation Roadmap */}
-          <LegalEscalationGuide airlineId={completedAnswers.airlineId || 'indigo'} />
-        </div>
-      ) : (
-        /* MCQ Diagnostic Wizard */
-        <GrievanceWizard onComplete={handleWizardComplete} />
+      {/* 1 TO 5: ONLY ONE QUESTION IS SHOWN AT A TIME */}
+      {currentQuestion <= 5 && (
+        <QuestionWizard
+          currentQuestion={currentQuestion}
+          airlineId={airlineId}
+          category={category}
+          durationOption={durationOption}
+          flightTimeOption={flightTimeOption}
+          assistanceOption={assistanceOption}
+          onSelectAirline={handleSelectAirline}
+          onSelectCategory={handleSelectCategory}
+          onSelectDuration={handleSelectDuration}
+          onSelectFlightTime={handleSelectFlightTime}
+          onSelectAssistance={handleSelectAssistance}
+          onBack={handleBack}
+        />
       )}
 
-      {/* Statutory Legal Cheatsheet */}
-      <DGCACharterReference />
+      {/* 6: STRAIGHT SOLUTION (NO WALLS OF TEXT, CLEAR STEPS GRAPHIC + CLAUSE LINKS) */}
+      {currentQuestion === 6 && entitlement && activeAirline && answers && (
+        <>
+          <StraightSolutionView
+            entitlement={entitlement}
+            airline={activeAirline}
+            answers={answers}
+            onOpenDraftModal={() => setIsDraftModalOpen(true)}
+            onReset={handleReset}
+          />
 
-      {/* Full 6-Airline Official Directory */}
-      <AirlineQuickDirectory />
-
-      {/* Legal Notice Draft Modal */}
-      {completedAnswers && (
-        <ComplaintDraftModal
-          isOpen={isDraftModalOpen}
-          onClose={() => setIsDraftModalOpen(false)}
-          answers={completedAnswers}
-        />
+          <ComplaintDraftModal
+            isOpen={isDraftModalOpen}
+            onClose={() => setIsDraftModalOpen(false)}
+            airlineId={activeAirline.id}
+            category={answers.category}
+          />
+        </>
       )}
     </div>
   );

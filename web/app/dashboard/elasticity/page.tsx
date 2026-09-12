@@ -24,18 +24,18 @@ export default async function ElasticityPage({ searchParams }: ElasticityPagePro
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-100">
+        <h1 className="text-2xl font-black tracking-tight text-slate-950">
           Lead-Time Fare Elasticity Curve
         </h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-slate-600 font-medium">
           Analyze how ticket prices escalate as advance purchase booking window narrows prior to departure.
         </p>
       </div>
 
       {/* Corridor Selector */}
-      <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 mr-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-700 mr-2">
             Select Route Corridor:
           </span>
           {routes.map((r) => {
@@ -44,10 +44,10 @@ export default async function ElasticityPage({ searchParams }: ElasticityPagePro
               <Link
                 key={`${r.origin}-${r.destination}`}
                 href={`/dashboard/elasticity?origin=${r.origin}&destination=${r.destination}`}
-                className={`rounded-md px-3 py-1.5 text-xs font-mono font-bold transition border ${
+                className={`rounded-lg px-3 py-1.5 text-xs font-mono font-bold transition border ${
                   isSelected
-                    ? "bg-blue-600 text-white border-blue-500 shadow-sm"
-                    : "bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800"
+                    ? "bg-blue-50 text-blue-900 border-blue-300 shadow-xs"
+                    : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                 }`}
               >
                 {r.origin} → {r.destination}
@@ -58,12 +58,12 @@ export default async function ElasticityPage({ searchParams }: ElasticityPagePro
       </div>
 
       {/* Elasticity Chart Card */}
-      <div className="rounded-xl border border-slate-800 bg-slate-950 p-6 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
         <div className="mb-4">
-          <h2 className="text-lg font-bold text-slate-100 font-mono">
+          <h2 className="text-lg font-black text-slate-950 font-mono">
             {selectedOrigin} → {selectedDestination} Price Elasticity Curve
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-600 font-medium">
             Average, minimum, and maximum fares (INR) grouped by advance purchase booking days
           </p>
         </div>

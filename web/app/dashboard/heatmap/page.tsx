@@ -16,10 +16,10 @@ export default async function HeatmapPage({ searchParams }: HeatmapPageProps) {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-100">
+        <h1 className="text-2xl font-black tracking-tight text-slate-950">
           Route × Travel Date Fare Heatmap
         </h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-slate-600 font-medium">
           Visualize average airfares across all tracked routes and upcoming travel departure dates.
         </p>
       </div>

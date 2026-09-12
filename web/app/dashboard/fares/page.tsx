@@ -47,10 +47,10 @@ export default async function FaresPage({ searchParams }: FaresPageProps) {
       {/* Page Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-100">
+          <h1 className="text-2xl font-black tracking-tight text-slate-950">
             Raw Fare Explorer
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-600 font-medium">
             Inspect, filter, and analyze granular scraped flight fare records across carriers and OTAs.
           </p>
         </div>
