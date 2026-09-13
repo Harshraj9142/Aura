@@ -414,34 +414,53 @@ Examples:
     return parser
 
 
-# ---------------------------------------------------------------------------
-# Command handlers
-# ---------------------------------------------------------------------------
 def cmd_list_routes() -> None:
-    """Print all configured routes."""
+    """Print all configured routes using Rich formatting."""
+    from rich.console import Console
+    from rich.table import Table
+    from rich.box import ROUNDED
+    console = Console()
     routes = get_enabled_routes()
-    print(f"\n{'Route':<12} {'Name':<25} {'Enabled':<8}")
-    print("-" * 45)
+
+    table = Table(title="✈️  Configured DGCA Aviation Corridors (AURA)", box=ROUNDED, border_style="cyan", header_style="bold cyan")
+    table.add_column("Corridor Code", style="bold cyan", width=14)
+    table.add_column("City Pair Name", style="bold white", width=28)
+    table.add_column("Traffic Weight", justify="right", style="yellow", width=16)
+    table.add_column("Status", justify="center", width=12)
+
+    weights = {"DEL-BOM": "28%", "DEL-BLR": "22%", "BOM-BLR": "18%", "DEL-CCU": "14%", "BLR-HYD": "10%", "MAA-DEL": "8%"}
+
     for r in routes:
         pair = f"{r['origin']}-{r['destination']}"
         name = r.get("name", "")
-        enabled = "✅" if r.get("enabled", True) else "❌"
-        print(f"{pair:<12} {name:<25} {enabled:<8}")
-    print(f"\nTotal: {len(routes)} routes\n")
+        weight = weights.get(pair, "N/A")
+        status = "[bold green]✓ ACTIVE[/]" if r.get("enabled", True) else "[bold red]DISABLED[/]"
+        table.add_row(pair, name, weight, status)
+
+    console.print(table)
+    console.print(f"Total: [bold cyan]{len(routes)} primary routes[/] tracked.\n")
 
 
 def cmd_list_sources() -> None:
-    """Print all configured sources."""
+    """Print all configured sources using Rich formatting."""
+    from rich.console import Console
+    from rich.table import Table
+    from rich.box import ROUNDED
+    console = Console()
     sources = get_enabled_sources()
-    print(f"\n{'Name':<20} {'Display':<25} {'Type':<10} {'Enabled':<8}")
-    print("-" * 63)
+
+    table = Table(title="📡 Configured Airfare Scraping Sources (APIx)", box=ROUNDED, border_style="green", header_style="bold green")
+    table.add_column("Source Identifier", style="bold cyan", width=20)
+    table.add_column("Platform / Brand", style="bold white", width=24)
+    table.add_column("Category", style="magenta", width=14)
+    table.add_column("Engine Status", justify="center", width=14)
+
     for s in sources:
-        enabled = "✅" if s.get("enabled", True) else "❌"
-        print(
-            f"{s['name']:<20} {s['display_name']:<25} "
-            f"{s['source_type']:<10} {enabled:<8}"
-        )
-    print(f"\nTotal: {len(sources)} sources\n")
+        status = "[bold green]● LIVE[/]" if s.get("enabled", True) else "[bold red]DISABLED[/]"
+        table.add_row(s["name"], s["display_name"], s["source_type"].upper(), status)
+
+    console.print(table)
+    console.print(f"Total: [bold green]{len(sources)} operational platforms[/] monitored.\n")
 
 
 def cmd_init_db() -> None:

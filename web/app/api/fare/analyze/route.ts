@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { ok, fail } from "@/lib/utils/apiResponse";
+import { Prisma } from "@prisma/client";
 
 const AIRLINE_SOURCE_MAP: Record<string, string[]> = {
   "IndiGo": ["indigo"],
@@ -17,6 +18,14 @@ const AIRLINE_SOURCE_MAP: Record<string, string[]> = {
   "SpiceJet": ["spicejet"],
   "Akasa Air": ["akasa", "akasaair"],
   "Air India Express": ["airindiaexpress", "air_india_express"],
+};
+
+const AIRLINE_PREFIX_MAP: Record<string, string[]> = {
+  "IndiGo": ["6E"],
+  "Air India": ["AI"],
+  "SpiceJet": ["SG", "EMT"],
+  "Akasa Air": ["QP"],
+  "Air India Express": ["IX"],
 };
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -30,21 +39,31 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const route = `${origin.toUpperCase()}-${destination.toUpperCase()}`;
     const sourceKeys = AIRLINE_SOURCE_MAP[airline] || [airline.toLowerCase().replace(/\s+/g, "")];
+    const prefixes = AIRLINE_PREFIX_MAP[airline] || [];
+
+    const orConditions: Prisma.FareWhereInput[] = [
+      { carrier: { contains: airline, mode: "insensitive" } },
+      { source: { in: sourceKeys } },
+    ];
+    for (const prefix of prefixes) {
+      orConditions.push({ flight_number: { startsWith: prefix } });
+      orConditions.push({ flight_number: { contains: prefix } });
+    }
 
     // Query strictly from database
-    let faresFromDb: any[] = [];
+    let faresFromDb: Awaited<ReturnType<typeof prisma.fare.findMany>> = [];
     try {
       faresFromDb = await prisma.fare.findMany({
         where: {
           route_origin: origin.toUpperCase(),
           route_destination: destination.toUpperCase(),
-          source: { in: sourceKeys },
+          OR: orConditions,
         },
         orderBy: { travel_date: "asc" },
         take: 1000,
       });
-    } catch (e: any) {
-      console.warn("Database query error in /api/fare/analyze:", e?.message);
+    } catch (e: unknown) {
+      console.warn("Database query error in /api/fare/analyze:", e instanceof Error ? e.message : String(e));
       return ok(null);
     }
 
@@ -124,7 +143,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       return {
         id: f.id,
-        flightNumber: f.flight_number || `${airline.slice(0, 2).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`,
+        flightNumber: f.flight_number || `${airline} Regular`,
         carrier: f.carrier || airline,
         fareClass: f.fare_class || "Economy",
         departureTime: f.scraped_at ? new Date(f.scraped_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "Direct",
@@ -169,8 +188,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     };
 
     return ok(result);
-  } catch (error: any) {
-    console.error("Strict analysis error:", error);
-    return fail(error?.message || "Failed to analyze database fares", "ANALYSIS_ERROR", 500);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Failed to analyze database fares";
+    console.error("Strict analysis error:", msg);
+    return fail(msg, "ANALYSIS_ERROR", 500);
   }
 }

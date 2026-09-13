@@ -11,6 +11,7 @@ Defines the database schema for:
 from __future__ import annotations
 
 import enum
+from typing import Optional
 import uuid
 from datetime import date, datetime
 
@@ -96,20 +97,20 @@ class Fare(Base):
         nullable=False,
         comment="Whether source is an airline or OTA",
     )
-    carrier: Mapped[str | None] = mapped_column(
+    carrier: Mapped[Optional[str]] = mapped_column(
         String(50), nullable=True, comment="Operating carrier (e.g. 'IndiGo', '6E')"
     )
-    flight_number: Mapped[str | None] = mapped_column(
+    flight_number: Mapped[Optional[str]] = mapped_column(
         String(20), nullable=True, comment="Flight number (e.g. '6E-2341')"
     )
-    fare_class: Mapped[str | None] = mapped_column(
+    fare_class: Mapped[Optional[str]] = mapped_column(
         String(50), nullable=True, comment="Fare class/cabin (e.g. 'Economy', 'Business')"
     )
-    base_fare: Mapped[float | None] = mapped_column(
+    base_fare: Mapped[Optional[float]] = mapped_column(
         Numeric(10, 2), nullable=True, comment="Base fare excluding taxes (INR)"
     )
-    taxes_and_fees: Mapped[float | None] = mapped_column(
-        Numeric(10, 2), nullable=True, comment="Taxes and fees (INR)"
+    taxes_and_fees: Mapped[Optional[float]] = mapped_column(
+        Numeric(10, 2), nullable=True, comment="Taxes and airport fees (INR)"
     )
     total_fare: Mapped[float] = mapped_column(
         Numeric(10, 2), nullable=False, comment="Total fare including taxes (INR)"
@@ -132,7 +133,7 @@ class Fare(Base):
     is_outlier: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, comment="Whether fare was flagged as an outlier"
     )
-    validation_warnings: Mapped[dict | None] = mapped_column(
+    validation_warnings: Mapped[Optional[dict]] = mapped_column(
         JSON, nullable=True, comment="List of validation warnings (if any)"
     )
 
@@ -180,7 +181,7 @@ class ScrapeRun(Base):
         server_default=func.now(),
         comment="When this scraping run started",
     )
-    completed_at: Mapped[datetime | None] = mapped_column(
+    completed_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
         comment="When this scraping run completed",
@@ -203,7 +204,7 @@ class ScrapeRun(Base):
         default=ScrapeRunStatus.RUNNING,
         comment="Current run status",
     )
-    summary: Mapped[dict | None] = mapped_column(
+    summary: Mapped[Optional[dict]] = mapped_column(
         JSON, nullable=True, comment="Detailed per-source summary"
     )
 
@@ -262,9 +263,9 @@ class IndexValueRecord(Base):
     )
     frequency: Mapped[str] = mapped_column(String(20), nullable=False, default="daily")
     period_date: Mapped[date] = mapped_column(Date, nullable=False)
-    index_score: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
+    index_score: Mapped[Optional[float]] = mapped_column(Numeric(10, 2), nullable=True)
     routes_included: Mapped[int] = mapped_column(Integer, nullable=False, default=6)
-    data_quality_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    data_quality_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     computed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

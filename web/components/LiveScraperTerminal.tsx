@@ -11,28 +11,22 @@ import {
   Search,
   CheckCircle2,
   AlertTriangle,
-  Clock,
   Plane,
   Layers,
-  ArrowUpRight,
   ShieldCheck,
   Download,
   FileText,
   Calendar,
   Cpu,
   Activity,
-  TrendingUp,
-  TrendingDown,
   BarChart3,
   Globe,
   ChevronLeft,
   ChevronRight,
   Loader2,
-  StopCircle,
-  Filter,
-  Wifi,
-  WifiOff,
-  PieChart
+  PieChart,
+  Copy,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -134,12 +128,11 @@ export default function LiveScraperTerminal() {
   const [farePage, setFarePage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [stats, setStats] = useState<ConsoleStats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(false);
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("scraped_at");
   const [sortOrder, setSortOrder] = useState<string>("desc");
 
-  const terminalEndRef = useRef<HTMLDivElement>(null);
+  const terminalContainerRef = useRef<HTMLDivElement>(null);
   const FARES_PER_PAGE = 25;
 
   // Fetch real-time Python scraper logs
@@ -149,7 +142,7 @@ export default function LiveScraperTerminal() {
       if (res.ok) {
         const json = await res.json();
         if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          const formatted: LogItem[] = json.data.map((item: any, i: number) => {
+          const formatted: LogItem[] = json.data.map((item: { endpoint?: string; message?: string; level?: string; id?: string; timestamp?: string }, i: number) => {
             let lvl: LogItem["level"] = "INFO";
             const text = item.endpoint || item.message || JSON.stringify(item);
             
@@ -219,7 +212,6 @@ export default function LiveScraperTerminal() {
 
   // Fetch console stats
   const fetchStats = useCallback(async () => {
-    setStatsLoading(true);
     try {
       const res = await fetch("/api/console/stats");
       if (res.ok) {
@@ -230,12 +222,11 @@ export default function LiveScraperTerminal() {
       }
     } catch (err) {
       console.warn("Stats fetch error:", err);
-    } finally {
-      setStatsLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchLogs();
     fetchSavedFares(1);
     fetchStats();
@@ -248,17 +239,18 @@ export default function LiveScraperTerminal() {
   }, [activeTab, farePage, fetchLogs, fetchSavedFares, fetchStats]);
 
   useEffect(() => {
-    if (autoScroll && activeTab === "terminal") {
-      terminalEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (autoScroll && activeTab === "terminal" && terminalContainerRef.current) {
+      terminalContainerRef.current.scrollTop = terminalContainerRef.current.scrollHeight;
     }
   }, [logs, autoScroll, activeTab]);
 
   // Page change for fares
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSavedFares(farePage);
   }, [farePage, sourceFilter, sortBy, sortOrder, fetchSavedFares]);
 
-  const handleLaunchScraper = async (params: { source: string; route: string; window: string }) => {
+  const handleLaunchScraper = useCallback(async (params: { source: string; route: string; window: string }) => {
     setIsScraping(true);
     try {
       const res = await fetch("/api/demo/scrape", {
@@ -279,11 +271,109 @@ export default function LiveScraperTerminal() {
         fetchStats();
       }, 15000);
     }
-  };
+  }, [fetchLogs, fetchSavedFares, fetchStats]);
+
+  const [copied, setCopied] = useState(false);
+  const [cliInput, setCliInput] = useState("");
 
   const triggerQuickRoute = (route: string) => {
     handleLaunchScraper({ source: "all", route, window: "7" });
   };
+
+  const handleCopyLogs = () => {
+    const text = filteredLogs.map((l) => `[${l.time}] [${l.level}] ${l.text}`).join("\n");
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleExecuteCommand = useCallback((cmdStr?: string) => {
+    const cmd = (cmdStr || cliInput).trim();
+    if (!cmd) return;
+
+    const time = new Date().toLocaleTimeString("en-IN", { hour12: false });
+    const nowId = Math.random().toString(36).slice(2, 9);
+    const userLog: LogItem = {
+      id: `cmd-${nowId}`,
+      time,
+      level: "INFO",
+      text: `aura@engine:~$ ${cmd}`,
+    };
+
+    if (cmd === "help" || cmd === "aura --help" || cmd === "--help") {
+      setLogs((prev) => [
+        ...prev,
+        userLog,
+        {
+          id: `out-${nowId}-help`,
+          time,
+          level: "SUCCESS",
+          text: "Available CLI Commands: probe [corridor], status, index, routes, sources, clear",
+        },
+      ]);
+    } else if (cmd.includes("status")) {
+      setLogs((prev) => [
+        ...prev,
+        userLog,
+        {
+          id: `out-${nowId}-status`,
+          time,
+          level: "UPSERT",
+          text: `Telemetry: ${totalFaresCount.toLocaleString("en-IN")} fares in PostgreSQL, 6 corridors monitored, 11 platforms active.`,
+        },
+      ]);
+    } else if (cmd.includes("index")) {
+      setLogs((prev) => [
+        ...prev,
+        userLog,
+        {
+          id: `out-${nowId}-index`,
+          time,
+          level: "SUCCESS",
+          text: "Fisher Ideal Airfare Index: 110.97 (Base 100.0) | Laspeyres: 110.97 | Paasche: 110.97 | Macroeconomic CPI Impact: +0.046 pp",
+        },
+      ]);
+    } else if (cmd.includes("routes")) {
+      setLogs((prev) => [
+        ...prev,
+        userLog,
+        {
+          id: `out-${nowId}-routes`,
+          time,
+          level: "SUCCESS",
+          text: "DGCA Corridors: DEL-BOM (28%), DEL-BLR (22%), BOM-BLR (18%), DEL-CCU (14%), BLR-HYD (10%), MAA-DEL (8%)",
+        },
+      ]);
+    } else if (cmd.includes("clear")) {
+      setLogs([]);
+    } else if (cmd.includes("probe") || cmd.includes("scrape")) {
+      const match = cmd.match(/DEL-BOM|DEL-BLR|BOM-BLR|DEL-CCU|BLR-HYD|MAA-DEL/i);
+      const route = match ? match[0].toUpperCase() : "DEL-BOM";
+      setLogs((prev) => [
+        ...prev,
+        userLog,
+        {
+          id: `out-${nowId}-probe`,
+          time,
+          level: "INFO",
+          text: `⚡ Launching automated Playwright probe on ${route}...`,
+        },
+      ]);
+      handleLaunchScraper({ source: "all", route, window: "7" });
+    } else {
+      setLogs((prev) => [
+        ...prev,
+        userLog,
+        {
+          id: `out-${nowId}-unknown`,
+          time,
+          level: "WARNING",
+          text: `Unknown command '${cmd}'. Type 'help' for available CLI commands.`,
+        },
+      ]);
+    }
+    setCliInput("");
+  }, [cliInput, totalFaresCount, handleLaunchScraper]);
 
   const getLevelBadgeStyle = (level: LogItem["level"]) => {
     switch (level) {
@@ -477,17 +567,19 @@ export default function LiveScraperTerminal() {
 
       {/* ── TAB: TERMINAL ──────────────────────────────────────────────── */}
       {activeTab === "terminal" && (
-        <div className="rounded-xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden font-mono">
-          <div className="bg-slate-900 px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+        <div className="rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden font-mono">
+          {/* macOS Style Window Title Bar */}
+          <div className="bg-slate-900/90 backdrop-blur px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
-                <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block" />
-                <span className="w-3 h-3 rounded-full bg-green-500/80 inline-block" />
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e] inline-block shadow-xs" />
+                <span className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123] inline-block shadow-xs" />
+                <span className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29] inline-block shadow-xs" />
               </div>
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-200">
                 <Terminal className="w-4 h-4 text-emerald-400" />
-                <span>harsh@Aura ~/scraper % python run_fixed_sources.py</span>
+                <span>aura@apix-engine: ~/scraper (zsh)</span>
+                <span className="text-[10px] text-slate-500 hidden md:inline">• Neon DB Live Sync</span>
               </div>
             </div>
 
@@ -499,7 +591,7 @@ export default function LiveScraperTerminal() {
                   placeholder="Filter logs..."
                   value={logFilter}
                   onChange={(e) => setLogFilter(e.target.value)}
-                  className="bg-slate-950 border border-slate-800 rounded text-xs pl-8 pr-2 py-1 text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 w-36 sm:w-48"
+                  className="bg-slate-950 border border-slate-800 rounded-lg text-xs pl-8 pr-2 py-1 text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 w-32 sm:w-44"
                 />
               </div>
 
@@ -510,26 +602,109 @@ export default function LiveScraperTerminal() {
                 className="bg-emerald-600 hover:bg-emerald-500 text-white font-sans text-xs font-semibold h-7 gap-1.5"
               >
                 {isScraping ? (
-                  <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Scraping...</span></>
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Scraping...</span>
+                  </>
                 ) : (
-                  <><Play className="w-3.5 h-3.5" /><span>⚡ Run Probe</span></>
+                  <>
+                    <Play className="w-3.5 h-3.5" />
+                    <span>⚡ Run Probe</span>
+                  </>
                 )}
               </Button>
 
-              <Button size="sm" variant="outline" onClick={fetchLogs} className="h-7 px-2 border-slate-800 text-slate-400 hover:text-slate-200" title="Refresh">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCopyLogs}
+                className="h-7 px-2.5 border-slate-800 text-slate-400 hover:text-slate-200 gap-1 text-[11px]"
+                title="Copy Terminal Output"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                <span className="hidden sm:inline">{copied ? "Copied!" : "Copy"}</span>
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={fetchLogs}
+                className="h-7 px-2 border-slate-800 text-slate-400 hover:text-slate-200"
+                title="Refresh Logs"
+              >
                 <RefreshCw className="w-3.5 h-3.5" />
               </Button>
-              <Button size="sm" variant="outline" onClick={() => setLogs([])} className="h-7 px-2 border-slate-800 text-slate-400 hover:text-red-400" title="Clear">
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setLogs([])}
+                className="h-7 px-2 border-slate-800 text-slate-400 hover:text-red-400"
+                title="Clear Terminal"
+              >
                 <Trash2 className="w-3.5 h-3.5" />
               </Button>
             </div>
           </div>
 
-          <div className="p-4 bg-slate-950/95 h-[400px] overflow-y-auto space-y-1 text-[11px] leading-relaxed select-text font-mono">
+          {/* Quick Command Suggestion Bar */}
+          <div className="bg-slate-900/60 border-b border-slate-800/80 px-4 py-2 flex flex-wrap items-center gap-1.5 text-[11px]">
+            <span className="text-slate-500 text-[10px] uppercase font-bold mr-1">CLI Commands:</span>
+            {[
+              { label: "status", cmd: "status" },
+              { label: "index", cmd: "index" },
+              { label: "routes", cmd: "routes" },
+              { label: "probe DEL-BOM", cmd: "probe DEL-BOM" },
+              { label: "probe BLR-HYD", cmd: "probe BLR-HYD" },
+              { label: "clear", cmd: "clear" },
+            ].map((chip) => (
+              <button
+                key={chip.label}
+                onClick={() => handleExecuteCommand(chip.cmd)}
+                className="px-2 py-0.5 rounded-md bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-emerald-300 transition-colors font-mono cursor-pointer"
+              >
+                $ {chip.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Interactive Command Input Line */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleExecuteCommand();
+            }}
+            className="flex items-center gap-2 bg-slate-950 px-4 py-2 border-b border-slate-800 text-xs font-mono"
+          >
+            <span className="text-emerald-400 font-bold shrink-0">aura@engine:~$</span>
+            <input
+              type="text"
+              placeholder="Type CLI command (e.g. status, index, probe DEL-BOM, clear, help)..."
+              value={cliInput}
+              onChange={(e) => setCliInput(e.target.value)}
+              className="flex-1 bg-transparent text-slate-100 placeholder:text-slate-600 focus:outline-none text-xs"
+            />
+            <button
+              type="submit"
+              className="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-600 hover:text-white text-slate-300 text-[11px] font-semibold transition"
+            >
+              Execute ↵
+            </button>
+          </form>
+
+          {/* Terminal Screen Body */}
+          <div
+            ref={terminalContainerRef}
+            className="p-4 bg-slate-950/95 h-[420px] overflow-y-auto space-y-1 text-[11px] leading-relaxed select-text font-mono"
+          >
             <div className="text-slate-500 border-b border-slate-900 pb-2 mb-2">
-              <div className="text-emerald-400 font-bold">AIRFARE PRICE INDEX SYSTEM (APIx) — MoSPI / NSO Problem Statement #26056</div>
+              <div className="text-emerald-400 font-bold">
+                AIRFARE PRICE INDEX SYSTEM (APIx) — MoSPI / NSO Problem Statement #26056
+              </div>
               <div className="text-slate-400">Playwright Multi-Source Engine connected to Neon PostgreSQL Database.</div>
-              <div className="text-slate-500">Sources: EaseMyTrip • Ixigo • Cleartrip • Yatra • MakeMyTrip • Goibibo • IndiGo • Akasa • SpiceJet • Air India • Air India Express</div>
+              <div className="text-slate-500 text-[10px]">
+                Sources: EaseMyTrip • Ixigo • Cleartrip • Yatra • MakeMyTrip • Goibibo • IndiGo • Akasa • SpiceJet • Air India • Air India Express
+              </div>
             </div>
 
             {filteredLogs.length === 0 ? (
@@ -546,10 +721,22 @@ export default function LiveScraperTerminal() {
                 </Button>
               </div>
             ) : (
-              filteredLogs.map((log) => (
-                <div key={log.id} className="flex items-start gap-2.5 hover:bg-slate-900/50 py-0.5 px-1 rounded transition-colors">
-                  <span className="text-slate-600 shrink-0 font-sans text-[10px] tabular-nums">{log.time}</span>
-                  <span className={`shrink-0 font-bold uppercase text-[9px] px-1 py-0.5 rounded border ${getLevelBadgeStyle(log.level)}`}>
+              filteredLogs.map((log, idx) => (
+                <div
+                  key={log.id}
+                  className="flex items-start gap-2 hover:bg-slate-900/50 py-0.5 px-1 rounded transition-colors"
+                >
+                  <span className="text-slate-700 text-[10px] select-none font-mono w-7 text-right shrink-0">
+                    {String(idx + 1).padStart(3, "0")}
+                  </span>
+                  <span className="text-slate-600 shrink-0 font-sans text-[10px] tabular-nums">
+                    {log.time}
+                  </span>
+                  <span
+                    className={`shrink-0 font-bold uppercase text-[9px] px-1 py-0.5 rounded border ${getLevelBadgeStyle(
+                      log.level
+                    )}`}
+                  >
                     {log.level}
                   </span>
                   <span className={`flex-1 break-all ${getLevelTextStyle(log.level)}`}>
@@ -558,9 +745,9 @@ export default function LiveScraperTerminal() {
                 </div>
               ))
             )}
-            <div ref={terminalEndRef} />
           </div>
 
+          {/* Terminal Footer Bar */}
           <div className="bg-slate-900/70 px-4 py-2 border-t border-slate-800 flex flex-wrap items-center justify-between text-[10px] text-slate-400 gap-2">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
@@ -568,7 +755,7 @@ export default function LiveScraperTerminal() {
                 <span className="text-emerald-400 font-semibold">PostgreSQL DB Sync: Active</span>
               </div>
               <span className="text-slate-600">•</span>
-              <span>Log Lines: {logs.length}</span>
+              <span>Lines: {logs.length}</span>
               <span className="text-slate-600">•</span>
               <span>DB Fares: {totalFaresCount.toLocaleString("en-IN")}</span>
             </div>
@@ -978,7 +1165,7 @@ export default function LiveScraperTerminal() {
                   <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="h-full rounded-full bg-emerald-500/70"
-                      style={{ width: `${Math.min(100, (src.count / (stats?.overview?.totalFares || 1)) * 100 * stats?.sources?.length!)}%` }}
+                      style={{ width: `${Math.min(100, (src.count / (stats?.overview?.totalFares || 1)) * 100 * (stats?.sources?.length || 1))}%` }}
                     />
                   </div>
                 </div>

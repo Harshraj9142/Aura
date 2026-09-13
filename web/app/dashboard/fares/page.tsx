@@ -1,9 +1,7 @@
 import { getFares } from "@/lib/services/fares.service";
 import { getTrackedRoutes } from "@/lib/services/routes.service";
 import { getTrackedSources } from "@/lib/services/sources.service";
-import { FaresFilterBar } from "@/components/fares/FaresFilterBar";
-import { FaresTable } from "@/components/fares/FaresTable";
-import { ExportButtons } from "@/components/dashboard/ExportButtons";
+import { FaresExplorerClient } from "@/components/fares/FaresExplorerClient";
 
 interface FaresPageProps {
   searchParams: Promise<{
@@ -43,25 +41,12 @@ export default async function FaresPage({ searchParams }: FaresPageProps) {
   ]);
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-950">
-            Raw Fare Explorer
-          </h1>
-          <p className="mt-1 text-sm text-slate-600 font-medium">
-            Inspect, filter, and analyze granular scraped flight fare records across carriers and OTAs.
-          </p>
-        </div>
-        <ExportButtons data={faresResult.data} filename="scraped_fares_data" />
-      </div>
-
-      {/* Filter Bar */}
-      <FaresFilterBar routes={routes} sources={sources} />
-
-      {/* Fares Table */}
-      <FaresTable fares={faresResult.data} pagination={faresResult.pagination} />
-    </div>
+    <FaresExplorerClient
+      fares={faresResult.data}
+      pagination={faresResult.pagination}
+      routes={routes}
+      sources={sources}
+    />
   );
 }
+

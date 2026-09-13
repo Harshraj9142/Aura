@@ -44,9 +44,14 @@ async function _getIndexTimeSeries(
     }
 
     if (dateFrom || dateTo) {
-      where.period_date = {};
-      if (dateFrom) (where.period_date as Record<string, Date>).gte = new Date(dateFrom);
-      if (dateTo) (where.period_date as Record<string, Date>).lte = new Date(dateTo);
+      const dateFilter: Record<string, Date> = {};
+      if (dateFrom) dateFilter.gte = new Date(dateFrom);
+      if (dateTo) {
+        const toDate = new Date(dateTo);
+        toDate.setHours(23, 59, 59, 999);
+        dateFilter.lte = toDate;
+      }
+      where.period_date = dateFilter;
     }
 
     const records = await prisma.indexValue.findMany({
@@ -54,7 +59,7 @@ async function _getIndexTimeSeries(
       orderBy: { period_date: "asc" },
     });
 
-    return records.map((r: any) => ({
+    return records.map((r) => ({
       id: r.id,
       date: r.period_date instanceof Date ? r.period_date.toISOString().split("T")[0] : String(r.period_date),
       origin: r.origin,
@@ -71,10 +76,10 @@ async function _getIndexTimeSeries(
 }
 
 /**
- * Cached version — revalidates every hour.
+ * Cached version — revalidates frequently.
  */
 export const getIndexTimeSeries = unstable_cache(
   _getIndexTimeSeries,
   ["index"],
-  { revalidate: 3600, tags: ["index"] }
+  { revalidate: 10, tags: ["index"] }
 );

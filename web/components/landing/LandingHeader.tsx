@@ -89,13 +89,16 @@ export function LandingHeader() {
               </div>
             )}
 
-            {/* CTA Pill button matching exact white pill from image */}
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center justify-center rounded-full bg-white px-6 py-2.5 text-xs sm:text-sm font-semibold text-[#1C222B] shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-white/80 hover:bg-slate-50 active:scale-95 transition-all duration-200"
-            >
-              Get Ticket Now
-            </Link>
+            {/* Auth Links */}
+            <div className="flex items-center text-xs sm:text-sm font-semibold text-[#1C222B]">
+              <Link href="/login" className="hover:text-black transition-colors">
+                Sign In
+              </Link>
+              <span className="mx-1.5 text-slate-400 font-medium">/</span>
+              <Link href="/register" className="hover:text-black transition-colors">
+                Sign Up
+              </Link>
+            </div>
           </div>
         </div>
       </div>

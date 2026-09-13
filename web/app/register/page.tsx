@@ -58,23 +58,29 @@ export default function Register() {
   return (
     <div className="flex min-h-screen bg-white">
       {/* Left Panel - Brand Image */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gray-900">
-        <Image
-          src="/landing/sky_background.jpg"
-          alt="Sky Background"
-          fill
-          sizes="50vw"
-          className="object-cover opacity-60"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900 opacity-90" />
-        <div className="absolute bottom-12 left-12 right-12 z-10">
-          <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">
-            Clearer sky for a brighter India.
-          </h2>
-          <p className="text-gray-300 text-lg">
-            Join us in empowering the nation with data-driven aviation insights.
-          </p>
+      <div className="hidden lg:flex lg:w-1/2 p-4 sm:p-8 bg-gray-900">
+        <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl">
+          <Image
+            src="/landing/airplane_window.png"
+            alt="Sky Background"
+            fill
+            sizes="50vw"
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-white/40" />
+          
+          <div className="absolute top-12 left-10 md:left-12 right-4 z-10">
+            <h1 className="text-slate-800 font-black tracking-tighter text-5xl md:text-6xl lg:text-7xl leading-[0.9] uppercase opacity-90">
+              A MORE CONNECTED<br />INDIA.
+            </h1>
+          </div>
+
+          <div className="absolute bottom-12 left-10 md:left-12 right-4 z-10">
+            <div className="text-slate-700 font-bold tracking-[0.15em] text-[0.65rem] md:text-xs uppercase opacity-90">
+              <p>REAL-TIME AIRFARE INTELLIGENCE &bull; TIME-SERIES CORRIDOR INDICES &bull; AURA API</p>
+            </div>
+          </div>
         </div>
       </div>
 

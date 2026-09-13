@@ -8,6 +8,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  ReferenceLine,
 } from "recharts";
 import { IndexValue } from "@/types/fare";
 
@@ -25,13 +26,19 @@ export function IndexTrendChart({ data }: IndexTrendChartProps) {
   }
 
   const formattedData = data.map((item) => ({
-    date: new Date(item.date).toLocaleDateString("en-IN", {
+    date: new Date(item.date).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     }),
     value: Number(item.index_value),
     pctChange: item.pct_change != null ? Number(item.pct_change) : null,
   }));
+
+  const values = formattedData.map((d) => d.value);
+  const minVal = Math.min(...values);
+  const maxVal = Math.max(...values);
+  const yMin = Math.max(80, Math.floor((minVal - 5) / 5) * 5);
+  const yMax = Math.ceil((maxVal + 5) / 5) * 5;
 
   return (
     <div className="h-80 w-full">
@@ -47,12 +54,18 @@ export function IndexTrendChart({ data }: IndexTrendChartProps) {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} />
-          <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} tickLine={false} />
+          <ReferenceLine
+            y={100}
+            stroke="#64748b"
+            strokeDasharray="4 4"
+            label={{ value: "Base 100", fill: "#64748b", fontSize: 10, position: "insideBottomLeft" }}
+          />
+          <XAxis dataKey="date" stroke="#94a3b8" fontSize={11} tickLine={false} />
           <YAxis
             stroke="#94a3b8"
-            fontSize={12}
+            fontSize={11}
             tickLine={false}
-            domain={["auto", "auto"]}
+            domain={[yMin, yMax]}
           />
           <Tooltip
             contentStyle={{
@@ -61,13 +74,13 @@ export function IndexTrendChart({ data }: IndexTrendChartProps) {
               borderRadius: "0.5rem",
               color: "#f8fafc",
             }}
-            formatter={(value: any) => [`₹${Number(value || 0).toLocaleString("en-IN")}`, "Index Value"]}
+            formatter={(value: unknown) => [Number(value || 0).toFixed(2), "Index Score (Base 100)"]}
           />
           <Area
             type="monotone"
             dataKey="value"
             stroke="#3b82f6"
-            strokeWidth={2}
+            strokeWidth={2.5}
             fillOpacity={1}
             fill="url(#indexGradient)"
           />

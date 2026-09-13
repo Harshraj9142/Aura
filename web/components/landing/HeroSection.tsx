@@ -213,13 +213,19 @@ export function HeroSection() {
             Elevate your journey with intelligent travel that takes you farther, faster, and with unmatched ease.
           </p>
 
-          {/* Center Pill Button: Get Ticket Now */}
+          {/* Center Auth Buttons */}
           <div className="mt-8 flex items-center justify-center gap-4">
             <Link
-              href="/dashboard"
+              href="/login"
+              className="group relative inline-flex items-center gap-3 rounded-full bg-white/10 border border-white/20 backdrop-blur-md px-8 py-3.5 text-sm font-extrabold text-white hover:bg-white/20 active:scale-95 transition-all duration-300"
+            >
+              <span>Sign In</span>
+            </Link>
+            <Link
+              href="/register"
               className="group relative inline-flex items-center gap-3 rounded-full bg-white px-8 py-3.5 text-sm font-extrabold text-slate-950 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:bg-slate-100 hover:shadow-[0_0_50px_rgba(255,255,255,0.5)] active:scale-95 transition-all duration-300"
             >
-              <span>Get Ticket Now</span>
+              <span>Sign Up</span>
               <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-950 text-white group-hover:translate-x-1 transition-transform">
                 <ArrowRight className="h-3.5 w-3.5" />
               </div>

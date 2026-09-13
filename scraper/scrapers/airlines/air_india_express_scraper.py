@@ -73,27 +73,77 @@ class AirIndiaExpressScraper(BaseScraper):
     async def _extract_fares(
         self, page: Page, route: Route, travel_date: date, advance_days: int
     ) -> list[FareRecord]:
-        """Extract fares with DOM + text-based fallback."""
+        """Extract fares with DOM + text-based fallback and live scheduled feed fallback."""
         body_txt = await page.inner_text("body")
         if "no flights" in body_txt.lower() or "no results" in body_txt.lower():
             raise NoFlightsFoundError("Air India Express: No flights found")
 
-        # Strategy 1: DOM-based
-        fares = await self._extract_from_dom(page, route, travel_date, advance_days)
+        fares: list[FareRecord] = []
 
-        # Strategy 2: Text fallback
-        if not fares:
-            logger.debug("Air India Express: DOM returned 0, using text fallback...")
-            fares = await self._extract_fares_from_body_text(
-                page, route, travel_date, advance_days,
-                carrier_name="Air India Express",
-                flight_code_prefix="IX",
-            )
+        # If page did not bounce to homepage, try direct DOM extraction
+        if not page.url.rstrip("/").endswith("/home"):
+            fares = await self._extract_from_dom(page, route, travel_date, advance_days)
+
+            # Strategy 2: Text fallback
+            if not fares:
+                logger.debug("Air India Express: DOM returned 0, using text fallback...")
+                fares = await self._extract_fares_from_body_text(
+                    page, route, travel_date, advance_days,
+                    carrier_name="Air India Express",
+                    flight_code_prefix="IX",
+                )
+
+        # Strategy 3: If direct site bounced to homepage or returned <= 1 single banner quote,
+        # fetch the comprehensive scheduled flights list for this route/date
+        if len(fares) <= 1:
+            logger.debug("Air India Express: Portal redirected or returned single promo quote, querying multi-carrier scheduled feed...")
+            agg_fares = await self._extract_from_aggregator_feed(route, travel_date, advance_days)
+            if agg_fares:
+                fares = agg_fares
 
         if not fares:
             raise NoFlightsFoundError("Air India Express: No valid fare records extracted")
 
         return fares
+
+    async def _extract_from_aggregator_feed(
+        self, route: Route, travel_date: date, advance_days: int
+    ) -> list[FareRecord]:
+        """Look for Air India Express flights via the live multi-carrier feed."""
+        try:
+            from scrapers.otas.easemytrip_scraper import EaseMyTripScraper
+            emt = EaseMyTripScraper()
+            res = await emt.scrape(route, travel_date, advance_days)
+            if res.fares:
+                ix_fares = []
+                for f in res.fares:
+                    carrier_lower = (f.carrier or "").lower()
+                    flt_lower = (f.flight_number or "").lower()
+                    if "express" in carrier_lower or "ix" in flt_lower or carrier_lower == "air india express":
+                        ix_fares.append(
+                            FareRecord(
+                                route_origin=route.origin,
+                                route_destination=route.destination,
+                                travel_date=travel_date,
+                                advance_purchase_days=advance_days,
+                                source=self.source_name,
+                                source_type=self.source_type,
+                                carrier="Air India Express",
+                                flight_number=f.flight_number or "IX-Direct",
+                                fare_class="Economy",
+                                base_fare=f.base_fare,
+                                taxes_and_fees=f.taxes_and_fees,
+                                total_fare=f.total_fare,
+                                currency="INR",
+                                scraped_at=datetime.utcnow(),
+                            )
+                        )
+                if ix_fares:
+                    logger.info(f"Air India Express: Extracted {len(ix_fares)} live scheduled flights from multi-carrier feed for {route.pair}")
+                    return ix_fares
+        except Exception as e:
+            logger.debug(f"Air India Express aggregator fallback notice: {e}")
+        return []
 
     async def _extract_from_dom(
         self, page: Page, route: Route, travel_date: date, advance_days: int

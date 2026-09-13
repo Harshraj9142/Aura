@@ -4,10 +4,10 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db/prisma";
 import crypto from "crypto";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || (session.user as any).role !== "GOVERNMENT") {
+  if (!session?.user || session.user.role !== "GOVERNMENT") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || (session.user as any).role !== "GOVERNMENT") {
+  if (!session?.user || session.user.role !== "GOVERNMENT") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || (session.user as any).role !== "GOVERNMENT") {
+  if (!session?.user || session.user.role !== "GOVERNMENT") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

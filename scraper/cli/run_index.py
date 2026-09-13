@@ -77,10 +77,12 @@ def run_index_calculation(frequency: str, target_date: date) -> None:
         )
 
         print(
-            f"[{freq.upper()}] Period: {period_start} | APIx Score: {result.index_score} | "
+            f"[{freq.upper()}] Period: {period_start} | APIx Fisher Score: {result.index_score} | "
             f"Routes Included: {result.routes_included}/6"
         )
-        if result.data_quality_note:
+        if result.index_score and result.breakdown:
+            print(f"\n{result.format_summary_table()}\n")
+        elif result.data_quality_note:
             print(f"  Note: {result.data_quality_note}")
 
 

@@ -8,34 +8,34 @@ import { FeatureDict, FlightPredictionInput } from "./types";
 export const AIRLINES_LIST = [
   "IndiGo",
   "Air India",
-  "Vistara",
-  "SpiceJet",
+  "Air India Express",
   "Akasa Air",
-  "AirAsia India",
+  "SpiceJet",
+  "Vistara",
 ];
 
 export const ROUTES_TOP = [
   "DEL_BOM", "BOM_DEL",
-  "CCU_DEL", "DEL_CCU",
-  "BLR_DEL", "DEL_BLR",
+  "DEL_BLR", "BLR_DEL",
   "BOM_BLR", "BLR_BOM",
-  "HYD_DEL", "DEL_HYD",
+  "DEL_CCU", "CCU_DEL",
+  "BLR_HYD", "HYD_BLR",
   "MAA_DEL", "DEL_MAA",
 ];
 
 export const ROUTE_BENCHMARKS: Record<string, number> = {
-  "DEL_BOM": 5500.0,
-  "BOM_DEL": 5500.0,
-  "CCU_DEL": 5100.0,
-  "DEL_CCU": 5100.0,
-  "BLR_DEL": 6200.0,
-  "DEL_BLR": 6200.0,
-  "BOM_BLR": 4200.0,
-  "BLR_BOM": 4200.0,
-  "HYD_DEL": 4800.0,
-  "DEL_HYD": 4800.0,
-  "MAA_DEL": 5600.0,
-  "DEL_MAA": 5600.0,
+  "DEL_BOM": 7078.0,
+  "BOM_DEL": 7078.0,
+  "DEL_BLR": 10130.0,
+  "BLR_DEL": 10130.0,
+  "BOM_BLR": 7828.0,
+  "BLR_BOM": 7828.0,
+  "DEL_CCU": 10105.0,
+  "CCU_DEL": 10105.0,
+  "BLR_HYD": 8568.0,
+  "HYD_BLR": 8568.0,
+  "MAA_DEL": 10800.0,
+  "DEL_MAA": 10800.0,
 };
 
 export class MLFeatureEngineer {

@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { FlightPredictionResult, LoggedPrediction, ModelPerformanceStats } from "@/lib/ml/types";
+import {
+  CorridorLiveSummary,
+  FlightPredictionResult,
+  LoggedPrediction,
+  ModelPerformanceStats,
+  RealTrackedFlight,
+} from "@/lib/ml/types";
 import { ModelRegistryCard } from "./ModelRegistryCard";
 import { PredictionSimulator } from "./PredictionSimulator";
 import { PredictionResultCard } from "./PredictionResultCard";
@@ -11,11 +17,15 @@ import { PredictionHistoryTable } from "./PredictionHistoryTable";
 interface PredictionDashboardClientProps {
   initialRegistryStats: ModelPerformanceStats[];
   initialPredictions: LoggedPrediction[];
+  initialCorridors?: CorridorLiveSummary[];
+  initialRealFlights?: RealTrackedFlight[];
 }
 
 export function PredictionDashboardClient({
   initialRegistryStats,
   initialPredictions,
+  initialCorridors,
+  initialRealFlights,
 }: PredictionDashboardClientProps) {
   const [currentPrediction, setCurrentPrediction] = useState<FlightPredictionResult | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -31,6 +41,8 @@ export function PredictionDashboardClient({
           <PredictionSimulator
             onPredictionChange={setCurrentPrediction}
             onLoadingChange={setLoading}
+            initialCorridors={initialCorridors}
+            initialRealFlights={initialRealFlights}
           />
         </div>
         <div className="lg:col-span-5">

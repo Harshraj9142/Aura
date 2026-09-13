@@ -7,7 +7,7 @@ browserbase==1.19.0
 
 # Database
 sqlalchemy==2.0.36
-psycopg2-binary==2.9.10
+psycopg2-binary==2.9.12
 alembic==1.14.0
 
 # Data processing
@@ -37,3 +37,7 @@ httpx==0.28.1
 pytest==8.3.4
 pytest-asyncio==0.24.0
 pytest-cov==6.0.0
+
+# Terminal UI
+rich>=13.0.0
+

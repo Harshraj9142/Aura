@@ -14,10 +14,14 @@ import { FlightPredictionInput } from "@/lib/ml/types";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    // Authenticate user via API Key or Session
-    const user = await verifyApiAccess(request);
-    if (!user) {
-      return fail("Unauthorized - Missing or Invalid API Key", "UNAUTHORIZED", 401);
+    // If an API key header is provided (external developer API usage), verify it
+    const authHeader = request.headers.get("authorization");
+    const apiKeyHeader = request.headers.get("x-api-key");
+    if (authHeader || apiKeyHeader) {
+      const user = await verifyApiAccess(request);
+      if (!user) {
+        return fail("Unauthorized - Invalid API Key", "UNAUTHORIZED", 401);
+      }
     }
 
     const body = await request.json();
@@ -57,8 +61,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     return ok(result);
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to generate flight prediction";
     console.error("Predict error:", err);
-    return fail(err.message || "Failed to generate flight prediction", "INFERENCE_ERROR", 500);
+    return fail(message, "INFERENCE_ERROR", 500);
   }
 }

@@ -72,11 +72,11 @@ async function main() {
     indexDate.setDate(today.getDate() - i);
 
     indexValuesToInsert.push({
-      date: indexDate,
+      period_date: indexDate,
       origin: null,
       destination: null,
       frequency: "daily",
-      index_value: 100 + (30 - i) * 0.4 + (Math.random() * 4 - 2),
+      index_score: 100 + (30 - i) * 0.4 + (Math.random() * 4 - 2),
       pct_change: (Math.random() * 2 - 1).toFixed(2),
     });
   }
