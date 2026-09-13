@@ -1,0 +1,29 @@
+services:
+  # 1. Background Worker for the Scraper
+  - type: worker
+    name: aura-scraper-worker
+    env: python
+    buildCommand: |
+      cd scraper
+      pip install -r requirements.txt
+      playwright install chromium
+    startCommand: cd scraper && python main.py --schedule
+    envVars:
+      - key: DATABASE_URL
+        sync: false # Set this in the Render Dashboard
+      - key: BROWSERBASE_API_KEY
+        sync: false
+      - key: BROWSERBASE_PROJECT_ID
+        sync: false
+
+  # 2. Web Service for ML Predictions
+  - type: web
+    name: aura-ml-service
+    env: python
+    buildCommand: |
+      cd aura-ml
+      pip install -r requirements.txt
+    startCommand: cd aura-ml && python run_demo.py # Replace with uvicorn command if serving an API
+    envVars:
+      - key: DATABASE_URL
+        sync: false
