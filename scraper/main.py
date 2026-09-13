@@ -477,6 +477,11 @@ def cmd_init_db() -> None:
 # Main
 # ---------------------------------------------------------------------------
 class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_HEAD(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+
     def do_GET(self):
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
