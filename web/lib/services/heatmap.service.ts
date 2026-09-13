@@ -34,25 +34,43 @@ async function _getHeatmapData(
     where.travel_date = dateFilter;
   }
 
-  const results = await prisma.fare.groupBy({
-    by: ["route_origin", "route_destination", "travel_date"],
-    where,
-    _avg: { total_fare: true },
-    orderBy: { travel_date: "asc" },
-  });
+  const [results, routeBenchmarks] = await Promise.all([
+    prisma.fare.groupBy({
+      by: ["route_origin", "route_destination", "travel_date"],
+      where,
+      _avg: { total_fare: true },
+      _min: { total_fare: true },
+      _max: { total_fare: true },
+      _count: { id: true },
+      orderBy: { travel_date: "asc" },
+    }),
+    prisma.route_base_values.findMany(),
+  ]);
 
-  return results.map((r) => ({
-    route: `${r.route_origin}-${r.route_destination}`,
-    travel_date: r.travel_date instanceof Date ? r.travel_date.toISOString().split("T")[0] : String(r.travel_date),
-    avg_total_fare: Math.round(Number(r._avg.total_fare ?? 0)),
-  }));
+  const benchmarkMap = new Map<string, number>();
+  for (const b of routeBenchmarks) {
+    benchmarkMap.set(`${b.route_origin}-${b.route_destination}`, Number(b.base_avg_fare));
+  }
+
+  return results.map((r) => {
+    const route = `${r.route_origin}-${r.route_destination}`;
+    return {
+      route,
+      travel_date: r.travel_date instanceof Date ? r.travel_date.toISOString().split("T")[0] : String(r.travel_date),
+      avg_total_fare: Math.round(Number(r._avg.total_fare ?? 0)),
+      min_fare: Math.round(Number(r._min.total_fare ?? 0)),
+      max_fare: Math.round(Number(r._max.total_fare ?? 0)),
+      sample_count: r._count.id,
+      base_benchmark: benchmarkMap.get(route) ?? Math.round(Number(r._avg.total_fare ?? 0)),
+    };
+  });
 }
 
 /**
- * Cached version of getHeatmapData — revalidates every hour.
+ * Cached version of getHeatmapData — revalidates every 60s.
  */
 export const getHeatmapData = unstable_cache(
   _getHeatmapData,
   ["heatmap"],
-  { revalidate: 3600, tags: ["heatmap"] }
+  { revalidate: 60, tags: ["heatmap"] }
 );

@@ -68,6 +68,10 @@ export interface HeatmapCell {
   route: string;
   travel_date: string;
   avg_total_fare: number;
+  min_fare?: number;
+  max_fare?: number;
+  sample_count?: number;
+  base_benchmark?: number;
 }
 
 // ─── Elasticity ──────────────────────────────────────────────────────────────

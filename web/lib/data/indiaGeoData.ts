@@ -1,4 +1,18 @@
-import type { FeatureCollection, Geometry } from "geojson";
+export type Geometry = {
+  type: string;
+  coordinates: number[][][] | number[][][][];
+};
+
+export type Feature<G = Geometry, P = Record<string, any>> = {
+  type: "Feature";
+  properties: P;
+  geometry: G;
+};
+
+export type FeatureCollection<G = Geometry, P = Record<string, any>> = {
+  type: "FeatureCollection";
+  features: Feature<G, P>[];
+};
 
 export const INDIA_GEOJSON: FeatureCollection<Geometry> = {
   type: "FeatureCollection",
