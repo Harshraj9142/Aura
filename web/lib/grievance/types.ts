@@ -79,6 +79,7 @@ export interface AirlineInfo {
   tagline: string;
   logoBg: string;
   logoUrl: string;
+  twitterHandle?: string;
   officialCocUrl: string;
   officialCharterUrl: string;
   officialSupportUrl: string;

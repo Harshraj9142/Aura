@@ -15,6 +15,7 @@ interface ComplaintDraftModalProps {
   initialFlightNumber?: string;
   initialTravelDate?: string;
   customIssueText?: string;
+  onOpenTwitterModal?: (details: { pnr: string; flightNumber: string; travelDate: string }) => void;
 }
 
 export function ComplaintDraftModal({
@@ -27,6 +28,7 @@ export function ComplaintDraftModal({
   initialFlightNumber = '',
   initialTravelDate = '',
   customIssueText = '',
+  onOpenTwitterModal,
 }: ComplaintDraftModalProps) {
   const [copied, setCopied] = useState(false);
   const [passengerName, setPassengerName] = useState('');
@@ -224,14 +226,31 @@ Contact Phone: [Your Mobile Number]`;
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between border-t border-slate-200 px-6 py-4 bg-white">
-          <button
-            onClick={handleDownload}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-800 hover:bg-slate-50 shadow-xs"
-          >
-            <span>Download .TXT</span>
-            <span>💾</span>
-          </button>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-6 py-4 bg-white">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownload}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-800 hover:bg-slate-50 shadow-xs"
+            >
+              <span>Download .TXT</span>
+              <span>💾</span>
+            </button>
+
+            {onOpenTwitterModal && (
+              <button
+                onClick={() => {
+                  onOpenTwitterModal({ pnr, flightNumber, travelDate });
+                  onClose();
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 px-3 py-2 text-xs font-bold text-white shadow-xs transition"
+              >
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                <span>Escalate on X (@dmca_test)</span>
+              </button>
+            )}
+          </div>
 
           <div className="flex items-center gap-3">
             <button

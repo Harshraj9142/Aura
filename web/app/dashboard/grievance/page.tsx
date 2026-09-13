@@ -7,6 +7,7 @@ import { getStraightSolution } from '@/lib/grievance/grievance-rules';
 import { QuestionWizard } from '@/components/grievance/QuestionWizard';
 import { StraightSolutionView } from '@/components/grievance/StraightSolutionView';
 import { ComplaintDraftModal } from '@/components/grievance/ComplaintDraftModal';
+import { TwitterEscalationModal } from '@/components/grievance/TwitterEscalationModal';
 import { Scale } from 'lucide-react';
 
 export default function GrievanceDashboardPage() {
@@ -27,6 +28,12 @@ export default function GrievanceDashboardPage() {
   const [customEntitlement, setCustomEntitlement] = useState<StatutoryEntitlement | null>(null);
 
   const [isDraftModalOpen, setIsDraftModalOpen] = useState<boolean>(false);
+  const [isTwitterModalOpen, setIsTwitterModalOpen] = useState<boolean>(false);
+  const [twitterDetails, setTwitterDetails] = useState<{
+    pnr?: string;
+    flightNumber?: string;
+    travelDate?: string;
+  }>({});
 
   // Handlers for question flow
   const handleSelectAirline = (id: AirlineId) => {
@@ -251,6 +258,7 @@ export default function GrievanceDashboardPage() {
             airline={activeAirline}
             answers={answers}
             onOpenDraftModal={() => setIsDraftModalOpen(true)}
+            onOpenTwitterModal={() => setIsTwitterModalOpen(true)}
             onReset={handleReset}
           />
 
@@ -264,6 +272,20 @@ export default function GrievanceDashboardPage() {
             initialFlightNumber={flightNumber}
             initialTravelDate={travelDate}
             customIssueText={customIssueText}
+            onOpenTwitterModal={(details) => {
+              setTwitterDetails(details);
+              setIsTwitterModalOpen(true);
+            }}
+          />
+
+          <TwitterEscalationModal
+            isOpen={isTwitterModalOpen}
+            onClose={() => setIsTwitterModalOpen(false)}
+            airlineId={activeAirline.id}
+            category={answers.category}
+            initialPnr={twitterDetails.pnr || pnr}
+            initialFlightNumber={twitterDetails.flightNumber || flightNumber}
+            initialTravelDate={twitterDetails.travelDate || travelDate}
           />
         </>
       )}

@@ -9,6 +9,7 @@ export const AIRLINE_DIRECTORY: Record<AirlineId, AirlineInfo> = {
     logoUrl: '/airlines/indigo.png',
     tagline: 'Low-cost airline with largest domestic market share',
     logoBg: 'bg-blue-600',
+    twitterHandle: '@IndiGo6E',
     officialCocUrl: 'https://www.goindigo.in/information/conditions-of-carriage.html',
     officialCharterUrl: 'https://www.goindigo.in/information/passenger-charter.html',
     officialSupportUrl: 'https://www.goindigo.in/contact-us.html',
@@ -33,6 +34,7 @@ export const AIRLINE_DIRECTORY: Record<AirlineId, AirlineInfo> = {
     logoUrl: '/airlines/airindia.png',
     tagline: 'Flag carrier full-service airline (Tata Group)',
     logoBg: 'bg-red-600',
+    twitterHandle: '@airindia',
     officialCocUrl: 'https://www.airindia.com/content/dam/air-india/pdfs/air-india-coc.pdf',
     officialCharterUrl: 'https://www.airindia.com/content/dam/air-india/pdfs/passenger-charter-know-your-rights.pdf',
     officialSupportUrl: 'https://www.airindia.com/in/en/contact-us/customer-support-portal.html',
@@ -57,6 +59,7 @@ export const AIRLINE_DIRECTORY: Record<AirlineId, AirlineInfo> = {
     logoUrl: '/airlines/vistara.png',
     tagline: 'Merged into Air India (Nov 2024), operating under AI 2xxx flight codes',
     logoBg: 'bg-purple-900',
+    twitterHandle: '@airindia',
     officialCocUrl: 'https://www.airindia.com/content/dam/air-india/pdfs/air-india-coc.pdf',
     officialCharterUrl: 'https://www.airindia.com/in/en/vistara-air-india-merger-faqs.html',
     officialSupportUrl: 'https://www.airindia.com/in/en/vistara-air-india-merger.html',
@@ -81,6 +84,7 @@ export const AIRLINE_DIRECTORY: Record<AirlineId, AirlineInfo> = {
     logoUrl: '/airlines/akasa.png',
     tagline: "India's newest greenest low-fare airline",
     logoBg: 'bg-orange-500',
+    twitterHandle: '@AkasaAir',
     officialCocUrl: 'https://www.akasaair.com/quick-links/conditions-of-carriage',
     officialCharterUrl: 'https://www.akasaair.com/customer-support/grievance-redressal-process',
     officialSupportUrl: 'https://www.akasaair.com/customer-support',
@@ -105,6 +109,7 @@ export const AIRLINE_DIRECTORY: Record<AirlineId, AirlineInfo> = {
     logoUrl: '/airlines/aix.png',
     tagline: 'Low-cost airline of Tata Group with unified domestic routes',
     logoBg: 'bg-amber-600',
+    twitterHandle: '@AirIndiaX',
     officialCocUrl: 'https://www.airindiaexpress.com/tnc',
     officialCharterUrl: 'https://www.airindiaexpress.com/passenger-rights',
     officialSupportUrl: 'https://www.airindiaexpress.com/support',
@@ -129,6 +134,7 @@ export const AIRLINE_DIRECTORY: Record<AirlineId, AirlineInfo> = {
     logoUrl: '/airlines/spicejet.png',
     tagline: 'Budget airline connecting tier-2 & tier-3 destinations',
     logoBg: 'bg-red-700',
+    twitterHandle: '@flyspicejet',
     officialCocUrl: 'https://corporate.spicejet.com/Tnc.aspx',
     officialCharterUrl: 'https://corporate.spicejet.com/PassengerSupport.aspx',
     officialSupportUrl: 'https://corporate.spicejet.com/ContactUs.aspx',
@@ -146,3 +152,11 @@ export const AIRLINE_DIRECTORY: Record<AirlineId, AirlineInfo> = {
     },
   },
 };
+
+export const AUTHORITY_TWITTER_HANDLES = {
+  advocacy: '@dmca_test',
+  dgca: '@DGCAIndia',
+  moca: '@MoCA_GoI',
+  airsewa: '@AirSewaMoCA',
+};
+

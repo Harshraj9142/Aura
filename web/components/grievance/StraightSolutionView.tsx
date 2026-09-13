@@ -21,6 +21,7 @@ interface StraightSolutionViewProps {
   airline: AirlineInfo;
   answers: GrievanceAnswers;
   onOpenDraftModal: () => void;
+  onOpenTwitterModal: () => void;
   onReset: () => void;
 }
 
@@ -29,6 +30,7 @@ export function StraightSolutionView({
   airline,
   answers,
   onOpenDraftModal,
+  onOpenTwitterModal,
   onReset,
 }: StraightSolutionViewProps) {
   return (
@@ -43,7 +45,7 @@ export function StraightSolutionView({
             <div className="h-5 w-5 rounded bg-white border border-slate-200 p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0">
               <img src={airline.logoUrl} alt={airline.shortName} className="max-h-full max-w-full object-contain" />
             </div>
-            <span>{airline.shortName}</span>
+            <span>{airline.name}</span>
           </span>
           {answers.category === 'other' ? (
             <span className="rounded-lg bg-purple-50 border border-purple-200 px-2.5 py-1 text-xs font-bold text-purple-800 flex items-center gap-1">
@@ -57,25 +59,30 @@ export function StraightSolutionView({
                 ? '1–2 Hr Flight'
                 : '> 2 Hr Flight'}
             </span>
-          ) : null}
+          ) : (
+            <span className="rounded-md bg-indigo-50 border border-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700 capitalize">
+              {answers.category.replace('_', ' ')}
+            </span>
+          )}
         </div>
 
         <button
           onClick={onReset}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition shadow-xs"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-slate-900 transition"
         >
           <RotateCcw className="h-3.5 w-3.5 text-slate-600" />
-          <span>Start Over</span>
+          <span>New Assessment</span>
         </button>
       </div>
 
-      {/* STRAIGHT SOLUTION HERO CARD */}
-      <div className="relative overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/90 via-white to-purple-50/70 p-6 shadow-xs">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Main Solution Showcase Card */}
+      <div className="rounded-3xl border-2 border-indigo-500/30 bg-gradient-to-br from-indigo-50/50 via-white to-slate-50 p-6 shadow-md sm:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-black text-emerald-900">
-                STATUTORY ENTITLEMENT
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white">
+                <Scale className="h-3 w-3" />
+                Legally Mandated
               </span>
               {entitlement.isAiCurated ? (
                 <span className="rounded-full bg-purple-100 border border-purple-200 px-2.5 py-0.5 text-[10px] font-bold text-purple-900 flex items-center gap-1">
@@ -98,12 +105,50 @@ export function StraightSolutionView({
             )}
           </div>
 
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={onOpenTwitterModal}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition"
+            >
+              <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+              <span>Escalate on X</span>
+            </button>
+
+            <button
+              onClick={onOpenDraftModal}
+              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-500 transition"
+            >
+              <span>Legal Notice</span>
+              <FileText className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Twitter / X Social Escalation Notice Banner */}
+        <div className="mt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-sky-200 bg-gradient-to-r from-sky-50 to-blue-50/60 p-3.5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-neutral-900 text-white shadow-xs">
+              <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900">
+                Public Escalation via @dmca_test
+              </h4>
+              <p className="text-[11px] text-slate-600">
+                Tag <span className="font-semibold text-slate-800">{airline.twitterHandle || airline.name}</span>, <span className="font-mono text-slate-700">@DGCAIndia</span> & <span className="font-mono text-slate-700">@MoCA_GoI</span> publicly on X to trigger rapid response.
+              </p>
+            </div>
+          </div>
           <button
-            onClick={onOpenDraftModal}
-            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-500 transition"
+            onClick={onOpenTwitterModal}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-sky-300 bg-white hover:bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-950 transition shadow-2xs"
           >
-            <span>Copy Pre-Filled Legal Notice</span>
-            <FileText className="h-3.5 w-3.5" />
+            <span>Preview Tweet</span>
+            <ExternalLink className="h-3 w-3 text-sky-700" />
           </button>
         </div>
 
