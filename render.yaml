@@ -4,8 +4,10 @@ services:
     name: aura-scraper-service
     env: python
     buildCommand: pip install -r requirements.txt && playwright install chromium
-    startCommand: python main.py --schedule
+    startCommand: playwright install chromium && python main.py --schedule
     envVars:
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: "0"
       - key: DATABASE_URL
         sync: false # Set this in the Render Dashboard
       - key: TWITTER_AUTH_TOKEN

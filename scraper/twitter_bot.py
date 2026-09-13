@@ -74,8 +74,8 @@ def publish_tweet(tweet_text: str, custom_auth_token: str = None) -> dict:
 
     logger.info("Initiating Playwright headless session for Twitter escalation...")
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(
+    def launch_browser(p):
+        return p.chromium.launch(
             headless=True,
             args=[
                 "--disable-blink-features=AutomationControlled",
@@ -84,6 +84,18 @@ def publish_tweet(tweet_text: str, custom_auth_token: str = None) -> dict:
                 "--disable-dev-shm-usage",
             ]
         )
+
+    with sync_playwright() as p:
+        try:
+            browser = launch_browser(p)
+        except Exception as e:
+            if "Executable doesn't exist" in str(e) or "playwright install" in str(e):
+                logger.info("Chromium executable missing, auto-installing on demand...")
+                import subprocess
+                subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], check=True)
+                browser = launch_browser(p)
+            else:
+                return {"success": False, "error": f"Failed to launch Chromium: {str(e)}"}
 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
