@@ -153,13 +153,23 @@ def publish_tweet(tweet_text: str, custom_auth_token: str = None) -> dict:
                 "error": "The auth_token cookie expired or was invalid. Please re-copy auth_token."
             }
 
-        editor = page.wait_for_selector(
-            '[data-testid="tweetTextarea_0"], div[role="textbox"][contenteditable="true"]',
-            timeout=15000
-        )
+        try:
+            editor = page.wait_for_selector(
+                '[data-testid="tweetTextarea_0"], div[role="textbox"][contenteditable="true"]',
+                timeout=15000
+            )
+        except Exception:
+            editor = None
+
         if not editor:
+            current_url = page.url
+            current_title = page.title()
             browser.close()
-            return {"success": False, "error": "Could not locate the tweet composer editor."}
+            logger.warning(f"Composer not found on page: {current_title} ({current_url})")
+            return {
+                "success": False,
+                "error": f"Could not find tweet editor on page '{current_title}' ({current_url})."
+            }
 
         # Focus & click avoiding pointer intercepts
         try:
