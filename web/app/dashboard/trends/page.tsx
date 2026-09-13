@@ -79,19 +79,20 @@ export default async function TrendsPage({ searchParams }: TrendsPageProps) {
               </span>
               <div className="inline-flex rounded-lg bg-slate-100 p-1 border border-slate-200">
                 {[
-                  { label: "1 Day", days: 1 },
                   { label: "7 Days", days: 7 },
+                  { label: "14 Days", days: 14 },
                   { label: "30 Days", days: 30 },
                   { label: "All Time", days: 0 },
                 ].map((range) => {
-                  const today = new Date("2026-09-11");
+                  const toStr = "2026-09-12";
+                  const latestDate = new Date(toStr);
                   let fromStr = "";
                   if (range.days > 0) {
-                    const fromDate = new Date(today.getTime() - (range.days - 1) * 24 * 60 * 60 * 1000);
+                    const fromDate = new Date(latestDate.getTime() - (range.days - 1) * 24 * 60 * 60 * 1000);
                     fromStr = fromDate.toISOString().split("T")[0];
                   }
-                  const isSelected = dateFrom === fromStr || (range.days === 0 && !dateFrom);
-                  const href = `/dashboard/trends?frequency=${frequency}${origin ? `&origin=${origin}` : ""}${destination ? `&destination=${destination}` : ""}${fromStr ? `&dateFrom=${fromStr}&dateTo=2026-09-11` : ""}`;
+                  const isSelected = (dateFrom === fromStr && dateTo === toStr) || (range.days === 0 && !dateFrom);
+                  const href = `/dashboard/trends?frequency=${frequency}${origin ? `&origin=${origin}` : ""}${destination ? `&destination=${destination}` : ""}${fromStr ? `&dateFrom=${fromStr}&dateTo=${toStr}` : ""}`;
 
                   return (
                     <Link
