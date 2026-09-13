@@ -42,6 +42,7 @@ export default function Header({ onRunScraper, scraperLoading }: HeaderProps) {
 
   const navLinks = [
     { name: "Price Index", href: "/dashboard" },
+    { name: "Platform Compare", href: "/dashboard/comparison" },
     { name: "Predictions (ML)", href: "/dashboard/predictions" },
     { name: "Corridor Trends", href: "/dashboard/trends" },
     { name: "Route Heatmap", href: "/dashboard/heatmap" },
@@ -75,7 +76,7 @@ export default function Header({ onRunScraper, scraperLoading }: HeaderProps) {
           </Link>
 
           {/* Center Navigation Links: Single Line (whitespace-nowrap) & Clean Gap Spacing */}
-          <nav className="hidden lg:flex items-center justify-center flex-1 gap-5 xl:gap-8 text-xs sm:text-sm font-semibold text-slate-200 drop-shadow-md whitespace-nowrap mx-4">
+          <nav className="hidden lg:flex items-center justify-center flex-1 gap-3.5 xl:gap-5 text-xs sm:text-[13px] font-semibold text-slate-200 drop-shadow-md whitespace-nowrap mx-3">
             {navLinks.map((link, idx) => {
               const isActive = pathname === link.href;
 
