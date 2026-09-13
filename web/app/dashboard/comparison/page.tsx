@@ -15,8 +15,8 @@ export default async function ComparisonPage() {
   const initialData = await getPlatformComparisons({});
 
   return (
-    <div className="w-full min-h-screen pt-32 sm:pt-36 lg:pt-38 pb-20 px-6 sm:px-10 lg:px-14 xl:px-16">
+    <main className="w-full min-h-screen">
       <ComparisonClientView initialData={initialData} />
-    </div>
+    </main>
   );
 }

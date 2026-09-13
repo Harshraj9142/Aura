@@ -1,12 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { Plane } from "lucide-react";
+import { DeveloperScraperSection } from "@/components/landing/DeveloperScraperSection";
 
 interface CorridorItem {
   id: string;
   code: string;
   cities: string;
+  origin: string;
+  destination: string;
   benchmark: string;
   index: string;
   optimalAdvance: string;
@@ -23,6 +27,8 @@ const corridors: CorridorItem[] = [
     id: "del-bom",
     code: "DEL ↔ BOM",
     cities: "Delhi ↔ Mumbai",
+    origin: "DEL",
+    destination: "BOM",
     benchmark: "₹7,928",
     index: "110.4",
     optimalAdvance: "14–21 Days Advance",
@@ -37,6 +43,8 @@ const corridors: CorridorItem[] = [
     id: "del-blr",
     code: "DEL ↔ BLR",
     cities: "Delhi ↔ Bengaluru",
+    origin: "DEL",
+    destination: "BLR",
     benchmark: "₹8,943",
     index: "110.4",
     optimalAdvance: "18–25 Days Advance",
@@ -51,6 +59,8 @@ const corridors: CorridorItem[] = [
     id: "bom-blr",
     code: "BOM ↔ BLR",
     cities: "Mumbai ↔ Bengaluru",
+    origin: "BOM",
+    destination: "BLR",
     benchmark: "₹6,635",
     index: "110.4",
     optimalAdvance: "10–14 Days Advance",
@@ -65,6 +75,8 @@ const corridors: CorridorItem[] = [
     id: "del-ccu",
     code: "DEL ↔ CCU",
     cities: "Delhi ↔ Kolkata",
+    origin: "DEL",
+    destination: "CCU",
     benchmark: "₹7,203",
     index: "110.4",
     optimalAdvance: "14–21 Days Advance",
@@ -79,6 +91,8 @@ const corridors: CorridorItem[] = [
     id: "blr-hyd",
     code: "BLR ↔ HYD",
     cities: "Bengaluru ↔ Hyderabad",
+    origin: "BLR",
+    destination: "HYD",
     benchmark: "₹4,724",
     index: "110.4",
     optimalAdvance: "7–14 Days Advance",
@@ -93,6 +107,8 @@ const corridors: CorridorItem[] = [
     id: "maa-del",
     code: "MAA ↔ DEL",
     cities: "Chennai ↔ Delhi",
+    origin: "MAA",
+    destination: "DEL",
     benchmark: "₹8,545",
     index: "110.4",
     optimalAdvance: "12–18 Days Advance",
@@ -113,7 +129,7 @@ export function PrimaryCorridorsSection() {
   );
 
   return (
-    <section className="relative z-10 bg-transparent py-24 px-4 sm:px-8 lg:px-16 border-t border-black/5 select-none font-display">
+    <section className="relative z-10 bg-transparent pt-28 sm:pt-36 pb-24 px-4 sm:px-8 lg:px-16 border-t border-black/5 select-none font-display scroll-mt-28">
 
       <div className="relative z-10 mx-auto max-w-7xl">
         {/* Section Header (No generic AI pill tags!) */}
@@ -168,9 +184,9 @@ export function PrimaryCorridorsSection() {
         {/* Corridor Cards Grid with Smooth Rounded Corners (rounded-[32px]) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {filteredCorridors.map((item) => (
-            <a
+            <Link
               key={item.id}
-              href="/dashboard/trends"
+              href={`/dashboard/fares?origin=${item.origin}&destination=${item.destination}`}
               className="group relative h-[300px] sm:h-[320px] w-full rounded-[32px] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col justify-between p-6 sm:p-8 text-white cursor-pointer border border-black/5 hover:-translate-y-1.5"
             >
               {/* Background Landmark Image */}
@@ -217,9 +233,12 @@ export function PrimaryCorridorsSection() {
                   <span className="font-medium text-emerald-400">({item.savings})</span>
                 </div>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
+
+        {/* Developer & Scraper Tools Section (Plain text visible layout before Ready to Explore card) */}
+        <DeveloperScraperSection />
 
         {/* Action Banner Card matching exact reference design */}
         <div className="mt-16 sm:mt-24 rounded-[32px] sm:rounded-[36px] bg-[#08080D] text-white p-10 sm:p-16 text-center flex flex-col items-center justify-center shadow-2xl border border-white/10">

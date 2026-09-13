@@ -15,6 +15,7 @@ import {
   Tooltip,
 } from "recharts";
 import { Plane, TrendingUp, Calendar, ArrowRightLeft, Activity, ShieldCheck, Zap } from "lucide-react";
+import { DashboardClosingBanner } from "@/components/DashboardClosingBanner";
 
 interface CorridorTrendsClientProps {
   initialIndexData: IndexValue[];
@@ -465,26 +466,9 @@ export function CorridorTrendsClient({
 
         </div>
 
-        {/* 
-          ========================================================================
-          ROW 4: GIANT NEUE-MONTREAL STYLE BACKGROUND DISPLAY TYPOGRAPHY (Reference 2)
-          - Printed directly on top of the blurred cloud background (NOT inside a white card box)
-          ========================================================================
-        */}
-        <div className="relative py-12 px-2 overflow-hidden flex flex-col items-start justify-center select-none pointer-events-none opacity-20 my-6">
-          <h2 className="text-6xl sm:text-8xl lg:text-[130px] font-black tracking-tighter text-slate-950 leading-none uppercase font-sans">
-            A MORE CONNECTED
-          </h2>
-          <h2 className="text-6xl sm:text-8xl lg:text-[130px] font-black tracking-tighter text-slate-950 leading-none uppercase font-sans -mt-2 sm:-mt-6">
-            INDIA.
-          </h2>
-          <p className="mt-4 text-xs sm:text-sm font-extrabold tracking-[0.3em] text-slate-800 uppercase">
-            REAL-TIME AIRFARE INTELLIGENCE • TIME-SERIES CORRIDOR INDICES • AURA API
-          </p>
-        </div>
-
+        {/* Closing Quote Banner */}
+        <DashboardClosingBanner quote="EVERY CORRIDOR HAS A RHYTHM. WE MEASURE IT." />
       </div>
-
     </div>
   );
 }

@@ -89,16 +89,14 @@ export function LandingHeader() {
               </div>
             )}
 
-            {/* Auth Links */}
-            <div className="flex items-center text-xs sm:text-sm font-semibold text-[#1C222B]">
-              <Link href="/login" className="hover:text-black transition-colors">
-                Sign In
-              </Link>
-              <span className="mx-1.5 text-slate-400 font-medium">/</span>
-              <Link href="/register" className="hover:text-black transition-colors">
-                Sign Up
-              </Link>
-            </div>
+            {/* Sign In / Sign Up Button */}
+            <Link
+              href="/register"
+              className="group inline-flex items-center gap-2 rounded-full bg-[#1C222B] hover:bg-black px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm hover:shadow-md active:scale-95 transition-all duration-200 cursor-pointer whitespace-nowrap"
+            >
+              <span>Sign In / Sign Up</span>
+              <span className="text-white/70 transition-transform duration-200 group-hover:translate-x-0.5">→</span>
+            </Link>
           </div>
         </div>
       </div>

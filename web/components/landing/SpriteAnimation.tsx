@@ -244,7 +244,7 @@ export function SpriteAnimation() {
         {/* Layer 1: Hero Center Block */}
         <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-between pointer-events-none">
           <div
-            className="mx-auto max-w-4xl px-6 text-center transition-all duration-300 ease-out flex flex-col items-center pt-44 sm:pt-52 md:pt-60 lg:pt-64 pointer-events-auto"
+            className="mx-auto max-w-4xl px-6 text-center transition-all duration-300 ease-out flex flex-col items-center pt-36 sm:pt-40 md:pt-44 lg:pt-48 pointer-events-auto"
             style={{
               opacity: heroOpacity,
               transform: `translateY(${heroTranslateY}px)`,
@@ -274,7 +274,7 @@ export function SpriteAnimation() {
 
           {/* Layer 2: How It Works Carousel */}
           <div
-            className="absolute inset-0 z-20 flex items-center justify-center transition-all duration-300 ease-out pt-16 pb-8 overflow-hidden pointer-events-auto"
+            className="absolute inset-0 z-20 flex items-center justify-center transition-all duration-300 ease-out pt-28 sm:pt-32 md:pt-36 lg:pt-40 pb-8 overflow-hidden pointer-events-auto"
             style={{
               opacity: featuresOpacity,
               transform: `translateY(${featuresTranslateY}px)`,

@@ -178,7 +178,7 @@ Contact Phone: [Your Mobile Number]`;
               placeholder="e.g. Rahul Sharma"
               value={passengerName}
               onChange={(e) => setPassengerName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-slate-950 focus:outline-none"
             />
           </div>
           <div>
@@ -190,7 +190,7 @@ Contact Phone: [Your Mobile Number]`;
               placeholder="e.g. W9Q7KL"
               value={pnr}
               onChange={(e) => setPnr(e.target.value.toUpperCase())}
-              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs uppercase text-slate-900 focus:border-indigo-500 focus:outline-none"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs uppercase text-slate-900 focus:border-slate-950 focus:outline-none"
             />
           </div>
           <div>
@@ -202,7 +202,7 @@ Contact Phone: [Your Mobile Number]`;
               placeholder="e.g. 6E 502"
               value={flightNumber}
               onChange={(e) => setFlightNumber(e.target.value.toUpperCase())}
-              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs uppercase text-slate-900 focus:border-indigo-500 focus:outline-none"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs uppercase text-slate-900 focus:border-slate-950 focus:outline-none"
             />
           </div>
           <div>
@@ -213,7 +213,7 @@ Contact Phone: [Your Mobile Number]`;
               type="date"
               value={travelDate}
               onChange={(e) => setTravelDate(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-slate-950 focus:outline-none"
             />
           </div>
         </div>
@@ -261,7 +261,7 @@ Contact Phone: [Your Mobile Number]`;
             </button>
             <button
               onClick={handleCopy}
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-500"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-slate-800 cursor-pointer"
             >
               <span>{copied ? 'Copied to Clipboard! ✓' : 'Copy Notice Text'}</span>
               <span>📋</span>

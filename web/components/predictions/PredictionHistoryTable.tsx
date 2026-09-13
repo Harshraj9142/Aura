@@ -59,38 +59,40 @@ export function PredictionHistoryTable({ predictions }: PredictionHistoryTablePr
 
                 return (
                   <tr key={p.predictionId} className="hover:bg-slate-50/90 transition">
-                    <td className="py-3 px-4 font-mono text-slate-500 font-medium">{p.predictionId}</td>
+                    <td className="py-3 px-4 font-mono text-xs sm:text-sm text-slate-600 font-medium">
+                      {p.predictionId}
+                    </td>
                     <td className="py-3 px-4">
-                      <div className="flex items-center gap-2.5">
-                        <AirlineLogo airline={carrierFlight} flightNumber={carrierFlight} size="xs" />
+                      <div className="flex items-center gap-3">
+                        <AirlineLogo airline={carrierFlight} flightNumber={carrierFlight} size="sm" />
                         <div>
-                          <div className="font-bold text-slate-900">{carrierFlight}</div>
-                          <div className="text-[10px] text-slate-500 font-medium">
+                          <div className="font-bold text-sm sm:text-base text-slate-950">{carrierFlight}</div>
+                          <div className="text-xs text-slate-500 font-medium mt-0.5">
                             {route} {depDate ? `· ${depDate}` : ""}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 font-mono text-slate-600 font-medium">
+                    <td className="py-3 px-4 font-mono text-xs sm:text-sm text-slate-700 font-bold">
                       +{p.targetHorizonHours}h
                     </td>
-                    <td className="py-3 px-4 text-right font-mono font-black text-purple-700 text-sm">
+                    <td className="py-3 px-4 text-right font-mono font-black text-purple-700 text-sm sm:text-base">
                       ₹{p.predictedPrice.toLocaleString("en-IN")}
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className="rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-mono font-bold text-purple-700 border border-purple-200">
+                      <span className="inline-block rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-mono font-bold text-purple-700 border border-purple-200">
                         {p.modelVersion}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right font-mono text-slate-500">
+                    <td className="py-3 px-4 text-right font-mono text-xs sm:text-sm text-slate-600 font-medium">
                       {p.targetTime ? p.targetTime.substring(0, 16).replace("T", " ") : "—"}
                     </td>
                     <td className="py-3 px-4 text-center">
                       {p.actualPrice !== null && p.actualPrice !== undefined ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-700 text-xs font-mono font-bold">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                        <span className="inline-flex items-center gap-1.5 text-emerald-700 text-xs sm:text-sm font-mono font-bold bg-emerald-50/80 px-3 py-1 rounded-full border border-emerald-200">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                           ₹{p.actualPrice.toFixed(0)}{" "}
-                          <span className="text-[10px] text-emerald-600 font-medium">
+                          <span className="text-xs text-emerald-600 font-semibold">
                             (Err: ₹{p.error !== null && p.error !== undefined ? p.error.toFixed(0) : "0"}
                             {p.percentageError !== null && p.percentageError !== undefined
                               ? ` · ${p.percentageError.toFixed(1)}%`
@@ -99,8 +101,8 @@ export function PredictionHistoryTable({ predictions }: PredictionHistoryTablePr
                           </span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-slate-400 text-[10px] font-medium">
-                          <Clock className="h-3 w-3" />
+                        <span className="inline-flex items-center gap-1.5 text-slate-500 text-xs font-medium bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                          <Clock className="h-3.5 w-3.5 text-slate-400" />
                           Awaiting Re-Scrape
                         </span>
                       )}

@@ -26,19 +26,19 @@ import {
 export function getCategoryIcon(id: GrievanceCategory) {
   switch (id) {
     case 'delay':
-      return <Clock className="h-5 w-5 text-amber-600" />;
+      return <Clock className="h-6 w-6 text-amber-600 group-hover:text-white transition-colors" />;
     case 'cancellation':
-      return <Ban className="h-5 w-5 text-rose-600" />;
+      return <Ban className="h-6 w-6 text-rose-600 group-hover:text-white transition-colors" />;
     case 'denied_boarding':
-      return <UserX className="h-5 w-5 text-indigo-600" />;
+      return <UserX className="h-6 w-6 text-slate-900 group-hover:text-white transition-colors" />;
     case 'baggage':
-      return <Luggage className="h-5 w-5 text-amber-700" />;
+      return <Luggage className="h-6 w-6 text-amber-700 group-hover:text-white transition-colors" />;
     case 'refund':
-      return <CreditCard className="h-5 w-5 text-emerald-600" />;
+      return <CreditCard className="h-6 w-6 text-emerald-600 group-hover:text-white transition-colors" />;
     case 'other':
-      return <Sparkles className="h-5 w-5 text-purple-600" />;
+      return <Sparkles className="h-6 w-6 text-slate-900 group-hover:text-white transition-colors" />;
     default:
-      return <AlertCircle className="h-5 w-5 text-indigo-600" />;
+      return <AlertCircle className="h-6 w-6 text-slate-900 group-hover:text-white transition-colors" />;
   }
 }
 
@@ -140,22 +140,21 @@ export function QuestionWizard({
   const isOtherFlow = category === 'other';
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      {/* Top Breadcrumb & Progress Bar */}
-      <div className="flex items-center justify-between">
+    <div className="w-full space-y-8">
+      {/* Top Header Step Pill Bar */}
+      <div className="flex items-center justify-between max-w-4xl mx-auto">
         {currentQuestion > 1 || isOtherFlow ? (
           <div className="flex items-center gap-2">
             <button
               onClick={onBack}
               disabled={isLoadingAi}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition shadow-xs disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/90 backdrop-blur-md px-4 py-2 text-xs sm:text-sm font-semibold text-slate-900 shadow-xs hover:bg-white hover:border-slate-950 transition-all cursor-pointer disabled:opacity-50"
             >
-              <span>←</span>
-              <span>Back</span>
+              <span>← Back</span>
             </button>
             {airline && (
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-900 shadow-2xs">
-                <div className="h-4 w-4 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/90 backdrop-blur-md px-4 py-2 text-xs sm:text-sm font-semibold text-slate-900 shadow-xs">
+                <div className="h-5 w-5 rounded bg-white p-0.5 flex items-center justify-center overflow-hidden">
                   <img src={airline.logoUrl} alt="" className="max-h-full max-w-full object-contain" />
                 </div>
                 <span>{airline.shortName}</span>
@@ -166,35 +165,16 @@ export function QuestionWizard({
           <div />
         )}
 
-        <div className="flex items-center gap-2">
+        <div className="inline-flex items-center gap-2.5 rounded-full bg-[#08080D] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-md">
           {isOtherFlow ? (
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-extrabold text-purple-700">
-                AI Dispute Curation
-              </span>
-              <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800">
-                Gemini + Groq
-              </span>
-            </div>
+            <>
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Legal Assessment</span>
+            </>
           ) : (
             <>
-              <span className="text-xs font-extrabold text-indigo-700">
-                Question {currentQuestion} of 5
-              </span>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((q) => (
-                  <div
-                    key={q}
-                    className={`h-1.5 w-6 rounded-full transition-all ${
-                      q === currentQuestion
-                        ? 'bg-indigo-600'
-                        : q < currentQuestion
-                        ? 'bg-emerald-600'
-                        : 'bg-slate-200'
-                    }`}
-                  />
-                ))}
-              </div>
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              <span>Step {currentQuestion} of 5</span>
             </>
           )}
         </div>
@@ -202,110 +182,90 @@ export function QuestionWizard({
 
       {/* QUESTION 1: AIRLINE SELECTION */}
       {currentQuestion === 1 && (
-        <div className="space-y-5 text-center animate-in fade-in duration-200">
-          <div>
-            <h2 className="text-2xl font-black text-slate-950 sm:text-3xl">
-              Which airline did you fly with?
+        <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <h2 className="font-heading text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 leading-[1.08]">
+              Which airline did you <span className="font-serif italic font-normal text-slate-950">fly</span> with?
             </h2>
-            <p className="mt-1 text-xs text-slate-600 font-medium">
+            <p className="font-body text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
               Select carrier to apply their exact Conditions of Carriage and statutory Nodal contacts.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
             {Object.values(AIRLINE_DIRECTORY).map((item) => (
               <button
                 key={item.id}
                 onClick={() => onSelectAirline(item.id)}
-                className="group flex flex-col items-start rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs transition-all hover:border-indigo-500 hover:shadow-md"
+                className="group relative flex flex-col items-start justify-between rounded-[28px] border border-white/90 bg-white/90 backdrop-blur-2xl p-6 sm:p-7 text-left shadow-md hover:shadow-2xl transition-all duration-300 hover:border-slate-950 hover:-translate-y-1.5 cursor-pointer"
               >
                 <div className="flex w-full items-center justify-between">
-                  <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 shadow-2xs p-1 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
+                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-white border border-slate-200/80 shadow-xs p-2 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
                     <img
                       src={item.logoUrl}
                       alt={item.shortName}
                       className="max-h-full max-w-full object-contain"
                     />
                   </div>
-                  <span className="inline-flex px-2 py-0.5 rounded-md text-[10px] font-black tracking-wider uppercase bg-slate-100 text-slate-700 border border-slate-200">
+                  <span className="inline-flex px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase bg-slate-100 text-slate-800 border border-slate-200">
                     {item.code}
                   </span>
                 </div>
-                <span className="mt-3 text-sm font-extrabold text-slate-950">
-                  {item.shortName}
-                </span>
-                <span className="mt-1 text-[10px] font-bold text-slate-500 group-hover:text-indigo-600">
-                  Select →
-                </span>
+
+                <div className="mt-6 w-full">
+                  <span className="text-lg sm:text-xl font-heading font-bold text-slate-950 tracking-tight block">
+                    {item.shortName}
+                  </span>
+                  <span className="mt-1.5 text-xs font-semibold text-slate-500 group-hover:text-slate-950 flex items-center gap-1 transition-colors">
+                    Select Carrier →
+                  </span>
+                </div>
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* QUESTION 2: WHAT PROBLEM OCCURRED (MCQ SECTION WITH "OTHER / EXPLAIN YOUR ISSUE") */}
+      {/* QUESTION 2: WHAT PROBLEM OCCURRED */}
       {currentQuestion === 2 && !isOtherFlow && (
-        <div className="space-y-5 text-center animate-in fade-in duration-200">
-          <div>
-            <h2 className="text-2xl font-black text-slate-950 sm:text-3xl">
-              What problem occurred?
+        <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <h2 className="font-heading text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 leading-[1.08]">
+              What <span className="font-serif italic font-normal text-slate-950">problem</span> occurred?
             </h2>
-            <p className="mt-1 text-xs text-slate-600 font-medium">
-              Select your grievance with {airline?.shortName}, or choose &ldquo;Other&rdquo; to describe any custom issue.
+            <p className="font-body text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
+              Select your grievance with {airline?.shortName}, or choose Custom Issue to describe any specific incident.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 max-w-4xl mx-auto">
             {PROBLEM_LIST.map((problem) => {
               const isOther = problem.id === 'other';
               return (
                 <button
                   key={problem.id}
                   onClick={() => onSelectCategory(problem.id)}
-                  className={`group flex items-center gap-3.5 rounded-xl border p-4 text-left shadow-xs transition-all ${
-                    isOther
-                      ? 'border-purple-300 bg-gradient-to-r from-purple-50/60 to-indigo-50/60 hover:border-purple-500 hover:shadow-md sm:col-span-2'
-                      : 'border-slate-200 bg-white hover:border-indigo-500 hover:shadow-md'
-                  }`}
+                  className="group relative flex items-center gap-5 rounded-[28px] border border-white/90 bg-white/90 backdrop-blur-2xl p-6 sm:p-7 text-left shadow-md hover:shadow-2xl transition-all duration-300 hover:border-slate-950 hover:-translate-y-1 cursor-pointer"
                 >
-                  <div
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border shadow-2xs transition-colors ${
-                      isOther
-                        ? 'bg-purple-100/80 border-purple-200 group-hover:bg-purple-200/80'
-                        : 'bg-slate-100 border-slate-200/80 group-hover:bg-indigo-50 group-hover:border-indigo-200'
-                    }`}
-                  >
+                  <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl border border-slate-200/80 bg-slate-100/90 shadow-xs transition-colors group-hover:bg-slate-950 group-hover:border-slate-950">
                     {getCategoryIcon(problem.id)}
                   </div>
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-extrabold text-slate-950 truncate">
+                      <span className="text-base sm:text-lg font-heading font-bold text-slate-950 tracking-tight truncate">
                         {problem.title}
                       </span>
-                      {isOther && (
-                        <span className="rounded-full bg-purple-600 px-2 py-0.2 text-[9px] font-bold text-white uppercase tracking-wider">
-                          AI Powered
-                        </span>
-                      )}
                     </div>
-                    <div
-                      className={`text-[11px] font-bold mt-0.5 ${
-                        isOther ? 'text-purple-700' : 'text-emerald-700'
-                      }`}
-                    >
+                    <div className="text-xs font-bold text-emerald-700 mt-0.5">
                       {problem.badge}
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+                    <p className="text-xs text-slate-500 mt-1 truncate">
                       {problem.quickDescription}
                     </p>
                   </div>
-                  <span
-                    className={`text-xs font-bold transition-all group-hover:translate-x-0.5 ${
-                      isOther
-                        ? 'text-purple-700 group-hover:text-purple-900'
-                        : 'text-slate-400 group-hover:text-indigo-600'
-                    }`}
-                  >
+
+                  <span className="text-sm font-bold text-slate-400 group-hover:text-slate-950 transition-colors group-hover:translate-x-1">
                     →
                   </span>
                 </button>
@@ -315,30 +275,26 @@ export function QuestionWizard({
         </div>
       )}
 
-      {/* DEDICATED OTHER / EXPLAIN YOUR ENTIRE ISSUE SCREEN (SKIPS Q3, Q4, Q5) */}
+      {/* DEDICATED OTHER / EXPLAIN YOUR ENTIRE ISSUE SCREEN */}
       {isOtherFlow && (
-        <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="text-center">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-100 border border-purple-200 px-3 py-1 text-xs font-bold text-purple-900 mb-2">
-              <Sparkles className="h-3.5 w-3.5 text-purple-700" />
-              <span>Full Issue Legal Assessment</span>
-            </div>
-            <h2 className="text-2xl font-black text-slate-950 sm:text-3xl">
-              Describe your entire issue with {airline?.shortName}
+        <div className="space-y-8 animate-in fade-in duration-300 max-w-4xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <h2 className="font-heading text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 leading-[1.08]">
+              Describe your <span className="font-serif italic font-normal text-slate-950">incident</span> in detail
             </h2>
-            <p className="mt-1 text-xs text-slate-600 font-medium max-w-lg mx-auto">
-              Provide complete details. Our AI will analyze DGCA Civil Aviation Requirements, verify airline liability, calculate compensation, and draft your legal notice.
+            <p className="font-body text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
+              Provide complete details. Our engine will analyze DGCA Civil Aviation Requirements, verify airline liability, calculate compensation, and draft your legal notice.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
+          <div className="rounded-[32px] border border-white/90 bg-white/90 backdrop-blur-2xl p-6 sm:p-10 shadow-2xl space-y-6">
             {/* Quick Inspiration Chips */}
             <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
-                <HelpCircle className="h-3 w-3" />
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5 mb-2">
+                <HelpCircle className="h-4 w-4" />
                 <span>Click a topic to auto-fill, or write your own below:</span>
               </label>
-              <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {COMMON_ISSUE_CHIPS.map((chip, idx) => (
                   <button
                     key={idx}
@@ -349,7 +305,7 @@ export function QuestionWizard({
                         : `• ${chip}: `;
                       onUpdateCustomField('customIssueText', updated);
                     }}
-                    className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:border-purple-400 hover:bg-purple-50/60 hover:text-purple-900 transition text-left"
+                    className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-950 hover:bg-slate-100 hover:text-slate-950 transition text-left cursor-pointer"
                   >
                     + {chip}
                   </button>
@@ -359,11 +315,11 @@ export function QuestionWizard({
 
             {/* Main Description Textarea */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-extrabold text-slate-900">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-bold text-slate-950">
                   What happened? (Detailed Explanation) <span className="text-rose-500">*</span>
                 </label>
-                <span className="text-[10px] font-bold text-slate-400">
+                <span className="text-xs font-bold text-slate-400">
                   {customIssueText.length} characters
                 </span>
               </div>
@@ -372,51 +328,51 @@ export function QuestionWizard({
                 value={customIssueText}
                 onChange={(e) => onUpdateCustomField('customIssueText', e.target.value)}
                 placeholder="Explain what occurred in detail. For example: 'On 12th Oct, my flight was rescheduled 8 hours earlier without any prior notification. When I reached the airport, airline refused rebooking, demanded ₹4,000 date change fee, and declined refund...'"
-                className="w-full rounded-xl border border-slate-300 bg-white p-3 text-xs leading-relaxed text-slate-900 placeholder:text-slate-400 focus:border-purple-600 focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
+                className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-xs sm:text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-950/20 focus:outline-none"
               />
             </div>
 
-            {/* Optional particulars to enrich legal notice */}
-            <div className="pt-2 border-t border-slate-100">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            {/* Optional particulars */}
+            <div className="pt-4 border-t border-slate-200">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-3">
                 Optional Travel Particulars (Pre-fills Legal Notice)
               </span>
-              <div className="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-600">PNR Number</label>
+                  <label className="text-xs font-bold text-slate-700">PNR Number</label>
                   <input
                     type="text"
                     placeholder="e.g. 6E8XYZ"
                     value={pnr}
                     onChange={(e) => onUpdateCustomField('pnr', e.target.value.toUpperCase())}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs uppercase text-slate-900 focus:border-purple-600 focus:outline-none"
+                    className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-xs uppercase text-slate-900 focus:border-slate-950 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-slate-600">Flight Number</label>
+                  <label className="text-xs font-bold text-slate-700">Flight Number</label>
                   <input
                     type="text"
                     placeholder="e.g. 6E 402"
                     value={flightNumber}
                     onChange={(e) => onUpdateCustomField('flightNumber', e.target.value.toUpperCase())}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs uppercase text-slate-900 focus:border-purple-600 focus:outline-none"
+                    className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-xs uppercase text-slate-900 focus:border-slate-950 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-slate-600">Travel Date</label>
+                  <label className="text-xs font-bold text-slate-700">Travel Date</label>
                   <input
                     type="date"
                     value={travelDate}
                     onChange={(e) => onUpdateCustomField('travelDate', e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-900 focus:border-purple-600 focus:outline-none"
+                    className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-900 focus:border-slate-950 focus:outline-none"
                   />
                 </div>
               </div>
             </div>
 
             {/* Action Buttons & AI Trigger */}
-            <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100">
+              <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
                 <span>Analyzed under DGCA CAR & Consumer Protection Act 2019</span>
               </div>
@@ -425,7 +381,7 @@ export function QuestionWizard({
                 type="button"
                 disabled={isLoadingAi || !customIssueText.trim()}
                 onClick={onSubmitCustomIssue}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 px-6 py-2.5 text-xs font-black text-white shadow-sm hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#08080D] px-8 py-3.5 text-xs sm:text-sm font-bold text-white shadow-xl hover:bg-slate-800 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoadingAi ? (
                   <>
@@ -435,7 +391,7 @@ export function QuestionWizard({
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4" />
-                    <span>Curate Statutory Solution with AI →</span>
+                    <span>Analyze Statutory Rights & Solution →</span>
                   </>
                 )}
               </button>
@@ -444,42 +400,42 @@ export function QuestionWizard({
         </div>
       )}
 
-      {/* QUESTION 3: DURATION EXTRA (Standard flow only) */}
+      {/* QUESTION 3: DURATION EXTRA */}
       {currentQuestion === 3 && !isOtherFlow && (
-        <div className="space-y-5 text-center animate-in fade-in duration-200">
-          <div>
-            <h2 className="text-2xl font-black text-slate-950 sm:text-3xl">
+        <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <h2 className="font-heading text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 leading-[1.08]">
               {category === 'delay'
-                ? 'How long was your flight delayed?'
+                ? <>How long was your flight <span className="font-serif italic font-normal text-slate-950">delayed</span>?</>
                 : category === 'cancellation'
-                ? 'When did the airline notify you?'
+                ? <>When did the airline <span className="font-serif italic font-normal text-slate-950">notify</span> you?</>
                 : category === 'baggage'
-                ? 'What is the status of your luggage?'
+                ? <>What is the status of your <span className="font-serif italic font-normal text-slate-950">luggage</span>?</>
                 : category === 'denied_boarding'
-                ? 'What happened at the boarding gate?'
-                : 'How long has the refund been delayed?'}
+                ? <>What happened at the <span className="font-serif italic font-normal text-slate-950">boarding gate</span>?</>
+                : <>How long has the refund been <span className="font-serif italic font-normal text-slate-950">delayed</span>?</>}
             </h2>
-            <p className="mt-1 text-xs text-slate-600 font-medium">
+            <p className="font-body text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
               DGCA statutory entitlement depends strictly on this timeline.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-2.5">
+          <div className="grid grid-cols-1 gap-4 max-w-3xl mx-auto">
             {getDurationOptions().map((opt) => (
               <button
                 key={opt.id}
                 onClick={() => onSelectDuration(opt.id)}
-                className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs transition-all hover:border-indigo-500 hover:shadow-md"
+                className="flex items-center justify-between rounded-[24px] border border-white/90 bg-white/90 backdrop-blur-2xl p-6 sm:p-7 text-left shadow-md hover:shadow-2xl transition-all duration-300 hover:border-slate-950 hover:-translate-y-0.5 cursor-pointer"
               >
                 <div>
-                  <div className="text-sm font-extrabold text-slate-950">
+                  <div className="text-base sm:text-lg font-heading font-bold text-slate-950 tracking-tight">
                     {opt.title}
                   </div>
-                  <div className="text-xs text-slate-600 font-medium">
+                  <div className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
                     {opt.hint}
                   </div>
                 </div>
-                <span className="text-xs font-bold text-indigo-700">
+                <span className="text-xs sm:text-sm font-bold text-slate-950">
                   Select →
                 </span>
               </button>
@@ -488,37 +444,37 @@ export function QuestionWizard({
         </div>
       )}
 
-      {/* QUESTION 4: SCHEDULED FLIGHT DURATION (Standard flow only) */}
+      {/* QUESTION 4: SCHEDULED FLIGHT DURATION */}
       {currentQuestion === 4 && !isOtherFlow && (
-        <div className="space-y-5 text-center animate-in fade-in duration-200">
-          <div>
-            <h2 className="text-2xl font-black text-slate-950 sm:text-3xl">
-              What was your scheduled flight duration?
+        <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <h2 className="font-heading text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 leading-[1.08]">
+              What was your scheduled <span className="font-serif italic font-normal text-slate-950">flight</span> duration?
             </h2>
-            <p className="mt-1 text-xs text-slate-600 font-medium">
+            <p className="font-body text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
               Under DGCA CAR Section 3, cash compensation brackets are determined by flight block time.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-1 gap-4 max-w-3xl mx-auto">
             {[
               {
                 id: '<1hr' as const,
-                icon: <Zap className="h-5 w-5 text-amber-500" />,
+                icon: <Zap className="h-6 w-6 text-amber-500" />,
                 title: 'Under 1 Hour',
                 desc: 'Short domestic routes (e.g., Mumbai to Pune / Delhi to Jaipur)',
                 comp: '₹5,000 Statutory Tier',
               },
               {
                 id: '1-2hr' as const,
-                icon: <Plane className="h-5 w-5 text-indigo-500" />,
+                icon: <Plane className="h-6 w-6 text-slate-900" />,
                 title: '1 to 2 Hours',
                 desc: 'Standard domestic routes (e.g., Delhi to Mumbai / Bangalore to Hyderabad)',
                 comp: '₹7,500 Statutory Tier',
               },
               {
                 id: '>2hr' as const,
-                icon: <Globe className="h-5 w-5 text-blue-500" />,
+                icon: <Globe className="h-6 w-6 text-slate-900" />,
                 title: 'Over 2 Hours',
                 desc: 'Long domestic / Cross-country (e.g., Delhi to Bangalore / Kolkata to Mumbai)',
                 comp: '₹10,000 Statutory Tier',
@@ -527,22 +483,22 @@ export function QuestionWizard({
               <button
                 key={opt.id}
                 onClick={() => onSelectFlightTime(opt.id)}
-                className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs transition-all hover:border-indigo-500 hover:shadow-md"
+                className="flex items-center justify-between rounded-[24px] border border-white/90 bg-white/90 backdrop-blur-2xl p-6 sm:p-7 text-left shadow-md hover:shadow-2xl transition-all duration-300 hover:border-slate-950 hover:-translate-y-0.5 cursor-pointer"
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 shadow-2xs">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-100 border border-slate-200/80 shadow-xs">
                     {opt.icon}
                   </div>
                   <div>
-                    <div className="text-sm font-extrabold text-slate-950">
+                    <div className="text-base sm:text-lg font-heading font-bold text-slate-950 tracking-tight">
                       {opt.title}
                     </div>
-                    <div className="text-xs text-slate-600 font-medium">
+                    <div className="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
                       {opt.desc}
                     </div>
                   </div>
                 </div>
-                <span className="rounded-lg bg-emerald-100 border border-emerald-200 px-2.5 py-1 text-xs font-black text-emerald-900">
+                <span className="rounded-full bg-emerald-100 border border-emerald-200 px-3.5 py-1.5 text-xs font-bold text-emerald-900">
                   {opt.comp}
                 </span>
               </button>
@@ -551,35 +507,35 @@ export function QuestionWizard({
         </div>
       )}
 
-      {/* QUESTION 5: ASSISTANCE PROVIDED (Standard flow only) */}
+      {/* QUESTION 5: ASSISTANCE PROVIDED */}
       {currentQuestion === 5 && !isOtherFlow && (
-        <div className="space-y-5 text-center animate-in fade-in duration-200">
-          <div>
-            <h2 className="text-2xl font-black text-slate-950 sm:text-3xl">
-              Did the airline provide food, hotel, or alternate flight?
+        <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <h2 className="font-heading text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 leading-[1.08]">
+              Did the airline provide <span className="font-serif italic font-normal text-slate-950">care</span> or assistance?
             </h2>
-            <p className="mt-1 text-xs text-slate-600 font-medium">
-              Airlines that fail to provide mandated duty-of-care face statutory penalties.
+            <p className="font-body text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
+              Airlines failing to provide mandated meals or accommodation face strict statutory penalties.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-1 gap-4 max-w-3xl mx-auto">
             {[
               {
                 id: 'none' as const,
-                icon: <XCircle className="h-5 w-5 text-rose-600" />,
+                icon: <XCircle className="h-6 w-6 text-rose-600" />,
                 title: 'No assistance provided (Left stranded)',
                 desc: 'Airline offered no meals, hotel stay, or acceptable alternate flight.',
               },
               {
                 id: 'refreshments' as const,
-                icon: <Coffee className="h-5 w-5 text-amber-600" />,
+                icon: <Coffee className="h-6 w-6 text-amber-600" />,
                 title: 'Light snacks or beverages only',
                 desc: 'Provided small water bottle or biscuit pack, but no full meal or stay.',
               },
               {
                 id: 'hotel_alternate' as const,
-                icon: <Building2 className="h-5 w-5 text-indigo-600" />,
+                icon: <Building2 className="h-6 w-6 text-slate-900" />,
                 title: 'Hotel or alternate flight offered',
                 desc: 'Airline arranged accommodation or rebooked onto another flight.',
               },
@@ -587,22 +543,22 @@ export function QuestionWizard({
               <button
                 key={opt.id}
                 onClick={() => onSelectAssistance(opt.id)}
-                className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs transition-all hover:border-indigo-500 hover:shadow-md"
+                className="flex items-center justify-between rounded-[24px] border border-white/90 bg-white/90 backdrop-blur-2xl p-6 sm:p-7 text-left shadow-md hover:shadow-2xl transition-all duration-300 hover:border-slate-950 hover:-translate-y-0.5 cursor-pointer"
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 shadow-2xs">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-100 border border-slate-200/80 shadow-xs">
                     {opt.icon}
                   </div>
                   <div>
-                    <div className="text-sm font-extrabold text-slate-950">
+                    <div className="text-base sm:text-lg font-heading font-bold text-slate-950 tracking-tight">
                       {opt.title}
                     </div>
-                    <div className="text-xs text-slate-600 font-medium">
+                    <div className="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
                       {opt.desc}
                     </div>
                   </div>
                 </div>
-                <span className="text-xs font-bold text-indigo-700">
+                <span className="text-xs sm:text-sm font-bold text-slate-950">
                   See Solution →
                 </span>
               </button>

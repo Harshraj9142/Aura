@@ -4,7 +4,8 @@ import { getElasticityData } from "@/lib/services/elasticity.service";
 import { getTrackedRoutes } from "@/lib/services/routes.service";
 import { ElasticityCurveChart } from "@/components/charts/ElasticityCurveChart";
 import { prisma } from "@/lib/db/prisma";
-import { Database } from "lucide-react";
+import { Database, Clock, TrendingDown, ArrowRight, ShieldCheck, Zap } from "lucide-react";
+import { DashboardClosingBanner } from "@/components/DashboardClosingBanner";
 
 export const metadata = {
   title: "Lead-Time Fare Elasticity | AURA",
@@ -194,6 +195,9 @@ export default async function ElasticityPage({ searchParams }: ElasticityPagePro
             baseBenchmark={baseBenchmark}
           />
         </div>
+
+        {/* Closing Quote Banner */}
+        <DashboardClosingBanner quote="TIME CHANGES THE FARE. WE MEASURE WHEN." />
       </div>
     </div>
   );

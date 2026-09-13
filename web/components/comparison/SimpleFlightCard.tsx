@@ -10,7 +10,6 @@ import {
   ArrowRight,
   TrendingDown,
   Sparkles,
-  ExternalLink,
   ShieldCheck,
 } from "lucide-react";
 
@@ -20,7 +19,6 @@ interface SimpleFlightCardProps {
 
 export default function SimpleFlightCard({ flight }: SimpleFlightCardProps) {
   const bestPlatform = flight.platforms.find((p) => p.isBestPrice);
-  const directPlatform = flight.platforms.find((p) => p.sourceType === "airline");
 
   // Determine savings insight
   let savingsMessage = "";
@@ -61,7 +59,7 @@ export default function SimpleFlightCard({ flight }: SimpleFlightCardProps) {
               </span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-600 mt-1.5">
+            <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-600 mt-1.5 font-medium">
               <span className="font-bold text-slate-900 flex items-center gap-1.5">
                 {flight.routeOrigin}
                 <ArrowRight className="h-3.5 w-3.5 text-blue-600" />
@@ -198,8 +196,8 @@ export default function SimpleFlightCard({ flight }: SimpleFlightCardProps) {
 
       {/* Bottom Summary Bar */}
       {savingsMessage && (
-        <div className="mt-4 pt-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-700">
-          <div className="flex items-center gap-2 font-medium">
+        <div className="mt-4 pt-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-700 font-medium">
+          <div className="flex items-center gap-2">
             <TrendingDown className="h-4 w-4 text-emerald-600" />
             <span>{savingsMessage}</span>
           </div>

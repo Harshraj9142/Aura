@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { DashboardClosingBanner } from "@/components/DashboardClosingBanner";
 import {
   AreaChart,
   Area,
@@ -805,6 +806,9 @@ export default function DashboardOverview() {
           </div>
         </div>
       )}
+
+      {/* Closing Quote Banner */}
+      <DashboardClosingBanner quote="A CLEARER MEASURE OF INDIA'S SKIES." />
     </div>
   );
 }

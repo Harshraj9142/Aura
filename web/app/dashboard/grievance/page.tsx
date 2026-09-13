@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { AirlineId, GrievanceCategory, GrievanceAnswers, StatutoryEntitlement } from '@/lib/grievance/types';
 import { AIRLINE_DIRECTORY } from '@/lib/grievance/airline-contacts';
 import { getStraightSolution } from '@/lib/grievance/grievance-rules';
@@ -8,7 +9,7 @@ import { QuestionWizard } from '@/components/grievance/QuestionWizard';
 import { StraightSolutionView } from '@/components/grievance/StraightSolutionView';
 import { ComplaintDraftModal } from '@/components/grievance/ComplaintDraftModal';
 import { TwitterEscalationModal } from '@/components/grievance/TwitterEscalationModal';
-import { Scale } from 'lucide-react';
+import { DashboardClosingBanner } from '@/components/DashboardClosingBanner';
 
 export default function GrievanceDashboardPage() {
   // Questions 1 to 5, or 6 for Solution
@@ -45,7 +46,6 @@ export default function GrievanceDashboardPage() {
     setCategory(cat);
     if (cat === 'other') {
       // For "Other", stay on Question 2 view which displays the full description screen
-      // Do not show Question 3, 4, 5
     } else {
       setCurrentQuestion(3);
     }
@@ -122,7 +122,6 @@ export default function GrievanceDashboardPage() {
 
   const handleBack = () => {
     if (category === 'other' && currentQuestion === 2) {
-      // Step back from "Other" description view to problem selection
       setCategory(null);
       return;
     }
@@ -194,101 +193,152 @@ export default function GrievanceDashboardPage() {
   const activeAirline = airlineId ? AIRLINE_DIRECTORY[airlineId] : null;
 
   return (
-    <div className="space-y-6 pb-16">
-      {/* Page Header */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
-              <Scale className="h-4 w-4" />
-            </span>
-            <h1 className="text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
-              Customer Grievance & Passenger Rights
-            </h1>
-            <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-bold text-emerald-900">
-              DGCA Protected
-            </span>
-          </div>
-          <p className="mt-1 text-xs text-slate-600 font-medium">
-            {category === 'other'
-              ? 'AI-powered legal dispute synthesis enforcing DGCA CAR & Consumer Protection Act 2019.'
-              : 'Answer quick questions or explain your issue to get an exact statutory solution and step-by-step enforcement plan.'}
-          </p>
+    <div className="relative w-full overflow-hidden space-y-0 font-sans">
+      {/* 
+        ========================================================================
+        1. HERO PANORAMA BANNER (Identical layout & typography across all tabs)
+        - Wide-angle cinematic airport customer service image (/dashboard/grievance_hero.jpg)
+        ========================================================================
+      */}
+      <div className="relative w-full min-h-[480px] sm:min-h-[520px] lg:min-h-[560px] flex flex-col justify-between pt-36 sm:pt-40 lg:pt-44 pb-20 sm:pb-24 px-6 sm:px-10 lg:px-14 xl:px-16">
+        
+        {/* Masked Panorama Background Image */}
+        <div
+          className="absolute inset-0 z-0 bg-slate-950 pointer-events-none"
+          style={{
+            maskImage:
+              "linear-gradient(to bottom, black 0%, black 45%, rgba(0,0,0,0.85) 65%, rgba(0,0,0,0.3) 85%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 0%, black 45%, rgba(0,0,0,0.85) 65%, rgba(0,0,0,0.3) 85%, transparent 100%)",
+          }}
+        >
+          <Image
+            src="/dashboard/grievance_hero.jpg"
+            alt="Customer Grievance & Passenger Rights Panorama"
+            fill
+            sizes="100vw"
+            className="object-cover object-center scale-[1.02]"
+            priority
+          />
+
+          {/* Top Black Vignette Gradient Layer */}
+          <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-black/95 via-black/60 to-transparent z-10" />
+
+          {/* Left Dark Vignette Layer */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-transparent sm:w-2/3 z-10" />
+
+          {/* Right Dark Vignette Layer */}
+          <div className="absolute inset-y-0 right-0 w-80 bg-gradient-to-l from-black/90 via-black/60 to-transparent z-10" />
         </div>
 
-        {currentQuestion < 6 && (
-          <div className="hidden sm:block text-right">
-            <span className="text-xs font-bold text-slate-600">
-              {category === 'other' ? 'AI Legal Assessment' : `Step ${currentQuestion} of 5`}
-            </span>
+        {/* Hero Content */}
+        <div className="relative z-20 w-full flex flex-col lg:flex-row items-start lg:items-center justify-between h-full gap-8">
+          
+          {/* Left Text Block */}
+          <div className="max-w-3xl space-y-4 pt-2">
+            <h1 className="text-5xl sm:text-7xl lg:text-[84px] font-bold tracking-tight text-white drop-shadow-xl leading-[1.02]">
+              Passenger <span className="font-serif italic font-normal text-white">Rights</span> & Grievance.
+            </h1>
+
+            <p className="text-lg sm:text-xl lg:text-2xl text-slate-100 font-medium leading-relaxed max-w-2xl drop-shadow-md">
+              Instant statutory entitlement calculation, DGCA rule enforcement, pre-drafted legal notices & social escalation.
+            </p>
+
+            <div className="pt-3 flex items-center gap-3 text-xs sm:text-sm font-extrabold tracking-[0.25em] text-slate-300 uppercase drop-shadow-sm">
+              <span className="h-[2px] w-10 bg-white" />
+              <span>DGCA CAR PROTECTED • CONSUMER PROTECTION ACT 2019</span>
+            </div>
           </div>
-        )}
+
+          {/* Right Text Block: Ultra Crisp Vertical Typography */}
+          <div className="hidden lg:flex flex-col items-end justify-start self-stretch py-2 text-right gap-8">
+            <div className="space-y-1.5 text-xs font-black tracking-[0.35em] text-white uppercase leading-relaxed drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+              <div>CIVIL AVIATION</div>
+              <div>STATUTORY RIGHTS</div>
+              <div>LEGAL NOTICE</div>
+              <div>DGCA ENFORCE</div>
+              <div className="pt-2 text-white/90">—</div>
+            </div>
+          </div>
+
+        </div>
       </div>
 
-      {/* 1 TO 5: QUESTION WIZARD (MCQ OR DEDICATED OTHER VIEW) */}
-      {currentQuestion <= 5 && (
-        <QuestionWizard
-          currentQuestion={currentQuestion}
-          airlineId={airlineId}
-          category={category}
-          durationOption={durationOption}
-          flightTimeOption={flightTimeOption}
-          assistanceOption={assistanceOption}
-          customIssueText={customIssueText}
-          pnr={pnr}
-          flightNumber={flightNumber}
-          travelDate={travelDate}
-          isLoadingAi={isLoadingAi}
-          onUpdateCustomField={handleUpdateCustomField}
-          onSubmitCustomIssue={handleSubmitCustomIssue}
-          onSelectAirline={handleSelectAirline}
-          onSelectCategory={handleSelectCategory}
-          onSelectDuration={handleSelectDuration}
-          onSelectFlightTime={handleSelectFlightTime}
-          onSelectAssistance={handleSelectAssistance}
-          onBack={handleBack}
-        />
-      )}
-
-      {/* 6: STRAIGHT SOLUTION (STATUTORY ENTITLEMENT + VISUAL STEPS + PRE-FILLED NOTICE) */}
-      {currentQuestion === 6 && entitlement && activeAirline && answers && (
-        <>
-          <StraightSolutionView
-            entitlement={entitlement}
-            airline={activeAirline}
-            answers={answers}
-            onOpenDraftModal={() => setIsDraftModalOpen(true)}
-            onOpenTwitterModal={() => setIsTwitterModalOpen(true)}
-            onReset={handleReset}
-          />
-
-          <ComplaintDraftModal
-            isOpen={isDraftModalOpen}
-            onClose={() => setIsDraftModalOpen(false)}
-            airlineId={activeAirline.id}
-            category={answers.category}
-            entitlement={entitlement}
-            initialPnr={pnr}
-            initialFlightNumber={flightNumber}
-            initialTravelDate={travelDate}
+      {/* 
+        ========================================================================
+        2. FLOATING CONTENT SECTION (Outer container rectangle removed)
+        ========================================================================
+      */}
+      <div className="w-full px-6 sm:px-10 lg:px-14 xl:px-16 -mt-14 sm:-mt-20 relative z-30 space-y-8 pb-16">
+        {/* 1 TO 5: QUESTION WIZARD (MCQ OR DEDICATED OTHER VIEW) */}
+        {currentQuestion <= 5 && (
+          <QuestionWizard
+            currentQuestion={currentQuestion}
+            airlineId={airlineId}
+            category={category}
+            durationOption={durationOption}
+            flightTimeOption={flightTimeOption}
+            assistanceOption={assistanceOption}
             customIssueText={customIssueText}
-            onOpenTwitterModal={(details) => {
-              setTwitterDetails(details);
-              setIsTwitterModalOpen(true);
-            }}
+            pnr={pnr}
+            flightNumber={flightNumber}
+            travelDate={travelDate}
+            isLoadingAi={isLoadingAi}
+            onUpdateCustomField={handleUpdateCustomField}
+            onSubmitCustomIssue={handleSubmitCustomIssue}
+            onSelectAirline={handleSelectAirline}
+            onSelectCategory={handleSelectCategory}
+            onSelectDuration={handleSelectDuration}
+            onSelectFlightTime={handleSelectFlightTime}
+            onSelectAssistance={handleSelectAssistance}
+            onBack={handleBack}
           />
+        )}
 
-          <TwitterEscalationModal
-            isOpen={isTwitterModalOpen}
-            onClose={() => setIsTwitterModalOpen(false)}
-            airlineId={activeAirline.id}
-            category={answers.category}
-            initialPnr={twitterDetails.pnr || pnr}
-            initialFlightNumber={twitterDetails.flightNumber || flightNumber}
-            initialTravelDate={twitterDetails.travelDate || travelDate}
-          />
-        </>
-      )}
+        {/* 6: STRAIGHT SOLUTION (STATUTORY ENTITLEMENT + VISUAL STEPS + PRE-FILLED NOTICE) */}
+        {currentQuestion === 6 && entitlement && activeAirline && answers && (
+          <>
+            <StraightSolutionView
+              entitlement={entitlement}
+              airline={activeAirline}
+              answers={answers}
+              onOpenDraftModal={() => setIsDraftModalOpen(true)}
+              onOpenTwitterModal={() => setIsTwitterModalOpen(true)}
+              onReset={handleReset}
+            />
+
+            <ComplaintDraftModal
+              isOpen={isDraftModalOpen}
+              onClose={() => setIsDraftModalOpen(false)}
+              airlineId={activeAirline.id}
+              category={answers.category}
+              entitlement={entitlement}
+              initialPnr={pnr}
+              initialFlightNumber={flightNumber}
+              initialTravelDate={travelDate}
+              customIssueText={customIssueText}
+              onOpenTwitterModal={(details) => {
+                setTwitterDetails(details);
+                setIsTwitterModalOpen(true);
+              }}
+            />
+
+            <TwitterEscalationModal
+              isOpen={isTwitterModalOpen}
+              onClose={() => setIsTwitterModalOpen(false)}
+              airlineId={activeAirline.id}
+              category={answers.category}
+              initialPnr={twitterDetails.pnr || pnr}
+              initialFlightNumber={twitterDetails.flightNumber || flightNumber}
+              initialTravelDate={twitterDetails.travelDate || travelDate}
+            />
+          </>
+        )}
+
+        {/* Closing Quote Banner */}
+        <DashboardClosingBanner quote="EVERY FARE HAS A STORY. EVERY COMPLAINT HAS A SIGNAL." />
+      </div>
     </div>
   );
 }
+

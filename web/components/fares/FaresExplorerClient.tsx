@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Fare, PaginationMeta } from "@/types/fare";
@@ -21,6 +21,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { BoardingPassFareCard } from "./BoardingPassFareCard";
+import { DashboardClosingBanner } from "@/components/DashboardClosingBanner";
 
 interface FaresExplorerClientProps {
   fares: Fare[];
@@ -77,6 +78,18 @@ export function FaresExplorerClient({
   const [dateFrom, setDateFrom] = useState(searchParams.get("dateFrom") || "");
   const [dateTo, setDateTo] = useState(searchParams.get("dateTo") || "");
   const [isOutlier, setIsOutlier] = useState(searchParams.get("isOutlier") || "exclude");
+
+  // Keep state in sync with URL searchParams
+  useEffect(() => {
+    setOrigin(searchParams.get("origin") || "");
+    setDestination(searchParams.get("destination") || "");
+    setSource(searchParams.get("source") || "");
+    setDateFrom(searchParams.get("dateFrom") || "");
+    setDateTo(searchParams.get("dateTo") || "");
+    if (searchParams.get("isOutlier")) {
+      setIsOutlier(searchParams.get("isOutlier") || "exclude");
+    }
+  }, [searchParams]);
 
   // Sidebar filter state
   const [maxPrice, setMaxPrice] = useState<number>(25000);
@@ -652,6 +665,8 @@ export function FaresExplorerClient({
         </div>
       )}
 
+      {/* Closing Quote Banner */}
+      <DashboardClosingBanner quote="THOUSANDS OF FARES. ONE CLEARER PICTURE." />
     </div>
   );
 }

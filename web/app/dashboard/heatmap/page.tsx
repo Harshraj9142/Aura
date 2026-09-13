@@ -4,6 +4,7 @@ import { getHeatmapData } from "@/lib/services/heatmap.service";
 import { HeatmapGrid } from "@/components/charts/HeatmapGrid";
 import { ExportButtons } from "@/components/dashboard/ExportButtons";
 import { Database } from "lucide-react";
+import { DashboardClosingBanner } from "@/components/DashboardClosingBanner";
 
 export const metadata: Metadata = {
   title: "Route × Travel Date Fare Heatmap | AURA",
@@ -121,6 +122,9 @@ export default async function HeatmapPage({ searchParams }: HeatmapPageProps) {
         </div>
 
         <HeatmapGrid data={heatmapData} />
+
+        {/* Closing Quote Banner */}
+        <DashboardClosingBanner quote="SEE WHERE INDIA MOVES. SEE WHERE PRICES MOVE." />
       </div>
     </div>
   );

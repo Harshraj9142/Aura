@@ -48,7 +48,7 @@ export const PROBLEM_LIST: ProblemOption[] = [
   {
     id: 'other',
     title: 'Other / Explain Your Issue',
-    badge: 'AI Curated Redressal',
+    badge: 'Custom Dispute Resolution',
     icon: '✨',
     quickDescription: 'Flight schedule change, unfair charges, medical, disability, or custom grievance',
   },

@@ -38,7 +38,7 @@ export function PredictionForecastChart({ data, currentPrice }: PredictionForeca
             <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-950">
               Multi-Horizon Price Progression Curve
             </h3>
-            <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 font-bold">
+            <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-900 border border-slate-200 font-bold">
               30-Day Lead Window
             </span>
           </div>
@@ -49,7 +49,7 @@ export function PredictionForecastChart({ data, currentPrice }: PredictionForeca
 
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-purple-600" />
+            <span className="h-2.5 w-2.5 rounded-full bg-slate-900" />
             <span className="text-slate-700 font-bold">ML Predicted Airfare</span>
           </div>
         </div>
@@ -60,8 +60,8 @@ export function PredictionForecastChart({ data, currentPrice }: PredictionForeca
           <AreaChart data={data} margin={{ top: 15, right: 15, left: 15, bottom: 5 }}>
             <defs>
               <linearGradient id="predictionGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#7c3aed" stopOpacity={0.0} />
+                <stop offset="5%" stopColor="#09090b" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="#09090b" stopOpacity={0.0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
@@ -95,7 +95,7 @@ export function PredictionForecastChart({ data, currentPrice }: PredictionForeca
                       <p className="text-xs font-bold text-slate-800">
                         {p.horizonLabel}
                       </p>
-                      <p className="text-lg font-mono font-black text-purple-700 mt-0.5">
+                      <p className="text-lg font-mono font-black text-slate-950 mt-0.5">
                         ₹{p.predictedPrice.toLocaleString("en-IN")}
                       </p>
                       <p className="text-xs font-mono font-bold text-slate-600 mt-0.5">
@@ -121,19 +121,19 @@ export function PredictionForecastChart({ data, currentPrice }: PredictionForeca
             <Area
               type="monotone"
               dataKey="predictedPrice"
-              stroke="#7c3aed"
+              stroke="#09090b"
               strokeWidth={2.5}
               fillOpacity={1}
               fill="url(#predictionGradient)"
-              dot={{ fill: "#7c3aed", r: 4, strokeWidth: 1.5, stroke: "#ffffff" }}
-              activeDot={{ r: 6, fill: "#6d28d9" }}
+              dot={{ fill: "#09090b", r: 4, strokeWidth: 1.5, stroke: "#ffffff" }}
+              activeDot={{ r: 6, fill: "#000000" }}
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
       <div className="mt-3 flex items-center gap-2 rounded-2xl bg-slate-50/80 px-4 py-2.5 text-xs text-slate-600 border border-slate-200 font-medium">
-        <Info className="h-4 w-4 text-purple-600 shrink-0" />
+        <Info className="h-4 w-4 text-slate-900 shrink-0" />
         <span>
           Prices typically escalate within the 7-day lead window due to dynamic yield management by low-cost carriers (LCCs) and sudden business travel demand spikes.
         </span>
