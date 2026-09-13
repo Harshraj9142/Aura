@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import {
   AreaChart,
   Area,
@@ -23,83 +22,103 @@ import {
 } from "lucide-react";
 import AirlineLogo from "@/components/AirlineLogo";
 
-// Chart mock history matching the reference design graph (Jan to Aug, reaching 102.6)
-const INDEX_CHART_DATA = [
-  { month: "Jan", index: 92 },
-  { month: "Feb", index: 91.5 },
-  { month: "Mar", index: 94 },
-  { month: "Apr", index: 96 },
-  { month: "May", index: 99.2 },
-  { month: "Jun", index: 97.8 },
-  { month: "Jul", index: 99.5 },
-  { month: "Aug", index: 102.6 },
+// Default real baseline data from Neon PostgreSQL (Ep-quiet-dawn)
+const INITIAL_INDEX_CHART_DATA = [
+  { month: "Aug 12", index: 99.4 },
+  { month: "Aug 16", index: 101.4 },
+  { month: "Aug 22", index: 105.5 },
+  { month: "Aug 29", index: 106.4 },
+  { month: "Sep 04", index: 110.3 },
+  { month: "Sep 08", index: 110.4 },
+  { month: "Sep 11", index: 106.0 },
+  { month: "Sep 12", index: 126.9 },
 ];
 
-const LIVE_ROUTE_FEEDS = [
+interface RouteFeedItem {
+  route: string;
+  carrier: string;
+  flightNumber: string;
+  fare: string;
+  tag: string;
+  tagType: "green" | "blue" | "red";
+}
+
+const INITIAL_LIVE_ROUTE_FEEDS: RouteFeedItem[] = [
   {
     route: "DEL → BOM",
-    carrier: "IndiGo",
-    flightNumber: "6E-205",
-    fare: "₹4,299",
-    tag: "↓ 14%",
-    tagType: "green",
-  },
-  {
-    route: "BOM → GOA",
-    carrier: "SpiceJet",
-    flightNumber: "SG-8169",
-    fare: "₹2,890",
-    tag: "Deal",
-    tagType: "blue",
+    carrier: "Air India",
+    flightNumber: "AI-525",
+    fare: "₹6,223",
+    tag: "↓ 22%",
+    tagType: "green" as const,
   },
   {
     route: "DEL → BLR",
-    carrier: "Akasa Air",
-    flightNumber: "QP-1351",
-    fare: "₹5,450",
-    tag: "High",
-    tagType: "red",
+    carrier: "Air India",
+    flightNumber: "AI-168",
+    fare: "₹7,225",
+    tag: "↓ 19%",
+    tagType: "green" as const,
+  },
+  {
+    route: "BOM → BLR",
+    carrier: "Air India",
+    flightNumber: "AI-726",
+    fare: "₹5,408",
+    tag: "↓ 18%",
+    tagType: "green" as const,
+  },
+  {
+    route: "DEL → CCU",
+    carrier: "Air India",
+    flightNumber: "AI-325",
+    fare: "₹5,297",
+    tag: "↓ 26%",
+    tagType: "green" as const,
   },
   {
     route: "BLR → HYD",
     carrier: "Air India",
-    flightNumber: "AI-512",
-    fare: "₹2,690",
-    tag: "↓ 11%",
-    tagType: "green",
+    flightNumber: "AI-549",
+    fare: "₹3,690",
+    tag: "↓ 22%",
+    tagType: "green" as const,
   },
   {
-    route: "DEL → CCU",
-    carrier: "Vistara",
-    flightNumber: "UK-705",
-    fare: "₹4,680",
-    tag: "↓ 8%",
-    tagType: "green",
+    route: "MAA → DEL",
+    carrier: "Air India",
+    flightNumber: "AI-112",
+    fare: "₹6,392",
+    tag: "↓ 25%",
+    tagType: "green" as const,
   },
 ];
 
 export default function DashboardOverview() {
   const [stats, setStats] = useState({
-    totalFares: 6482,
-    avgFare: 4892,
+    totalFares: 6715,
+    avgFare: 8841,
     otasCount: 6,
-    avgUpdateTime: "2.3s",
-    airfareIndex: 102.6,
+    avgUpdateTime: "1.2s",
+    airfareIndex: 126.9,
+    indexPctChange: 19.7,
   });
 
+  const [chartData, setChartData] = useState(INITIAL_INDEX_CHART_DATA);
+  const [liveRouteFeeds, setLiveRouteFeeds] = useState(INITIAL_LIVE_ROUTE_FEEDS);
+
   useEffect(() => {
-    // Attempt to load live API stats if available
+    // Load live database stats from PostgreSQL
     async function loadStats() {
       try {
-        const [routesRes] = await Promise.all([
-          fetch("/api/routes").then((r) => r.json()).catch(() => null),
-        ]);
-
-        if (routesRes?.data?.length) {
-          setStats((prev) => ({
-            ...prev,
-            totalFares: routesRes.data.length * 280,
-          }));
+        const res = await fetch("/api/dashboard/overview");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            if (json.data.stats) setStats(json.data.stats);
+            if (json.data.chartData?.length) setChartData(json.data.chartData);
+            if (json.data.liveFeeds?.length) setLiveRouteFeeds(json.data.liveFeeds);
+          }
         }
       } catch (err) {
         console.warn("API load note:", err);
@@ -316,8 +335,8 @@ export default function DashboardOverview() {
                 </span>
                 <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700">
                   <TrendingUp className="h-3.5 w-3.5" />
-                  2.4%
-                  <span className="text-[11px] font-normal text-slate-500">vs last month</span>
+                  {stats.indexPctChange >= 0 ? `+${stats.indexPctChange}%` : `${stats.indexPctChange}%`}
+                  <span className="text-[11px] font-normal text-slate-500">vs 30d base</span>
                 </span>
               </div>
             </div>
@@ -326,7 +345,7 @@ export default function DashboardOverview() {
             <div className="mt-8 h-52 w-full relative">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={INDEX_CHART_DATA}
+                  data={chartData}
                   margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
                 >
                   <defs>
@@ -339,11 +358,11 @@ export default function DashboardOverview() {
                     dataKey="month"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 11, fill: "#64748b" }}
+                    tick={{ fontSize: 10, fill: "#64748b" }}
+                    interval="preserveStartEnd"
                   />
                   <YAxis
-                    domain={[75, 125]}
-                    ticks={[80, 90, 100, 110, 120]}
+                    domain={["auto", "auto"]}
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 11, fill: "#64748b" }}
@@ -370,9 +389,9 @@ export default function DashboardOverview() {
                 </AreaChart>
               </ResponsiveContainer>
 
-              {/* Floating marker for latest index 102.6 */}
+              {/* Floating marker for latest index */}
               <div className="absolute top-2 right-4 bg-slate-900 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-md">
-                102.6
+                {stats.airfareIndex}
               </div>
             </div>
           </div>
@@ -474,7 +493,7 @@ export default function DashboardOverview() {
 
               {/* Route List Feed Right */}
               <div className="sm:col-span-7 space-y-2">
-                {LIVE_ROUTE_FEEDS.map((item, idx) => (
+                {liveRouteFeeds.map((item, idx) => (
                   <div
                     key={idx}
                     className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/90 transition border border-slate-200/40"

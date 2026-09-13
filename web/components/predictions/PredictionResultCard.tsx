@@ -7,9 +7,7 @@ import {
   Minus,
   Sparkles,
   CheckCircle2,
-  AlertCircle,
   Clock,
-  ArrowRight,
 } from "lucide-react";
 import { FlightPredictionResult } from "@/lib/ml/types";
 

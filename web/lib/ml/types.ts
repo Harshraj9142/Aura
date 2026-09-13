@@ -96,3 +96,27 @@ export interface LoggedPrediction {
   percentageError?: number | null;
   evaluatedAt?: string | null;
 }
+
+export interface RealTrackedFlight {
+  id: number;
+  flightNumber: string;
+  airline: string;
+  origin: string;
+  destination: string;
+  departureTime: string;
+  price: number;
+  durationMinutes: number;
+  stops: number;
+}
+
+export interface CorridorLiveSummary {
+  origin: string;
+  destination: string;
+  label: string;
+  baseFare: number;
+  liveAvgFare: number;
+  minFare: number;
+  maxFare: number;
+  count: number;
+  durationMinutes: number;
+}

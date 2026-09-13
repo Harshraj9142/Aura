@@ -12,7 +12,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { HorizonPoint } from "@/lib/ml/types";
-import { TrendingUp, Calendar, Info } from "lucide-react";
+import { Info } from "lucide-react";
 
 interface PredictionForecastChartProps {
   data: HorizonPoint[];

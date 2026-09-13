@@ -1,7 +1,12 @@
 import { Metadata } from "next";
-import { getModelRegistryStats, getRecentPredictions } from "@/lib/services/prediction.service";
+import {
+  getModelRegistryStats,
+  getRecentPredictions,
+  getRealCorridorSummaries,
+  getRealTrackedFlights,
+} from "@/lib/services/prediction.service";
 import { PredictionDashboardClient } from "@/components/predictions/PredictionDashboardClient";
-import { Sparkles, BrainCircuit } from "lucide-react";
+import { BrainCircuit } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "AI Price Predictions & Forecasts | APIx",
@@ -12,9 +17,11 @@ export const metadata: Metadata = {
 export const revalidate = 60; // Refresh every minute
 
 export default async function PredictionsPage() {
-  const [registryStats, recentPredictions] = await Promise.all([
+  const [registryStats, recentPredictions, corridorStats, realFlights] = await Promise.all([
     getModelRegistryStats(),
     getRecentPredictions(25),
+    getRealCorridorSummaries(),
+    getRealTrackedFlights(12),
   ]);
 
   return (
@@ -41,6 +48,8 @@ export default async function PredictionsPage() {
       <PredictionDashboardClient
         initialRegistryStats={registryStats}
         initialPredictions={recentPredictions}
+        initialCorridors={corridorStats}
+        initialRealFlights={realFlights}
       />
     </div>
   );
