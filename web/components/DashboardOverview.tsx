@@ -31,7 +31,7 @@ const INITIAL_INDEX_CHART_DATA = [
   { month: "Sep 04", index: 110.3 },
   { month: "Sep 08", index: 110.4 },
   { month: "Sep 11", index: 106.0 },
-  { month: "Sep 12", index: 126.9 },
+  { month: "Sep 12", index: 110.4 },
 ];
 
 interface RouteFeedItem {
@@ -97,11 +97,11 @@ const INITIAL_LIVE_ROUTE_FEEDS: RouteFeedItem[] = [
 export default function DashboardOverview() {
   const [stats, setStats] = useState({
     totalFares: 6715,
-    avgFare: 8841,
+    avgFare: 8445,
     otasCount: 6,
-    avgUpdateTime: "1.2s",
-    airfareIndex: 126.9,
-    indexPctChange: 19.7,
+    avgUpdateTime: "0.8s",
+    airfareIndex: 110.4,
+    indexPctChange: 4.2,
   });
 
   const [chartData, setChartData] = useState(INITIAL_INDEX_CHART_DATA);
