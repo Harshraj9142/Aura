@@ -32,8 +32,8 @@ export async function getActiveSurgeAlerts(): Promise<SurgeAlert[]> {
     });
 
     const baseValues = await prisma.route_base_values.findMany();
-    const baseMap = new Map(
-      baseValues.map((b) => [`${b.route_origin}-${b.route_destination}`, Number(b.base_avg_fare)])
+    const baseMap = new Map<string, number>(
+      baseValues.map((b: any) => [`${b.route_origin}-${b.route_destination}`, Number(b.base_avg_fare)])
     );
 
     for (const r of routeAvgFares) {
@@ -42,7 +42,7 @@ export async function getActiveSurgeAlerts(): Promise<SurgeAlert[]> {
       const maxFare = Number(r._max.total_fare ?? 0);
       const baseFare = baseMap.get(pair);
 
-      if (baseFare && baseFare > 0) {
+      if (baseFare !== undefined && baseFare > 0) {
         const surgePct = Math.round(((avgFare - baseFare) / baseFare) * 100);
 
         if (surgePct >= 20) {

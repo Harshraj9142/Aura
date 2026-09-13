@@ -110,7 +110,7 @@ export async function GET() {
     ]);
 
     // Format source breakdown
-    const sources = sourceBreakdown.map((s) => ({
+    const sources = sourceBreakdown.map((s: any) => ({
       name: s.source,
       type: s.source_type,
       count: s._count.id,
@@ -120,7 +120,7 @@ export async function GET() {
     }));
 
     // Format route breakdown
-    const routes = routeBreakdown.map((r) => ({
+    const routes = routeBreakdown.map((r: any) => ({
       origin: r.route_origin,
       destination: r.route_destination,
       pair: `${r.route_origin}-${r.route_destination}`,
@@ -131,7 +131,7 @@ export async function GET() {
     }));
 
     // Format carrier breakdown
-    const carriers = carrierBreakdown.map((c) => ({
+    const carriers = carrierBreakdown.map((c: any) => ({
       name: c.carrier,
       count: c._count.id,
       avgFare: Math.round(Number(c._avg.total_fare) || 0),
@@ -146,7 +146,7 @@ export async function GET() {
       : [];
 
     // Unique sources and routes count
-    const uniqueSources = new Set(sourceBreakdown.map((s) => s.source)).size;
+    const uniqueSources = new Set(sourceBreakdown.map((s: any) => s.source)).size;
     const uniqueRoutes = routeBreakdown.length;
     const uniqueCarriers = carrierBreakdown.length;
 
@@ -172,7 +172,7 @@ export async function GET() {
         sources,
         routes,
         carriers,
-        latestFares: latestFares.map((f) => ({
+        latestFares: latestFares.map((f: any) => ({
           ...f,
           total_fare: Number(f.total_fare),
           scraped_at: f.scraped_at.toISOString(),

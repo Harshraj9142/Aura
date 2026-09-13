@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const keys = await prisma.apiKey.findMany({
-      where: { userId: session.user.id },
+      where: { userId: (session.user as any).id },
       orderBy: { createdAt: "desc" },
     });
 
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       data: {
         key: apiKey,
         name: name,
-        userId: session.user.id,
+        userId: (session.user as any).id,
       },
     });
 
@@ -73,7 +73,7 @@ export async function DELETE(request: NextRequest) {
     await prisma.apiKey.delete({
       where: {
         id: keyId,
-        userId: session.user.id, // ensure they can only delete their own
+        userId: (session.user as any).id, // ensure they can only delete their own
       },
     });
 

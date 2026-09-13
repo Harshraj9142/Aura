@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       "Scraped At (UTC)",
     ];
 
-    const rows = fares.map((f) => [
+    const rows = fares.map((f: any) => [
       f.id,
       f.route_origin,
       f.route_destination,
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     const csvContent = [
       headers.join(","),
-      ...rows.map((row) => row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",")),
+      ...rows.map((row: any) => row.map((val: any) => `"${String(val).replace(/"/g, '""')}"`).join(",")),
     ].join("\n");
 
     return new NextResponse(csvContent, {
