@@ -1,0 +1,195 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "AURA API (Government Access)",
+    "description": "Internal API Documentation for the AURA Airfare Price Index Platform. This API provides programmatic access to historical airfares, market elasticity metrics, route analytics, and machine learning price predictions.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "AURA Developer Support",
+      "email": "support@aura-aviation.in"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Local Development Environment"
+    },
+    {
+      "url": "https://api.aura.gov.in/v1",
+      "description": "Production Government API (Placeholder)"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-KEY"
+      },
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/fares": {
+      "get": {
+        "summary": "Retrieve Airfare Data",
+        "description": "Get historical and scraped airfare records based on advanced filters. Used to populate the Price Index and Fares Explorer.",
+        "parameters": [
+          {
+            "name": "origin",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "example": "DEL" },
+            "description": "Origin Airport IATA Code (e.g., DEL)"
+          },
+          {
+            "name": "destination",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "example": "BOM" },
+            "description": "Destination Airport IATA Code (e.g., BOM)"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "date", "example": "2026-09-01" },
+            "description": "Filter fares from this departure date."
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "date", "example": "2026-10-01" },
+            "description": "Filter fares up to this departure date."
+          },
+          {
+            "name": "carrier",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "example": "Air India" },
+            "description": "Filter by a specific airline carrier."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 50 },
+            "description": "Limit the number of records returned (max 500)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response containing an array of airfare records.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": { "type": "integer", "example": 152 },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string", "example": "uuid-1234" },
+                          "route_origin": { "type": "string", "example": "DEL" },
+                          "route_destination": { "type": "string", "example": "BOM" },
+                          "departure_date": { "type": "string", "example": "2026-09-15" },
+                          "total_fare": { "type": "number", "example": 4500.50 },
+                          "carrier": { "type": "string", "example": "IndiGo" },
+                          "flight_number": { "type": "string", "example": "6E-123" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Missing or invalid parameters."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid API Key."
+          }
+        }
+      }
+    },
+    "/predict": {
+      "post": {
+        "summary": "Predict Flight Fares",
+        "description": "Generate predictions for future flight fares using our proprietary Machine Learning models. Returns a predicted price and a confidence interval.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "origin": { "type": "string", "example": "DEL" },
+                  "destination": { "type": "string", "example": "BOM" },
+                  "departure_date": { "type": "string", "example": "2026-10-01" },
+                  "days_to_departure": { "type": "integer", "example": 15 },
+                  "carrier": { "type": "string", "example": "Air India" }
+                },
+                "required": ["origin", "destination", "departure_date"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully generated price prediction.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "predicted_price": { "type": "number", "example": 5200 },
+                    "confidence_score": { "type": "number", "example": 0.89 },
+                    "lower_bound": { "type": "number", "example": 4800 },
+                    "upper_bound": { "type": "number", "example": 5600 },
+                    "model_version": { "type": "string", "example": "v2.1.0-xgb" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access."
+          }
+        }
+      }
+    },
+    "/analytics/elasticity": {
+      "get": {
+        "summary": "Lead-Time Elasticity Metrics",
+        "description": "Retrieve price elasticity metrics based on how many days prior to departure a ticket was booked. Identifies price surging patterns.",
+        "parameters": [
+          {
+            "name": "route",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "example": "DEL-BOM" },
+            "description": "The route to analyze (Origin-Destination)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Elasticity analytics data."
+          }
+        }
+      }
+    }
+  }
+}

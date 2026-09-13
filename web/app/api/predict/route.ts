@@ -9,10 +9,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFlightPrediction, logPrediction } from "@/lib/services/prediction.service";
 import { ok, fail } from "@/lib/utils/apiResponse";
+import { verifyApiAccess } from "@/lib/apiAuth";
 import { FlightPredictionInput } from "@/lib/ml/types";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Authenticate user via API Key or Session
+    const user = await verifyApiAccess(request);
+    if (!user) {
+      return fail("Unauthorized - Missing or Invalid API Key", "UNAUTHORIZED", 401);
+    }
+
     const body = await request.json();
 
     if (!body.origin || !body.destination || !body.airline || body.currentPrice === undefined) {
