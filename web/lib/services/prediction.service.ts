@@ -28,7 +28,7 @@ export async function getFlightPrediction(
  */
 export async function getModelRegistryStats(): Promise<ModelPerformanceStats[]> {
   try {
-    const records = await (prisma as any).model_registry.findMany({
+    const records = await prisma.model_registry.findMany({
       orderBy: { created_at: "desc" },
     });
 
@@ -47,14 +47,14 @@ export async function getModelRegistryStats(): Promise<ModelPerformanceStats[]> 
       ];
     }
 
-    return records.map((r: any) => ({
+    return records.map((r) => ({
       championVersion: r.version,
       algorithm: r.algorithm,
       mae: r.metrics_mae ?? 2.83,
       rmse: r.metrics_rmse ?? 23.79,
       mape: r.metrics_mape ?? 0.03,
       trainingSamples: r.sample_count ?? 8955,
-      status: r.status as "production" | "candidate" | "archived",
+      status: (r.status || "candidate") as "production" | "candidate" | "archived",
       lastRetrainedAt: r.created_at,
     }));
   } catch (err) {
@@ -79,12 +79,12 @@ export async function getModelRegistryStats(): Promise<ModelPerformanceStats[]> 
  */
 export async function getRecentPredictions(limit: number = 20): Promise<LoggedPrediction[]> {
   try {
-    const rows = await (prisma as any).predictions.findMany({
+    const rows = await prisma.predictions.findMany({
       take: limit,
       orderBy: { predicted_at: "desc" },
     });
 
-    return rows.map((p: any) => ({
+    return rows.map((p) => ({
       predictionId: p.prediction_id,
       flightSignature: p.flight_signature,
       predictedAt: p.predicted_at,
@@ -110,14 +110,14 @@ export async function logPrediction(
   flightSignature: string,
   predictedPrice: number,
   horizonHours: number = 24,
-  modelVersion: string = "v2"
+  modelVersion: string = "v3"
 ): Promise<void> {
   try {
     const now = new Date();
     const targetDate = new Date(now.getTime() + horizonHours * 3600000);
     const predId = `pred_${Math.random().toString(36).substring(2, 10)}`;
 
-    await (prisma as any).predictions.create({
+    await prisma.predictions.create({
       data: {
         prediction_id: predId,
         flight_signature: flightSignature,

@@ -2,16 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Plane,
   Calendar,
   IndianRupee,
   Sliders,
   Sparkles,
-  ChevronDown,
   Layers,
-  ArrowRight,
 } from "lucide-react";
-import { FlightPredictionInput, FlightPredictionResult } from "@/lib/ml/types";
+import { FlightPredictionResult } from "@/lib/ml/types";
 import AirlineLogo from "@/components/AirlineLogo";
 
 interface RouteOption {
@@ -19,24 +16,25 @@ interface RouteOption {
   destination: string;
   label: string;
   benchmark: number;
+  durationMinutes: number;
 }
 
 const POPULAR_ROUTES: RouteOption[] = [
-  { origin: "DEL", destination: "BOM", label: "Delhi → Mumbai", benchmark: 5500 },
-  { origin: "CCU", destination: "DEL", label: "Kolkata → Delhi", benchmark: 5100 },
-  { origin: "BLR", destination: "DEL", label: "Bengaluru → Delhi", benchmark: 6200 },
-  { origin: "BOM", destination: "BLR", label: "Mumbai → Bengaluru", benchmark: 4200 },
-  { origin: "HYD", destination: "DEL", label: "Hyderabad → Delhi", benchmark: 4800 },
-  { origin: "MAA", destination: "DEL", label: "Chennai → Delhi", benchmark: 5600 },
+  { origin: "DEL", destination: "BOM", label: "Delhi → Mumbai", benchmark: 7078, durationMinutes: 130 },
+  { origin: "DEL", destination: "BLR", label: "Delhi → Bengaluru", benchmark: 10130, durationMinutes: 165 },
+  { origin: "BOM", destination: "BLR", label: "Mumbai → Bengaluru", benchmark: 7828, durationMinutes: 105 },
+  { origin: "DEL", destination: "CCU", label: "Delhi → Kolkata", benchmark: 10105, durationMinutes: 135 },
+  { origin: "BLR", destination: "HYD", label: "Bengaluru → Hyderabad", benchmark: 8568, durationMinutes: 75 },
+  { origin: "MAA", destination: "DEL", label: "Chennai → Delhi", benchmark: 10800, durationMinutes: 170 },
 ];
 
 const AIRLINES = [
   "IndiGo",
   "Air India",
-  "Vistara",
-  "SpiceJet",
+  "Air India Express",
   "Akasa Air",
-  "AirAsia India",
+  "SpiceJet",
+  "Vistara",
 ];
 
 interface PredictionSimulatorProps {
@@ -51,11 +49,11 @@ export function PredictionSimulator({
   const [selectedRoute, setSelectedRoute] = useState<RouteOption>(POPULAR_ROUTES[0]);
   const [airline, setAirline] = useState<string>("IndiGo");
   const [daysToDeparture, setDaysToDeparture] = useState<number>(7);
-  const [currentPrice, setCurrentPrice] = useState<number>(5500);
+  const [currentPrice, setCurrentPrice] = useState<number>(POPULAR_ROUTES[0].benchmark);
   const [stops, setStops] = useState<number>(0);
-  const [durationMinutes, setDurationMinutes] = useState<number>(130);
+  const [durationMinutes, setDurationMinutes] = useState<number>(POPULAR_ROUTES[0].durationMinutes);
   const [showFeatures, setShowFeatures] = useState<boolean>(false);
-  const [activeFeatures, setActiveFeatures] = useState<Record<string, any> | null>(null);
+  const [activeFeatures, setActiveFeatures] = useState<Record<string, unknown> | null>(null);
 
   const runPrediction = async (
     route = selectedRoute,
@@ -99,13 +97,32 @@ export function PredictionSimulator({
 
   // Run initial prediction on mount
   useEffect(() => {
-    runPrediction(POPULAR_ROUTES[0], "IndiGo", 7, 5500, 0, 130);
+    let isMounted = true;
+    const timer = setTimeout(() => {
+      if (isMounted) {
+        runPrediction(
+          POPULAR_ROUTES[0],
+          "IndiGo",
+          7,
+          POPULAR_ROUTES[0].benchmark,
+          0,
+          POPULAR_ROUTES[0].durationMinutes
+        );
+      }
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRouteChange = (r: RouteOption) => {
     setSelectedRoute(r);
     setCurrentPrice(r.benchmark);
-    runPrediction(r, airline, daysToDeparture, r.benchmark, stops, durationMinutes);
+    setDurationMinutes(r.durationMinutes);
+    runPrediction(r, airline, daysToDeparture, r.benchmark, stops, r.durationMinutes);
   };
 
   return (

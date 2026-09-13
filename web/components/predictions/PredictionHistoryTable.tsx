@@ -2,7 +2,7 @@
 
 import React from "react";
 import { LoggedPrediction } from "@/lib/ml/types";
-import { History, CheckCircle2, Clock, Sparkles } from "lucide-react";
+import { History, CheckCircle2, Clock } from "lucide-react";
 import AirlineLogo from "@/components/AirlineLogo";
 
 interface PredictionHistoryTableProps {
@@ -47,6 +47,7 @@ export function PredictionHistoryTable({ predictions }: PredictionHistoryTablePr
                 const parts = p.flightSignature.split("_");
                 const carrierFlight = parts[0] || p.flightSignature;
                 const route = parts.length >= 3 ? `${parts[1]} → ${parts[2]}` : "";
+                const depDate = parts.length >= 4 ? parts[3].split("T")[0] : "";
 
                 return (
                   <tr key={p.predictionId} className="hover:bg-slate-900/40 transition">
@@ -56,7 +57,9 @@ export function PredictionHistoryTable({ predictions }: PredictionHistoryTablePr
                         <AirlineLogo airline={carrierFlight} flightNumber={carrierFlight} size="xs" />
                         <div>
                           <div className="font-medium text-slate-200">{carrierFlight}</div>
-                          {route && <div className="text-[10px] text-slate-500">{route}</div>}
+                          <div className="text-[10px] text-slate-500">
+                            {route} {depDate ? `· ${depDate}` : ""}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -76,9 +79,16 @@ export function PredictionHistoryTable({ predictions }: PredictionHistoryTablePr
                     </td>
                     <td className="py-2.5 text-center">
                       {p.actualPrice !== null && p.actualPrice !== undefined ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-400 text-[11px] font-mono">
+                        <span className="inline-flex items-center gap-1 text-emerald-400 text-[11px] font-mono font-medium">
                           <CheckCircle2 className="h-3 w-3" />
-                          ₹{p.actualPrice.toFixed(0)} (Err: ₹{p.error?.toFixed(0)})
+                          ₹{p.actualPrice.toFixed(0)}{" "}
+                          <span className="text-[10px] text-emerald-500/80">
+                            (Err: ₹{p.error !== null && p.error !== undefined ? p.error.toFixed(0) : "0"}
+                            {p.percentageError !== null && p.percentageError !== undefined
+                              ? ` · ${p.percentageError.toFixed(1)}%`
+                              : ""}
+                            )
+                          </span>
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-slate-500 text-[10px]">
