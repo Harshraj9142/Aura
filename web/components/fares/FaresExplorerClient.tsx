@@ -80,18 +80,11 @@ export function FaresExplorerClient({
 
   // Sidebar filter state
   const [maxPrice, setMaxPrice] = useState<number>(25000);
-  const [selectedDiscount, setSelectedDiscount] = useState<string | null>(null);
-  const [selectedDepartureTime, setSelectedDepartureTime] = useState<string | null>(null);
-  const [selectedAircraft, setSelectedAircraft] = useState<string | null>(null);
   const [activeTabModal, setActiveTabModal] = useState<Fare | null>(null);
 
   // Accordion state
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
     price: true,
-    discount: true,
-    departure: true,
-    aircraft: true,
-    operator: true,
   });
 
   const origins = Array.from(new Set(routes.map((r) => r.origin))).sort();
@@ -588,79 +581,6 @@ export function FaresExplorerClient({
                   </div>
                 )}
               </div>
-
-              <hr className="border-slate-100" />
-
-              {/* Discount Chips */}
-              <div className="space-y-3">
-                <div
-                  onClick={() => toggleAccordion("discount")}
-                  className="flex items-center justify-between cursor-pointer select-none"
-                >
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-950">Discount Offer</span>
-                  <span className="text-slate-400 font-bold text-xs">
-                    {openAccordions.discount ? "▲" : "▼"}
-                  </span>
-                </div>
-
-                {openAccordions.discount && (
-                  <div className="grid grid-cols-4 gap-2 pt-1">
-                    {["5%", "10%", "15%", "20%"].map((disc) => (
-                      <button
-                        key={disc}
-                        onClick={() => setSelectedDiscount(selectedDiscount === disc ? null : disc)}
-                        className={`py-1.5 text-xs font-bold rounded-full border transition text-center ${
-                          selectedDiscount === disc
-                            ? "bg-slate-950 text-white border-slate-950 shadow-md"
-                            : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                        }`}
-                      >
-                        {disc}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <hr className="border-slate-100" />
-
-              {/* Departure Time */}
-              <div className="space-y-3">
-                <div
-                  onClick={() => toggleAccordion("departure")}
-                  className="flex items-center justify-between cursor-pointer select-none"
-                >
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-950">Departure Time</span>
-                  <span className="text-slate-400 font-bold text-xs">
-                    {openAccordions.departure ? "▲" : "▼"}
-                  </span>
-                </div>
-
-                {openAccordions.departure && (
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    {[
-                      { label: "Morning", time: "06:00 - 12:00" },
-                      { label: "Afternoon", time: "12:00 - 18:00" },
-                      { label: "Evening", time: "18:00 - 00:00" },
-                      { label: "Night", time: "00:00 - 06:00" },
-                    ].map((t) => (
-                      <button
-                        key={t.label}
-                        onClick={() => setSelectedDepartureTime(selectedDepartureTime === t.label ? null : t.label)}
-                        className={`p-2.5 rounded-2xl border transition text-left ${
-                          selectedDepartureTime === t.label
-                            ? "bg-slate-950 text-white border-slate-950 shadow-sm"
-                            : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                        }`}
-                      >
-                        <div className="text-xs font-bold">{t.label}</div>
-                        <div className="text-[10px] opacity-80">{t.time}</div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
             </div>
           </div>
 

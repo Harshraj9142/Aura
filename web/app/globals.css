@@ -57,4 +57,13 @@ body {
   font-size: 0.75rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+}
+
+@media (min-width: 1024px) {
+  .ticket-cutout-mask {
+    -webkit-mask-image: radial-gradient(circle 12px at calc(100% - 256px) 0, transparent 12px, black 12.5px), radial-gradient(circle 12px at calc(100% - 256px) 100%, transparent 12px, black 12.5px);
+    -webkit-mask-composite: source-in;
+    mask-image: radial-gradient(circle 12px at calc(100% - 256px) 0, transparent 12px, black 12.5px), radial-gradient(circle 12px at calc(100% - 256px) 100%, transparent 12px, black 12.5px);
+    mask-composite: intersect;
+  }
 }

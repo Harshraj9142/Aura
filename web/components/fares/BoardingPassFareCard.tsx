@@ -139,7 +139,7 @@ export function BoardingPassFareCard({ fare, onViewDetails }: BoardingPassFareCa
   const flightCodeFormatted = fare.flight_number || `${config.codePrefix}-${400 + (hash % 500)}`;
 
   return (
-    <div className="group relative w-full rounded-3xl bg-white border border-slate-200/90 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col lg:flex-row items-stretch select-none">
+    <div className="ticket-cutout-mask group relative w-full rounded-3xl bg-white border border-slate-200/90 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col lg:flex-row items-stretch select-none">
       
       {/* ── LEFT TICKET BODY (Main Boarding Pass Body) ────────────────────────── */}
       <div className="flex-1 p-6 flex flex-col justify-between space-y-5 bg-white relative">
@@ -272,11 +272,8 @@ export function BoardingPassFareCard({ fare, onViewDetails }: BoardingPassFareCa
 
       </div>
 
-      {/* ── DOTTED PERFORATED TEAR LINE WITH PHYSICAL PUNCH HOLES ─────────────── */}
-      <div className="hidden lg:block relative w-0 border-r-2 border-dashed border-slate-200">
-        <div className="absolute -top-3.5 -left-[11px] w-6 h-6 rounded-full bg-[#08080D] border border-slate-800 z-30" />
-        <div className="absolute -bottom-3.5 -left-[11px] w-6 h-6 rounded-full bg-[#08080D] border border-slate-800 z-30" />
-      </div>
+      {/* ── DOTTED PERFORATED TEAR LINE ─────────────── */}
+      <div className="hidden lg:block relative w-0 border-r-2 border-dashed border-slate-200 my-3" />
 
       {/* ── RIGHT PERFORATED TEAR STUB (FARES & BARCODE) ───────────────────────── */}
       <div className="p-6 bg-slate-50/70 flex flex-col justify-between space-y-4 w-full lg:w-64 shrink-0 relative select-none">
