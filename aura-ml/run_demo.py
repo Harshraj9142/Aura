@@ -7,6 +7,9 @@ Executes the full feedback loop from scraping simulation to deployment.
 import time
 import json
 from datetime import datetime, timedelta, timezone
+import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from aura_ml.pipeline.orchestrator import PipelineOrchestrator
 from aura_ml.features.engineer import FeatureEngineer
 
@@ -15,7 +18,20 @@ def print_banner(step_num: int, title: str):
     print(f"  STAGE {step_num}: {title.upper()}")
     print("=" * 75)
 
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK")
+        
+def start_health_server():
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    print(f"Health check web server started on port {port}")
+
 def main():
+    start_health_server()
     print("""
     =====================================================================
           AURA ML: CONTINUOUS-LEARNING AIRFARE PRICE PREDICTION
@@ -234,8 +250,13 @@ def main():
     print("""
     =====================================================================
        DEMO COMPLETE: All 11 stages of the pipeline executed safely!
+       (Service will now stay alive to respond to Render health checks)
     =====================================================================
     """)
+    
+    # Keep the main thread alive so the Web Service doesn't exit
+    while True:
+        time.sleep(3600)
 
 if __name__ == "__main__":
     main()

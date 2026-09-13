@@ -26,6 +26,9 @@ import sys
 import uuid
 from datetime import date, datetime, timedelta
 from pathlib import Path
+import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 from loguru import logger
 
@@ -473,8 +476,21 @@ def cmd_init_db() -> None:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK")
+        
+def start_health_server():
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    logger.info(f"Health check web server started on port {port}")
+
 def main() -> None:
     """Main entry point for the APIx scraper CLI."""
+    start_health_server()
     setup_logging()
     parser = build_parser()
     args = parser.parse_args()
