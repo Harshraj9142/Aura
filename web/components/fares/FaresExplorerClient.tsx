@@ -124,9 +124,6 @@ export function FaresExplorerClient({
     setDateTo("");
     setIsOutlier("exclude");
     setMaxPrice(25000);
-    setSelectedDiscount(null);
-    setSelectedDepartureTime(null);
-    setSelectedAircraft(null);
 
     startTransition(() => {
       router.push("/dashboard/fares");
