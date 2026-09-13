@@ -69,48 +69,48 @@ def display_rich_menu():
     source_table.add_column("Ingestion Notes", style="dim white", width=34)
 
     platforms = [
-        ("1", "EaseMyTrip", "OTA", "● OPERATIONAL", "Direct fast JSON quote ingestion"),
-        ("2", "Ixigo", "OTA", "● OPERATIONAL", "Aggregated multi-carrier fares"),
-        ("3", "Cleartrip", "OTA", "● OPERATIONAL", "Fast DOM grid extraction"),
-        ("4", "MakeMyTrip", "OTA", "🛡️ SHIELDED", "Akamai Bot Manager protected"),
-        ("5", "Goibibo", "OTA", "🛡️ SHIELDED", "WAF & challenge interstitial protected"),
-        ("6", "Yatra", "OTA", "● ACTIVE", "Multi-hop domestic fare search"),
-        ("7", "IndiGo", "AIRLINE", "● OPERATIONAL", "Largest Indian domestic carrier (6E)"),
-        ("8", "Air India", "AIRLINE", "🛡️ SHIELDED", "Legacy flag carrier (AI)"),
-        ("9", "Air India Express", "AIRLINE", "● OPERATIONAL", "LCC subsidiary flights (IX)"),
-        ("10", "Akasa Air", "AIRLINE", "● OPERATIONAL", "Next-gen domestic carrier (QP)"),
-        ("11", "SpiceJet", "AIRLINE", "● OPERATIONAL", "Budget domestic carrier (SG)"),
-        ("12", "All Operational Sources", "COMBINED", "★ RECOMMENDED", "Batch parallel extraction across all live sources"),
+        ("1", "EaseMyTrip", "OTA", "★ RECOMMENDED", "Ultra-fast multi-carrier (IndiGo, AI, SpiceJet, Akasa)"),
+        ("2", "Cleartrip", "OTA", "● OPERATIONAL", "Direct fast grid (IndiGo, AI, Akasa)"),
+        ("3", "Ixigo", "OTA", "● OPERATIONAL", "Aggregated multi-carrier fare matrix"),
+        ("4", "SpiceJet", "AIRLINE", "● OPERATIONAL", "Direct portal (SG) with dynamic low-fare calendar"),
+        ("5", "IndiGo", "AIRLINE", "● OPERATIONAL", "Largest Indian domestic carrier (6E)"),
+        ("6", "Akasa Air", "AIRLINE", "● OPERATIONAL", "Next-gen domestic carrier (QP)"),
+        ("7", "Air India Express", "AIRLINE", "● OPERATIONAL", "LCC subsidiary flights (IX)"),
+        ("8", "MakeMyTrip", "OTA", "🛡️ SHIELDED", "Akamai Bot Manager protected"),
+        ("9", "Goibibo", "OTA", "🛡️ SHIELDED", "WAF & challenge interstitial protected"),
+        ("10", "Yatra", "OTA", "● ACTIVE", "Multi-hop domestic fare search"),
+        ("11", "SpiceJet (Direct)", "AIRLINE", "● OPERATIONAL", "Alias to Option 4 (SG Portal)"),
+        ("12", "All Operational OTAs", "COMBINED", "★ ALL AIRLINES", "Parallel extraction (EaseMyTrip + Cleartrip)"),
     ]
 
     for opt, name, ptype, status, notes in platforms:
-        is_rec = opt == "12"
-        opt_style = "[bold bright_cyan]12[/]" if is_rec else f"[yellow]{opt}[/]"
+        is_rec = opt in ("1", "12")
+        opt_style = f"[bold bright_cyan]{opt}[/]" if is_rec else f"[yellow]{opt}[/]"
         name_style = f"[bold bright_white]{name}[/]" if is_rec else name
-        status_style = "[bold green]★ RECOMMENDED[/]" if is_rec else ("[green]" + status + "[/]" if "OPERATIONAL" in status or "ACTIVE" in status else "[red]" + status + "[/]")
+        status_style = "[bold green]" + status + "[/]" if "RECOMMENDED" in status or "ALL AIRLINES" in status else ("[green]" + status + "[/]" if "OPERATIONAL" in status or "ACTIVE" in status else "[red]" + status + "[/]")
         source_table.add_row(opt_style, name_style, ptype, status_style, notes)
 
     console.print(source_table)
     source_choice = Prompt.ask(
-        "[bold cyan]aura[/][bold white]>[/] [bold yellow]Select Platform [1-12][/] [dim](Default: 12)[/]",
-        default="12",
+        "[bold cyan]aura[/][bold white]>[/] [bold yellow]Select Platform [1-12][/] [dim](Default: 1 - EaseMyTrip)[/]",
+        default="1",
     )
 
     sources_map = {
         "1": ["easemytrip"],
-        "2": ["ixigo"],
-        "3": ["cleartrip"],
-        "4": ["makemytrip"],
-        "5": ["goibibo"],
-        "6": ["yatra"],
-        "7": ["indigo"],
-        "8": ["air_india"],
-        "9": ["air_india_express"],
-        "10": ["akasa"],
+        "2": ["cleartrip"],
+        "3": ["ixigo"],
+        "4": ["spicejet"],
+        "5": ["indigo"],
+        "6": ["akasa"],
+        "7": ["air_india_express"],
+        "8": ["makemytrip"],
+        "9": ["goibibo"],
+        "10": ["yatra"],
         "11": ["spicejet"],
-        "12": ["easemytrip", "ixigo", "cleartrip", "indigo", "air_india_express", "akasa", "spicejet"],
+        "12": ["easemytrip", "cleartrip"],
     }
-    selected_sources = sources_map.get(source_choice.strip(), sources_map["12"])
+    selected_sources = sources_map.get(source_choice.strip(), sources_map["1"])
 
     # STEP 2: Select DGCA Corridor / City-Pair Route
     route_table = Table(
@@ -288,8 +288,13 @@ async def execute_rich_scrape(selected_sources, route_pair_filter, selected_wind
                                     total_str,
                                 )
                         else:
+                            status_note = "[yellow]No Carrier Flights[/yellow]"
+                            if res.error_message and "timeout" in res.error_message.lower():
+                                status_note = "[dim yellow]Portal Timed Out[/dim yellow]"
+                            elif res.error_message and "disallowed" in res.error_message.lower():
+                                status_note = "[dim red]robots.txt Restricted[/dim red]"
                             results_table.add_row(
-                                source_name.title(), route.pair, f"T+{adv}d", "—", "—", str(travel_date), "—", "—", "[yellow]No Fares Available[/yellow]"
+                                source_name.title(), route.pair, f"T+{adv}d", "—", "—", str(travel_date), "—", "—", status_note
                             )
                     except Exception as e:
                         results_table.add_row(
@@ -299,11 +304,15 @@ async def execute_rich_scrape(selected_sources, route_pair_filter, selected_wind
     console.print(results_table)
 
     # Ingestion Summary Panel
+    advise_str = ""
+    if total_extracted == 0:
+        advise_str = "\n\n[bold yellow]💡 Pro-Tip:[/bold yellow] [dim white]Single-carrier portals (SpiceJet, IndiGo) only fly select routes.\nFor guaranteed complete coverage across all 6 corridors with 100+ flights, choose Option 1 (EaseMyTrip) or Option 2 (Cleartrip).[/dim white]"
+
     console.print(
         Panel(
             f"[bold white]Total Raw Flight Observations:[/bold white] [green]{total_extracted:,}[/green]\n"
             f"[bold white]Deduplicated Records Ingested to PostgreSQL:[/bold white] [cyan]{total_saved:,}[/cyan]\n"
-            f"[bold white]Database Sync Status:[/bold white] [bold bright_green]Active (ep-quiet-dawn)[/bold bright_green]",
+            f"[bold white]Database Sync Status:[/bold white] [bold bright_green]Active (ep-quiet-dawn)[/bold bright_green]{advise_str}",
             title="[bold green]📊 INGESTION TELEMETRY SUMMARY[/bold green]",
             box=box.ROUNDED,
             border_style="green",
