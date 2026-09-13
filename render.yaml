@@ -3,8 +3,8 @@ services:
   - type: web
     name: aura-scraper-service
     env: python
-    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
-    startCommand: cd scraper && python main.py --schedule
+    buildCommand: pip install -r requirements.txt && playwright install chromium
+    startCommand: python main.py --schedule
     envVars:
       - key: DATABASE_URL
         sync: false # Set this in the Render Dashboard
