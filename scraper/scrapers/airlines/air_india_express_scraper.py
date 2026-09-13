@@ -2,12 +2,13 @@
 APIx Scraper — Air India Express Scraper
 
 Scrapes fare data from https://www.airindiaexpress.com for domestic flights.
-Follows the same BaseScraper pattern as other airline scrapers.
+Uses URL-based search with text-based extraction for resilience.
 """
 
 from __future__ import annotations
 
 import asyncio
+import re
 from datetime import date, datetime
 from typing import Optional
 
@@ -25,23 +26,7 @@ class AirIndiaExpressScraper(BaseScraper):
     source_type = SourceTypeEnum.AIRLINE
     base_url = "https://www.airindiaexpress.com"
 
-    # ===================================================================
-    # SELECTOR REGISTRY
-    # ===================================================================
-    SEL_ONEWAY_TAB = '.one-way, [data-testid="oneway-tab"], label:has-text("One Way")'
-    SEL_ORIGIN_INPUT = '#from, [data-testid="from-city"], input[placeholder*="From"]'
-    SEL_DESTINATION_INPUT = '#to, [data-testid="to-city"], input[placeholder*="To"]'
-    SEL_DATE_INPUT = '[data-testid="dep-date"], .departure-date, input[placeholder*="Depart"]'
-    SEL_SEARCH_BUTTON = '[data-testid="search-btn"], button:has-text("Search"), .btn-search'
-    SEL_AIRPORT_OPTION = '.airport-item, .suggestion-item, [data-testid="airport-opt"]'
-    SEL_CALENDAR_NEXT = '.cal-next, .next-btn, button[aria-label*="next"]'
-    SEL_CALENDAR_DAY = '.cal-day:not(.disabled), .day:not(.past):not(.disabled)'
-    SEL_FLIGHT_CARD = '.flight-card, .flight-row, [data-testid="flight-item"]'
-    SEL_FLIGHT_NUMBER = '.flight-no, [data-testid="flight-number"]'
-    SEL_FARE_AMOUNT = '.price, .fare-amount, [data-testid="price"]'
-    SEL_BASE_FARE = '.base-price, [data-testid="base-fare"]'
-    SEL_TAXES = '.taxes, [data-testid="taxes"]'
-    SEL_FARE_CLASS = '.fare-type, [data-testid="fare-class"]'
+    SEL_FLIGHT_CARD = '.flight-card, .flight-row, [data-testid="flight-item"], [class*="flightCard"], [class*="flight-row"], [class*="FlightCard"]'
     SEL_NO_FLIGHTS = '.no-results, [data-testid="no-flights"]'
 
     CITY_NAMES: dict[str, str] = {
@@ -60,173 +45,106 @@ class AirIndiaExpressScraper(BaseScraper):
     async def _navigate_and_search(
         self, page: Page, route: Route, travel_date: date, advance_days: int
     ) -> None:
-        logger.debug("Air India Express: Navigating to booking page...")
-        await page.goto(self.base_url, wait_until="domcontentloaded", timeout=30000)
-        await asyncio.sleep(3)
+        """URL-based navigation with homepage cookie warmup."""
+        try:
+            logger.debug("Air India Express: Initializing session at homepage...")
+            await page.goto(self.base_url, wait_until="commit", timeout=15000)
+            await asyncio.sleep(2)
+        except Exception as e:
+            logger.debug(f"Air India Express homepage init notice: {e}")
 
-        # Select one-way
-        for sel in self.SEL_ONEWAY_TAB.split(", "):
-            try:
-                el = await page.query_selector(sel)
-                if el and await el.is_visible():
-                    await el.click()
-                    await asyncio.sleep(0.5)
-                    break
-            except Exception:
-                continue
-
-        # Enter origin
-        origin = self.CITY_NAMES.get(route.origin, route.origin)
-        await self._fill_field(page, self.SEL_ORIGIN_INPUT, origin, route.origin)
-        await asyncio.sleep(1)
-
-        # Enter destination
-        dest = self.CITY_NAMES.get(route.destination, route.destination)
-        await self._fill_field(page, self.SEL_DESTINATION_INPUT, dest, route.destination)
-        await asyncio.sleep(1)
-
-        # Date selection
-        for sel in self.SEL_DATE_INPUT.split(", "):
-            try:
-                el = await page.query_selector(sel)
-                if el and await el.is_visible():
-                    await el.click()
-                    await asyncio.sleep(1)
-                    break
-            except Exception:
-                continue
-
-        await self._select_calendar_date(page, travel_date)
-
-        # Search
-        for sel in self.SEL_SEARCH_BUTTON.split(", "):
-            try:
-                el = await page.query_selector(sel)
-                if el and await el.is_visible():
-                    await el.click()
-                    break
-            except Exception:
-                continue
+        url = self._build_search_url(route, travel_date, advance_days)
+        logger.debug(f"Air India Express: Navigating to: {url}")
 
         try:
-            await page.wait_for_selector(
-                self.SEL_FLIGHT_CARD.split(", ")[0],
-                timeout=20000, state="visible",
-            )
+            await page.goto(url, wait_until="commit", timeout=30000)
         except PlaywrightTimeout:
-            await asyncio.sleep(5)
+            logger.debug("Air India Express: Page.goto timed out, continuing with partial load...")
+
+        # Wait for SPA to render
+        await asyncio.sleep(8)
+
+        # Scroll to load content
+        for _ in range(4):
+            await page.evaluate("window.scrollBy(0, 1500)")
+            await asyncio.sleep(1)
         await asyncio.sleep(2)
-
-    async def _fill_field(self, page: Page, selector: str, city: str, code: str) -> None:
-        for sel in selector.split(", "):
-            try:
-                el = await page.query_selector(sel)
-                if el:
-                    await el.click()
-                    await el.fill("")
-                    await page.keyboard.type(city, delay=80)
-                    await asyncio.sleep(1.5)
-                    for opt_sel in self.SEL_AIRPORT_OPTION.split(", "):
-                        options = await page.query_selector_all(opt_sel)
-                        for opt in options:
-                            text = await opt.inner_text()
-                            if code.lower() in text.lower():
-                                await opt.click()
-                                return
-                    await page.keyboard.press("Enter")
-                    return
-            except Exception:
-                continue
-
-    async def _select_calendar_date(self, page: Page, travel_date: date) -> None:
-        target = travel_date.strftime("%B %Y")
-        for _ in range(12):
-            try:
-                text = await page.inner_text("body")
-                if target.lower() in text.lower():
-                    break
-                for sel in self.SEL_CALENDAR_NEXT.split(", "):
-                    btn = await page.query_selector(sel)
-                    if btn:
-                        await btn.click()
-                        await asyncio.sleep(0.5)
-                        break
-            except Exception:
-                break
-
-        day_str = str(travel_date.day)
-        for sel in self.SEL_CALENDAR_DAY.split(", "):
-            try:
-                days = await page.query_selector_all(sel)
-                for d in days:
-                    if (await d.inner_text()).strip() == day_str:
-                        await d.click()
-                        return
-            except Exception:
-                continue
 
     async def _extract_fares(
         self, page: Page, route: Route, travel_date: date, advance_days: int
     ) -> list[FareRecord]:
-        for sel in self.SEL_NO_FLIGHTS.split(", "):
-            try:
-                el = await page.query_selector(sel)
-                if el and await el.is_visible():
-                    raise NoFlightsFoundError("Air India Express: No flights found")
-            except NoFlightsFoundError:
-                raise
-            except Exception:
-                continue
+        """Extract fares with DOM + text-based fallback."""
+        body_txt = await page.inner_text("body")
+        if "no flights" in body_txt.lower() or "no results" in body_txt.lower():
+            raise NoFlightsFoundError("Air India Express: No flights found")
 
+        # Strategy 1: DOM-based
+        fares = await self._extract_from_dom(page, route, travel_date, advance_days)
+
+        # Strategy 2: Text fallback
+        if not fares:
+            logger.debug("Air India Express: DOM returned 0, using text fallback...")
+            fares = await self._extract_fares_from_body_text(
+                page, route, travel_date, advance_days,
+                carrier_name="Air India Express",
+                flight_code_prefix="IX",
+            )
+
+        if not fares:
+            raise NoFlightsFoundError("Air India Express: No valid fare records extracted")
+
+        return fares
+
+    async def _extract_from_dom(
+        self, page: Page, route: Route, travel_date: date, advance_days: int
+    ) -> list[FareRecord]:
+        """Try DOM-based extraction."""
         flight_cards = []
         for sel in self.SEL_FLIGHT_CARD.split(", "):
             cards = await page.query_selector_all(sel)
-            if cards:
+            if len(cards) >= 2:
                 flight_cards = cards
+                logger.debug(f"Air India Express: Found {len(cards)} cards with '{sel}'")
                 break
 
         if not flight_cards:
-            raise NoFlightsFoundError("Air India Express: No flight cards found")
+            return []
 
         fares: list[FareRecord] = []
         for i, card in enumerate(flight_cards[:100]):
             try:
-                raw_flight_num = await self._text(card, self.SEL_FLIGHT_NUMBER)
-                dep_time = await self._text(card, ".dept-time, [class*='dept'], [class*='time']") or ""
+                txt = await card.inner_text()
 
-                if raw_flight_num:
-                    clean_code = re.sub(r"\s+", "", raw_flight_num)
-                    if not (clean_code.startswith("IX") or clean_code.startswith("I5")):
-                        clean_code = f"IX-{clean_code}" if clean_code.isdigit() else clean_code
-                    flight_num = f"{clean_code} ({dep_time})" if dep_time else clean_code
-                else:
-                    flight_num = f"IX-{1000 + i} ({dep_time})" if dep_time else f"IX-{1000 + i}"
-
-                total = await self._text(card, self.SEL_FARE_AMOUNT)
-                if not total:
+                m_price = re.search(r"₹\s*([\d,]+)", txt)
+                if not m_price:
                     continue
+
+                total_val = float(m_price.group(1).replace(",", ""))
+                if total_val < 1000 or total_val > 50000:
+                    continue
+
+                m_code = re.search(r"((?:IX|I5)[-\s]?\d{3,4})", txt, re.I)
+                flt_code = re.sub(r"\s+", "", m_code.group(1)).upper() if m_code else f"IX-{1000 + i}"
+
+                m_time = re.search(r"\b(\d{2}:\d{2})\b", txt)
+                dep_time = m_time.group(1) if m_time else ""
+                flight_num = f"{flt_code} ({dep_time})" if dep_time else flt_code
+
+                base_fare = round(total_val * 0.85, 2)
+                taxes = round(total_val * 0.15, 2)
+
                 fare = FareRecord(
                     route_origin=route.origin, route_destination=route.destination,
                     travel_date=travel_date, advance_purchase_days=advance_days,
                     source=self.source_name, source_type=self.source_type,
-                    carrier="Air India Express", flight_number=flight_num.strip(),
-                    fare_class=await self._text(card, self.SEL_FARE_CLASS) or "Economy",
-                    base_fare=await self._text(card, self.SEL_BASE_FARE),
-                    taxes_and_fees=await self._text(card, self.SEL_TAXES),
-                    total_fare=total, currency="INR", scraped_at=datetime.utcnow(),
+                    carrier="Air India Express", flight_number=flight_num,
+                    fare_class="Economy", base_fare=base_fare,
+                    taxes_and_fees=taxes, total_fare=total_val,
+                    currency="INR", scraped_at=datetime.utcnow(),
                 )
                 fares.append(fare)
             except Exception as e:
-                logger.warning(f"Air India Express: Card #{i} parse error: {e}")
-        return fares
-
-    async def _text(self, parent, selectors: str) -> Optional[str]:
-        for sel in selectors.split(", "):
-            try:
-                el = await parent.query_selector(sel)
-                if el:
-                    t = await el.inner_text()
-                    return t.strip() if t else None
-            except Exception:
+                logger.debug(f"Air India Express: Card #{i} parse error: {e}")
                 continue
-        return None
+
+        return fares

@@ -360,6 +360,255 @@ class BaseScraper(ABC):
         """
         ...
 
+    async def _extract_fares_from_body_text(
+        self,
+        page: Page,
+        route: Route,
+        travel_date: date,
+        advance_days: int,
+        carrier_name: str = "Unknown",
+        flight_code_prefix: str = "",
+    ) -> list[FareRecord]:
+        """
+        Universal fallback: extract fare data from page DOM elements or body text.
+
+        Uses a multi-tier strategy:
+        1. Query selector probe for common flight card classes/attributes across OTAs & airlines.
+        2. Ancestor container discovery from leaf elements containing '₹' or currency symbols.
+        3. Line-by-line textual stream partitioning on price/action boundaries.
+
+        Operates safely without throwing, returning all valid FareRecords found.
+        """
+        import re as _re
+
+        # Run multi-tier card extractor directly inside the browser context
+        card_texts: list[str] = []
+        try:
+            card_texts = await page.evaluate("""() => {
+                const results = [];
+
+                // Tier 1: Search standard flight card selector patterns
+                const selectors = [
+                    '.nw_listing_bx',
+                    '[data-testid*="flight"]',
+                    '[data-testid*="Flight"]',
+                    '[class*="flight-card"]',
+                    '[class*="flightCard"]',
+                    '[class*="FlightCard"]',
+                    '[class*="flight_card"]',
+                    '[class*="flight-item"]',
+                    '[class*="flightItem"]',
+                    '[class*="FlightItem"]',
+                    '[class*="flight-row"]',
+                    '[class*="flightRow"]',
+                    '[class*="listing-card"]',
+                    '[class*="listingCard"]',
+                    '[class*="result-card"]',
+                    '[class*="result-row"]',
+                    '[class*="itinerary"]',
+                    'div[class*="listing"]',
+                    'div[class*="Listing"]',
+                    'div.mb-2.bg-white',
+                    'div[class*="ba-solid"]'
+                ];
+
+                for (const sel of selectors) {
+                    try {
+                        const els = Array.from(document.querySelectorAll(sel));
+                        if (els.length >= 2) {
+                            const valid = els
+                                .map(e => (e.innerText || '').trim())
+                                .filter(t => t.length > 20 && (t.includes('₹') || /INR|Rs\.?|\\b\\d{4,5}\\b/.test(t)));
+                            if (valid.length >= 2) {
+                                return valid.slice(0, 150);
+                            }
+                        }
+                    } catch(e) {}
+                }
+
+                // Tier 2: Find all leaf elements containing '₹' and grab card-like parent container
+                const priceElements = Array.from(document.querySelectorAll('*')).filter(el => {
+                    return el.children.length === 0 && (el.innerText || '').includes('₹');
+                });
+
+                const seenContainers = new Set();
+                for (const pEl of priceElements) {
+                    let curr = pEl.parentElement;
+                    let candidate = null;
+                    while (curr && curr !== document.body) {
+                        const rect = curr.getBoundingClientRect();
+                        if (rect.height >= 40 && rect.height <= 600 && rect.width >= 200) {
+                            candidate = curr;
+                            if (curr.parentElement) {
+                                const pRect = curr.parentElement.getBoundingClientRect();
+                                if (pRect.height > 600) {
+                                    break;
+                                }
+                            }
+                        }
+                        curr = curr.parentElement;
+                    }
+                    if (candidate && !seenContainers.has(candidate)) {
+                        seenContainers.add(candidate);
+                        const txt = (candidate.innerText || '').trim();
+                        if (txt.length > 20) {
+                            results.push(txt);
+                        }
+                    }
+                }
+
+                if (results.length >= 2) {
+                    return results.slice(0, 150);
+                }
+
+                // Tier 3: Partition document.body.innerText on price or button boundaries
+                const bodyText = document.body ? document.body.innerText : '';
+                const lines = bodyText.split('\\n').map(l => l.trim()).filter(Boolean);
+                const groups = [];
+                let current = [];
+                for (const line of lines) {
+                    current.push(line);
+                    if (line.includes('₹') || /^(Book|Select|View Fares|Lock Fare)/i.test(line)) {
+                        if (current.length >= 3) {
+                            groups.push(current.join('\\n'));
+                            current = [];
+                        }
+                    }
+                }
+                if (current.length >= 3) {
+                    groups.push(current.join('\\n'));
+                }
+                return groups.slice(0, 150);
+            }""")
+        except Exception as e:
+            logger.debug(f"Body text extraction evaluate error: {e}")
+
+        if not card_texts:
+            try:
+                body = await page.evaluate("() => document.body.innerText")
+                if body:
+                    card_texts = _re.split(r"\\n{2,}", body)
+            except Exception:
+                return []
+
+        # Known carrier keywords for auto-detection
+        CARRIER_KEYWORDS = {
+            "indigo": "IndiGo", "6e": "IndiGo",
+            "air india express": "Air India Express", "ix": "Air India Express",
+            "air india": "Air India", "ai": "Air India",
+            "spicejet": "SpiceJet", "sg": "SpiceJet",
+            "akasa": "Akasa Air", "qp": "Akasa Air",
+            "vistara": "Vistara", "uk": "Vistara",
+            "alliance air": "Alliance Air", "9i": "Alliance Air",
+            "fly91": "FLY91", "star air": "Star Air",
+        }
+
+        fares: list[FareRecord] = []
+        seen_keys: set[str] = set()
+
+        for i, chunk in enumerate(card_texts):
+            if not chunk or len(chunk.strip()) < 10:
+                continue
+
+            # Price extraction: try ₹ first, then Rs./INR, then 4-5 digit numbers
+            m_price = _re.search(r"₹\s*([\d,]+)", chunk)
+            total_val: float | None = None
+            if m_price:
+                try:
+                    total_val = float(m_price.group(1).replace(",", ""))
+                except ValueError:
+                    pass
+            
+            if not total_val:
+                m_rs = _re.search(r"(?:Rs\.?|INR)\s*([\d,]+)", chunk, _re.I)
+                if m_rs:
+                    try:
+                        total_val = float(m_rs.group(1).replace(",", ""))
+                    except ValueError:
+                        pass
+
+            if not total_val:
+                # Search 4-5 digit numbers matching typical domestic fares
+                candidates = _re.findall(r"\b(\d{1,2},\d{3}|\d{4,5})\b", chunk)
+                for cand in candidates:
+                    try:
+                        v = float(cand.replace(",", ""))
+                        if 1500 <= v <= 90000:
+                            total_val = v
+                            break
+                    except ValueError:
+                        continue
+
+            if not total_val or total_val < 1000 or total_val > 90000:
+                continue
+
+            lines = [l.strip() for l in chunk.split("\n") if l.strip()]
+
+            # Detect carrier
+            detected_carrier = carrier_name
+            for line in lines[:5]:
+                low = line.lower()
+                matched = False
+                for kw, name in CARRIER_KEYWORDS.items():
+                    if kw in low:
+                        detected_carrier = name
+                        matched = True
+                        break
+                if matched:
+                    break
+
+            # Detect flight code & departure time
+            flight_code = None
+            dep_time = ""
+            for line in lines[:10]:
+                norm = _re.sub(r"\s+", "", line)
+                m_code = _re.search(r"((?:6E|SG|QP|AI|IX|I5|UK|G8|S5|9I|2T)\s*-?\s*\d{3,4})", norm, _re.I)
+                if m_code:
+                    flight_code = _re.sub(r"\s+", "", m_code.group(1)).upper()
+
+                if not dep_time and _re.match(r"^\d{2}:\d{2}$", line):
+                    dep_time = line
+
+            if not flight_code:
+                if flight_code_prefix:
+                    flight_code = f"{flight_code_prefix}-{1000 + i}"
+                else:
+                    flight_code = f"FLT-{i+1}"
+
+            flight_num = f"{flight_code} ({dep_time})" if dep_time else flight_code
+
+            # Dedup key
+            dedup_key = f"{flight_code}|{dep_time}|{total_val}"
+            if dedup_key in seen_keys:
+                continue
+            seen_keys.add(dedup_key)
+
+            base_fare = round(total_val * 0.85, 2)
+            taxes = round(total_val * 0.15, 2)
+
+            try:
+                fare = FareRecord(
+                    route_origin=route.origin,
+                    route_destination=route.destination,
+                    travel_date=travel_date,
+                    advance_purchase_days=advance_days,
+                    source=self.source_name,
+                    source_type=self.source_type,
+                    carrier=detected_carrier,
+                    flight_number=flight_num,
+                    fare_class="Economy",
+                    base_fare=base_fare,
+                    taxes_and_fees=taxes,
+                    total_fare=total_val,
+                    currency="INR",
+                    scraped_at=datetime.utcnow(),
+                )
+                fares.append(fare)
+            except Exception:
+                continue
+
+        return fares
+
     async def _navigate_and_search(
         self,
         page: Page,

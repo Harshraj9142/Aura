@@ -2,6 +2,7 @@
 APIx Scraper — SpiceJet Scraper
 
 Scrapes fare data from https://www.spicejet.com for domestic flights.
+Uses URL-based search + text-based extraction for maximum resilience.
 """
 
 from __future__ import annotations
@@ -41,74 +42,83 @@ class SpiceJetScraper(BaseScraper):
     async def _navigate_and_search(
         self, page: Page, route: Route, travel_date: date, advance_days: int
     ) -> None:
-        logger.debug("SpiceJet: Navigating to booking homepage...")
-        await page.goto(self.base_url, wait_until="domcontentloaded", timeout=30000)
-        await asyncio.sleep(2)
-
-        # Step 1: Select One-Way
+        """URL-based navigation with homepage cookie warmup."""
+        # Step 1: Visit homepage to acquire cookies/session
         try:
-            btn_oneway = await page.query_selector("[data-testid='one-way-radio-button'], #oneWay, label:has-text('One Way')")
-            if btn_oneway:
-                await btn_oneway.click(force=True)
-                await asyncio.sleep(0.5)
-        except Exception:
-            pass
-
-        # Step 2: Fill Origin
-        origin_name = self.CITY_NAMES.get(route.origin, route.origin)
-        try:
-            await page.click("[data-testid='to-testID-origin'], input[placeholder*='From']", force=True)
-            await asyncio.sleep(0.5)
-            await page.keyboard.type(route.origin, delay=80)
-            await asyncio.sleep(1)
-
-            opt = await page.query_selector(f"div:has-text('{origin_name}')")
-            if opt:
-                await opt.click(force=True)
-            else:
-                await page.keyboard.press("Enter")
+            logger.debug("SpiceJet: Initializing session at homepage...")
+            await page.goto(self.base_url, wait_until="commit", timeout=15000)
+            await asyncio.sleep(2)
         except Exception as e:
-            logger.debug(f"SpiceJet origin fill notice: {e}")
+            logger.debug(f"SpiceJet homepage init notice: {e}")
 
-        await asyncio.sleep(0.5)
+        # Step 2: Navigate to search URL
+        url = self._build_search_url(route, travel_date, advance_days)
+        logger.debug(f"SpiceJet: Navigating to: {url}")
 
-        # Step 3: Fill Destination
-        dest_name = self.CITY_NAMES.get(route.destination, route.destination)
         try:
-            await page.click("[data-testid='to-testID-destination'], input[placeholder*='To']", force=True)
-            await asyncio.sleep(0.5)
-            await page.keyboard.type(route.destination, delay=80)
-            await asyncio.sleep(1)
+            await page.goto(url, wait_until="commit", timeout=30000)
+        except PlaywrightTimeout:
+            logger.debug("SpiceJet: Page.goto timed out at 30s, continuing with partial load...")
 
-            opt = await page.query_selector(f"div:has-text('{dest_name}')")
-            if opt:
-                await opt.click(force=True)
-            else:
-                await page.keyboard.press("Enter")
-        except Exception as e:
-            logger.debug(f"SpiceJet destination fill notice: {e}")
-
-        await asyncio.sleep(0.5)
-
-        # Step 4: Click Search Flight CTA
-        try:
-            await page.click("[data-testid='home-page-flight-cta'], button:has-text('Search')", force=True)
-        except Exception as e:
-            logger.warning(f"SpiceJet Search CTA click error: {e}")
-
-        # Wait for results or URL transition
+        # Wait for SPA to render flight results
         await asyncio.sleep(8)
+
+        # Scroll to trigger any lazy-loaded content
+        for _ in range(4):
+            await page.evaluate("window.scrollBy(0, 1500)")
+            await asyncio.sleep(1)
+
+        await asyncio.sleep(2)
 
     async def _extract_fares(
         self, page: Page, route: Route, travel_date: date, advance_days: int
     ) -> list[FareRecord]:
+        """Extract fares using DOM selectors with text-based fallback."""
         body_txt = await page.inner_text("body")
         if "no flights" in body_txt.lower() or "no results" in body_txt.lower():
             raise NoFlightsFoundError("SpiceJet: No flights found")
 
-        # Find elements containing fare amounts
-        cards = await page.query_selector_all("[data-testid*='flight-card'], [class*='flight-row'], [class*='availFlight'], div.css-1dbjc4n")
-        
+        # Strategy 1: Try DOM-based extraction with broad selectors
+        fares = await self._extract_from_dom(page, route, travel_date, advance_days, body_txt)
+
+        # Strategy 2: Text-based fallback using BaseScraper helper
+        if not fares:
+            logger.debug("SpiceJet: DOM selectors matched nothing, using text fallback...")
+            fares = await self._extract_fares_from_body_text(
+                page, route, travel_date, advance_days,
+                carrier_name="SpiceJet",
+                flight_code_prefix="SG",
+            )
+
+        if not fares:
+            raise NoFlightsFoundError("SpiceJet: No valid flight fare records extracted")
+
+        return fares
+
+    async def _extract_from_dom(
+        self, page: Page, route: Route, travel_date: date, advance_days: int, body_txt: str
+    ) -> list[FareRecord]:
+        """Try extracting fares from the rendered DOM using multiple selector strategies."""
+        # Try multiple broad selectors that might match SpiceJet's React SPA
+        selectors = [
+            "[data-testid*='flight']",
+            "div.css-1dbjc4n",
+            "[class*='flight-card']",
+            "[class*='flight-row']",
+            "[class*='availFlight']",
+            "div[class*='result']",
+        ]
+
+        cards = []
+        for sel in selectors:
+            cards = await page.query_selector_all(sel)
+            if len(cards) >= 2:
+                logger.debug(f"SpiceJet: Found {len(cards)} elements with '{sel}'")
+                break
+
+        if not cards:
+            return []
+
         fares: list[FareRecord] = []
         for i, card in enumerate(cards[:100]):
             try:
@@ -151,8 +161,5 @@ class SpiceJetScraper(BaseScraper):
                     fares.append(fare)
             except Exception:
                 continue
-
-        if not fares:
-            raise NoFlightsFoundError("SpiceJet: No valid flight fare records extracted")
 
         return fares

@@ -54,9 +54,14 @@ class CleartripScraper(BaseScraper):
         for _ in range(10):
             cards = await page.query_selector_all(self.SEL_FLIGHT_CARD)
             if len(cards) >= 3:
-                logger.debug(f"Cleartrip: Loaded {len(cards)} flight cards.")
+                logger.debug(f"Cleartrip: Loaded {len(cards)} initial flight cards.")
                 break
             await asyncio.sleep(1)
+
+        # Smoothly scroll down to trigger virtualized lazy-loading of all 60-100 cards
+        for _ in range(5):
+            await page.evaluate("window.scrollBy(0, 2000)")
+            await asyncio.sleep(0.8)
         await asyncio.sleep(1.5)
 
     async def _extract_fares(
@@ -78,78 +83,85 @@ class CleartripScraper(BaseScraper):
             return cards.slice(0, 100).map(c => c.innerText || '');
         }}""")
 
-        if not cards_texts:
-            raise NoFlightsFoundError("Cleartrip: No flight cards found")
-
         fares: list[FareRecord] = []
-        for i, txt in enumerate(cards_texts):
-            try:
-                total_val = None
-                lines = [l.strip() for l in txt.split("\n") if l.strip()]
-                if not lines or "AIRLINES" in lines[0] or "Clear" in lines[0]:
-                    continue
+        if cards_texts:
+            for i, txt in enumerate(cards_texts):
+                try:
+                    total_val = None
+                    lines = [l.strip() for l in txt.split("\n") if l.strip()]
+                    if not lines or "AIRLINES" in lines[0] or "Clear" in lines[0]:
+                        continue
 
-                carrier = "Unknown Airline"
-                for line in lines[:5]:
-                    if any(c in line.lower() for c in ["indigo", "air india", "air india express", "spicejet", "akasa"]):
-                        carrier = line
-                        break
+                    carrier = "Unknown Airline"
+                    for line in lines[:5]:
+                        if any(c in line.lower() for c in ["indigo", "air india", "air india express", "spicejet", "akasa"]):
+                            carrier = line
+                            break
 
-                dep_time = ""
-                flight_code = None
-                for line in lines[:8]:
-                    if not dep_time and re.match(r"^\d{2}:\d{2}$", line):
-                        dep_time = line
+                    dep_time = ""
+                    flight_code = None
+                    for line in lines[:8]:
+                        if not dep_time and re.match(r"^\d{2}:\d{2}$", line):
+                            dep_time = line
 
-                    norm = re.sub(r"\s+", "", line)
-                    m = re.search(r"([A-Z0-9]{2}-?\d{3,4})", norm)
-                    if m and m.group(1) not in ("DEL", "BOM", "BLR", "CCU", "HYD", "MAA"):
-                        flight_code = m.group(1)
+                        norm = re.sub(r"\s+", "", line)
+                        m = re.search(r"([A-Z0-9]{2}-?\d{3,4})", norm)
+                        if m and m.group(1) not in ("DEL", "BOM", "BLR", "CCU", "HYD", "MAA"):
+                            flight_code = m.group(1)
 
-                if not flight_code:
-                    flight_code = f"CT-{i+1}"
+                    if not flight_code:
+                        flight_code = f"CT-{i+1}"
 
-                flight_num = f"{flight_code} ({dep_time})" if dep_time else flight_code
+                    flight_num = f"{flight_code} ({dep_time})" if dep_time else flight_code
 
-                m_price = re.search(r"₹\s*([\d,]+)", txt)
-                if not m_price:
-                    all_nums = re.findall(r"[\d,]{4,6}", txt)
-                    for n_str in all_nums:
-                        try:
-                            v = float(n_str.replace(",", ""))
-                            if 1500 <= v <= 90000:
-                                total_val = v
-                                break
-                        except ValueError:
-                            continue
-                else:
-                    total_val = float(m_price.group(1).replace(",", ""))
+                    m_price = re.search(r"₹\s*([\d,]+)", txt)
+                    if not m_price:
+                        all_nums = re.findall(r"[\d,]{4,6}", txt)
+                        for n_str in all_nums:
+                            try:
+                                v = float(n_str.replace(",", ""))
+                                if 1500 <= v <= 90000:
+                                    total_val = v
+                                    break
+                            except ValueError:
+                                continue
+                    else:
+                        total_val = float(m_price.group(1).replace(",", ""))
 
-                if not total_val or total_val < 1000:
-                    continue
+                    if not total_val or total_val < 1000:
+                        continue
 
-                base_fare = round(total_val * 0.85, 2)
-                taxes = round(total_val * 0.15, 2)
+                    base_fare = round(total_val * 0.85, 2)
+                    taxes = round(total_val * 0.15, 2)
 
-                fare = FareRecord(
-                    route_origin=route.origin,
-                    route_destination=route.destination,
-                    travel_date=travel_date,
-                    advance_purchase_days=advance_days,
-                    source=self.source_name,
-                    source_type=self.source_type,
-                    carrier=carrier.strip(),
-                    flight_number=flight_num.strip(),
-                    fare_class="Economy",
-                    base_fare=base_fare,
-                    taxes_and_fees=taxes,
-                    total_fare=total_val,
-                    currency="INR",
-                    scraped_at=datetime.utcnow(),
-                )
-                fares.append(fare)
-            except Exception as e:
-                logger.warning(f"Cleartrip: Card #{i} error: {e}")
+                    fare = FareRecord(
+                        route_origin=route.origin,
+                        route_destination=route.destination,
+                        travel_date=travel_date,
+                        advance_purchase_days=advance_days,
+                        source=self.source_name,
+                        source_type=self.source_type,
+                        carrier=carrier.strip(),
+                        flight_number=flight_num.strip(),
+                        fare_class="Economy",
+                        base_fare=base_fare,
+                        taxes_and_fees=taxes,
+                        total_fare=total_val,
+                        currency="INR",
+                        scraped_at=datetime.utcnow(),
+                    )
+                    fares.append(fare)
+                except Exception as e:
+                    logger.warning(f"Cleartrip: Card #{i} error: {e}")
+
+        # Fallback to text extraction if DOM cards yielded nothing or very few
+        if len(fares) < 3:
+            logger.debug("Cleartrip: Few or no DOM fares found, falling back to text extraction...")
+            text_fares = await self._extract_fares_from_body_text(
+                page, route, travel_date, advance_days,
+            )
+            if text_fares:
+                fares = text_fares
 
         if not fares:
             raise NoFlightsFoundError("Cleartrip: No valid fare records extracted")
