@@ -293,6 +293,7 @@ async def execute_rich_scrape(selected_sources, route_pair_filter, selected_wind
             breakdown_table.add_column("Base Fare (P₀)", justify="right", style="white", footer="-")
             breakdown_table.add_column("Current Fare (Pₜ)", justify="right", style="green", footer="-")
             breakdown_table.add_column("Price Relative (Rᵢ)", justify="right", style="bold yellow", footer="-")
+            breakdown_table.add_column("Route Fisher (Fᵢ)", justify="right", style="bold magenta", footer=f"{calc_result.index_score:.2f}")
             breakdown_table.add_column("DGCA Weight (wᵢ)", justify="right", style="blue", footer="100.0%")
             breakdown_table.add_column("Weighted Contrib (Cᵢ)", justify="right", style="bold green", footer=f"{calc_result.laspeyres_score:.2f}")
 
@@ -302,6 +303,7 @@ async def execute_rich_scrape(selected_sources, route_pair_filter, selected_wind
                     f"₹{b.base_price:,.2f}",
                     f"₹{b.current_price:,.2f}",
                     f"{b.price_relative:.2f}%",
+                    f"{b.route_fisher:.2f}",
                     f"{b.normalized_weight * 100:.1f}%",
                     f"{b.weighted_contribution:.2f}",
                 )
