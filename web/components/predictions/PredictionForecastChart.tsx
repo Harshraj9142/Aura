@@ -31,11 +31,11 @@ export function PredictionForecastChart({ data, currentPrice }: PredictionForeca
   const yDomainMax = Math.ceil((maxPrice * 1.05) / 100) * 100;
 
   return (
-    <div className="rounded-3xl bg-white/95 backdrop-blur-xl border border-white/90 p-6 sm:p-8 shadow-xl space-y-4">
+    <div className="rounded-3xl bg-white/95 backdrop-blur-2xl border border-white/95 p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.12)] space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-900">
+            <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-950">
               Multi-Horizon Price Progression Curve
             </h3>
             <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 font-bold">
@@ -82,7 +82,7 @@ export function PredictionForecastChart({ data, currentPrice }: PredictionForeca
             />
             <ReferenceLine
               y={currentPrice}
-              stroke="#f59e0b"
+              stroke="#d97706"
               strokeDasharray="4 4"
               strokeWidth={1.5}
             />
@@ -103,9 +103,9 @@ export function PredictionForecastChart({ data, currentPrice }: PredictionForeca
                         <span
                           className={
                             p.priceDelta > 0
-                              ? "text-rose-600"
+                              ? "text-rose-600 font-bold"
                               : p.priceDelta < 0
-                              ? "text-emerald-600"
+                              ? "text-emerald-600 font-bold"
                               : "text-slate-600"
                           }
                         >

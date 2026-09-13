@@ -489,15 +489,15 @@ export default function LiveScraperTerminal() {
 
       {/* ── QUICK ACTION BAR ───────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div className="lg:col-span-8 rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-3">
+        <div className="lg:col-span-8 rounded-3xl border border-white/90 bg-white/80 backdrop-blur-xl p-5 space-y-3 shadow-xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-emerald-400" />
-              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-200">
+              <Zap className="w-4 h-4 text-emerald-600" />
+              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-900">
                 1-Click Quick Corridor Probe Launchers
               </h3>
             </div>
-            <Badge variant="outline" className={`text-[10px] ${isScraping ? "bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"}`}>
+            <Badge variant="outline" className={`text-[10px] font-bold ${isScraping ? "bg-amber-100 text-amber-800 border-amber-200 animate-pulse" : "bg-emerald-100 text-emerald-800 border-emerald-200"}`}>
               {isScraping ? "⚡ SCRAPING LIVE..." : "● READY"}
             </Badge>
           </div>
@@ -515,13 +515,13 @@ export default function LiveScraperTerminal() {
                 key={item.route}
                 onClick={() => triggerQuickRoute(item.route)}
                 disabled={isScraping}
-                className="group p-2 rounded-lg border border-slate-800 bg-slate-900/60 hover:bg-slate-900 hover:border-emerald-500/40 text-left transition-all disabled:opacity-50"
+                className="group p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-emerald-400 text-left transition-all disabled:opacity-50 shadow-xs"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-mono text-slate-500 uppercase">{item.label}</span>
-                  <Plane className="w-3 h-3 text-slate-600 group-hover:text-emerald-400 transition-colors" />
+                  <span className="text-[9px] font-mono font-semibold text-slate-500 uppercase">{item.label}</span>
+                  <Plane className="w-3 h-3 text-slate-400 group-hover:text-emerald-600 transition-colors" />
                 </div>
-                <p className="text-[11px] font-bold font-mono text-slate-200 group-hover:text-emerald-300 mt-0.5">{item.route}</p>
+                <p className="text-[11px] font-bold font-mono text-slate-900 group-hover:text-emerald-700 mt-0.5">{item.route}</p>
                 <p className="text-[9px] text-slate-500">{item.weight} weight</p>
               </button>
             ))}
@@ -529,35 +529,35 @@ export default function LiveScraperTerminal() {
         </div>
 
         {/* Live Stats Mini Cards */}
-        <div className="lg:col-span-4 rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-3">
+        <div className="lg:col-span-4 rounded-3xl border border-white/90 bg-white/80 backdrop-blur-xl p-5 space-y-3 shadow-xl">
           <div className="flex items-center gap-1.5">
-            <Activity className="w-4 h-4 text-cyan-400" />
-            <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-200">
+            <Activity className="w-4 h-4 text-cyan-600" />
+            <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-900">
               Live Database Stats
             </h3>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800">
-              <p className="text-[10px] text-slate-500 uppercase font-mono">Total Fares</p>
-              <p className="text-lg font-bold font-mono text-emerald-400">
+            <div className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-200/80">
+              <p className="text-[10px] text-slate-500 uppercase font-mono font-semibold">Total Fares</p>
+              <p className="text-lg font-bold font-mono text-emerald-700">
                 {stats?.overview?.totalFares?.toLocaleString("en-IN") || totalFaresCount?.toLocaleString("en-IN") || "—"}
               </p>
             </div>
-            <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800">
-              <p className="text-[10px] text-slate-500 uppercase font-mono">Today</p>
-              <p className="text-lg font-bold font-mono text-cyan-300">
+            <div className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-200/80">
+              <p className="text-[10px] text-slate-500 uppercase font-mono font-semibold">Today</p>
+              <p className="text-lg font-bold font-mono text-cyan-700">
                 {stats?.overview?.faresToday?.toLocaleString("en-IN") || "—"}
               </p>
             </div>
-            <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800">
-              <p className="text-[10px] text-slate-500 uppercase font-mono">Avg Fare</p>
-              <p className="text-lg font-bold font-mono text-slate-100">
+            <div className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-200/80">
+              <p className="text-[10px] text-slate-500 uppercase font-mono font-semibold">Avg Fare</p>
+              <p className="text-lg font-bold font-mono text-slate-900">
                 ₹{stats?.overview?.avgFare?.toLocaleString("en-IN") || "—"}
               </p>
             </div>
-            <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800">
-              <p className="text-[10px] text-slate-500 uppercase font-mono">Sources</p>
-              <p className="text-lg font-bold font-mono text-purple-300">
+            <div className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-200/80">
+              <p className="text-[10px] text-slate-500 uppercase font-mono font-semibold">Sources</p>
+              <p className="text-lg font-bold font-mono text-purple-700">
                 {stats?.overview?.uniqueSources || "—"}
               </p>
             </div>
@@ -774,20 +774,20 @@ export default function LiveScraperTerminal() {
 
       {/* ── TAB: DATABASE RECORDS ──────────────────────────────────────── */}
       {activeTab === "database" && (
-        <div className="rounded-xl border border-slate-800 bg-slate-950 p-6 space-y-5">
+        <div className="rounded-3xl border border-white/90 bg-white/80 backdrop-blur-xl p-6 sm:p-8 space-y-5 shadow-xl">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
             <div>
               <div className="flex items-center gap-2">
-                <Database className="w-5 h-5 text-emerald-400" />
-                <h2 className="text-lg font-bold text-slate-100 tracking-tight">
+                <Database className="w-5 h-5 text-emerald-600" />
+                <h2 className="text-lg font-bold text-slate-900 tracking-tight">
                   PostgreSQL Fare Records
                 </h2>
-                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs">
+                <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-200 text-xs font-bold">
                   {totalFaresCount.toLocaleString("en-IN")} Total
                 </Badge>
               </div>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 All scraped fare data stored in Neon PostgreSQL after deduplication & validation.
               </p>
             </div>
@@ -967,29 +967,29 @@ export default function LiveScraperTerminal() {
           {/* Overview Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {[
-              { label: "Total Fares", value: stats?.overview?.totalFares?.toLocaleString("en-IN") || "—", color: "text-emerald-400", icon: Layers },
-              { label: "Today's Fares", value: stats?.overview?.faresToday?.toLocaleString("en-IN") || "—", color: "text-cyan-300", icon: Calendar },
-              { label: "Unique Sources", value: String(stats?.overview?.uniqueSources || "—"), color: "text-purple-300", icon: Globe },
-              { label: "Unique Routes", value: String(stats?.overview?.uniqueRoutes || "—"), color: "text-blue-300", icon: Plane },
-              { label: "Unique Carriers", value: String(stats?.overview?.uniqueCarriers || "—"), color: "text-amber-300", icon: Activity },
-              { label: "Outlier Rate", value: `${stats?.overview?.outlierRate || "0"}%`, color: "text-red-400", icon: AlertTriangle },
+              { label: "Total Fares", value: stats?.overview?.totalFares?.toLocaleString("en-IN") || "—", color: "text-emerald-700", icon: Layers },
+              { label: "Today's Fares", value: stats?.overview?.faresToday?.toLocaleString("en-IN") || "—", color: "text-cyan-700", icon: Calendar },
+              { label: "Unique Sources", value: String(stats?.overview?.uniqueSources || "—"), color: "text-purple-700", icon: Globe },
+              { label: "Unique Routes", value: String(stats?.overview?.uniqueRoutes || "—"), color: "text-blue-700", icon: Plane },
+              { label: "Unique Carriers", value: String(stats?.overview?.uniqueCarriers || "—"), color: "text-amber-700", icon: Activity },
+              { label: "Outlier Rate", value: `${stats?.overview?.outlierRate || "0"}%`, color: "text-red-700", icon: AlertTriangle },
             ].map((card) => (
-              <div key={card.label} className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-1">
-                <div className="flex items-center justify-between text-slate-400 text-[10px] font-mono uppercase tracking-wider">
+              <div key={card.label} className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 space-y-1 shadow-xs">
+                <div className="flex items-center justify-between text-slate-500 text-[10px] font-mono font-bold uppercase tracking-wider">
                   <span>{card.label}</span>
                   <card.icon className={`w-4 h-4 ${card.color}`} />
                 </div>
-                <p className={`text-xl font-bold font-mono ${card.color}`}>{card.value}</p>
+                <p className={`text-2xl font-bold font-mono ${card.color}`}>{card.value}</p>
               </div>
             ))}
           </div>
 
           {/* Price Distribution */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-5 space-y-4">
+            <div className="rounded-3xl border border-white/90 bg-white/80 backdrop-blur-xl p-6 space-y-4 shadow-xl">
               <div className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-sm font-bold text-slate-100">Fare Price Range Distribution</h3>
+                <BarChart3 className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-sm font-bold text-slate-900">Fare Price Range Distribution</h3>
               </div>
               <div className="space-y-2">
                 {stats?.sources?.map((src) => {
@@ -998,16 +998,16 @@ export default function LiveScraperTerminal() {
                   return (
                     <div key={src.name} className="flex items-center gap-3">
                       <span className={`text-[11px] font-mono font-bold w-24 truncate ${getSourceColor(src.name)}`}>{src.name}</span>
-                      <div className="flex-1 relative h-5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                      <div className="flex-1 relative h-5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                         <div
-                          className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-emerald-600/60 to-emerald-400/40"
+                          className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400"
                           style={{ width: `${barWidth}%` }}
                         />
-                        <span className="absolute right-2 top-0.5 text-[10px] font-mono text-slate-300">
+                        <span className="absolute right-2 top-0.5 text-[10px] font-mono text-slate-700 font-bold">
                           ₹{src.minFare.toLocaleString("en-IN")} – ₹{src.maxFare.toLocaleString("en-IN")}
                         </span>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-500 w-12 text-right">{src.count}</span>
+                      <span className="text-[10px] font-mono text-slate-600 w-12 text-right font-bold">{src.count}</span>
                     </div>
                   );
                 })}
@@ -1015,29 +1015,29 @@ export default function LiveScraperTerminal() {
             </div>
 
             {/* Carrier Breakdown */}
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-5 space-y-4">
+            <div className="rounded-3xl border border-white/90 bg-white/80 backdrop-blur-xl p-6 space-y-4 shadow-xl">
               <div className="flex items-center gap-2">
-                <PieChart className="w-5 h-5 text-purple-400" />
-                <h3 className="text-sm font-bold text-slate-100">Top Carriers by Records</h3>
+                <PieChart className="w-5 h-5 text-purple-600" />
+                <h3 className="text-sm font-bold text-slate-900">Top Carriers by Records</h3>
               </div>
               <div className="space-y-2">
                 {stats?.carriers?.slice(0, 10).map((carrier, idx) => {
                   const maxCount = stats?.carriers?.[0]?.count || 1;
                   const barWidth = (carrier.count / maxCount) * 100;
-                  const colors = ["text-emerald-400", "text-cyan-400", "text-blue-400", "text-purple-400", "text-amber-400", "text-pink-400", "text-indigo-400", "text-orange-400", "text-teal-400", "text-lime-400"];
+                  const colors = ["text-emerald-700", "text-cyan-700", "text-blue-700", "text-purple-700", "text-amber-700", "text-pink-700", "text-indigo-700", "text-orange-700", "text-teal-700", "text-lime-700"];
                   return (
                     <div key={carrier.name} className="flex items-center gap-2.5">
                       <AirlineLogo airline={carrier.name} size="xs" />
                       <span className={`text-[11px] font-mono font-bold w-24 truncate ${colors[idx % colors.length]}`}>
                         {carrier.name}
                       </span>
-                      <div className="flex-1 relative h-4 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                      <div className="flex-1 relative h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                         <div
-                          className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-purple-600/60 to-purple-400/40"
+                          className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-purple-600 to-purple-400"
                           style={{ width: `${barWidth}%` }}
                         />
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400 w-16 text-right">
+                      <span className="text-[10px] font-mono text-slate-600 font-bold w-16 text-right">
                         {carrier.count} / ₹{carrier.avgFare.toLocaleString("en-IN")}
                       </span>
                     </div>
@@ -1049,36 +1049,36 @@ export default function LiveScraperTerminal() {
 
           {/* Performance Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-1">
-              <div className="flex items-center justify-between text-xs text-slate-400 font-mono uppercase">
+            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 space-y-1 shadow-xs">
+              <div className="flex items-center justify-between text-xs text-slate-600 font-mono font-bold uppercase">
                 <span>Playwright Stealth</span>
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
               </div>
-              <p className="text-2xl font-bold font-mono text-emerald-400">98.6%</p>
+              <p className="text-2xl font-bold font-mono text-emerald-700">98.6%</p>
               <p className="text-[11px] text-slate-500 font-mono">--disable-http2 bot bypass</p>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-1">
-              <div className="flex items-center justify-between text-xs text-slate-400 font-mono uppercase">
+            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 space-y-1 shadow-xs">
+              <div className="flex items-center justify-between text-xs text-slate-600 font-mono font-bold uppercase">
                 <span>Avg Latency</span>
-                <Cpu className="w-4 h-4 text-cyan-400" />
+                <Cpu className="w-4 h-4 text-cyan-600" />
               </div>
-              <p className="text-2xl font-bold font-mono text-cyan-300">2.1s / page</p>
+              <p className="text-2xl font-bold font-mono text-cyan-700">2.1s / page</p>
               <p className="text-[11px] text-slate-500 font-mono">Chromium headless speed</p>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-1">
-              <div className="flex items-center justify-between text-xs text-slate-400 font-mono uppercase">
+            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 space-y-1 shadow-xs">
+              <div className="flex items-center justify-between text-xs text-slate-600 font-mono font-bold uppercase">
                 <span>Deduplication</span>
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               </div>
-              <p className="text-2xl font-bold font-mono text-slate-100">100% Passed</p>
+              <p className="text-2xl font-bold font-mono text-slate-900">100% Passed</p>
               <p className="text-[11px] text-slate-500 font-mono">Zero synthetic duplicates</p>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-1">
-              <div className="flex items-center justify-between text-xs text-slate-400 font-mono uppercase">
+            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 space-y-1 shadow-xs">
+              <div className="flex items-center justify-between text-xs text-slate-600 font-mono font-bold uppercase">
                 <span>Robots.txt Ethics</span>
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               </div>
-              <p className="text-2xl font-bold font-mono text-slate-100">100% Compliant</p>
+              <p className="text-2xl font-bold font-mono text-slate-900">100% Compliant</p>
               <p className="text-[11px] text-slate-500 font-mono">Pre-request delay enforced</p>
             </div>
           </div>
@@ -1126,45 +1126,45 @@ export default function LiveScraperTerminal() {
           </div>
 
           {/* Sources Grid */}
-          <div className="rounded-xl border border-slate-800 bg-slate-950 p-5 space-y-4">
+          <div className="rounded-3xl border border-white/90 bg-white/80 backdrop-blur-xl p-6 space-y-4 shadow-xl">
             <div className="flex items-center gap-2">
-              <Globe className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-sm font-bold text-slate-100">Source Platform Breakdown</h3>
-              <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+              <Globe className="w-5 h-5 text-emerald-600" />
+              <h3 className="text-sm font-bold text-slate-900">Source Platform Breakdown</h3>
+              <Badge variant="outline" className="text-[10px] bg-emerald-100 text-emerald-800 border-emerald-200 font-bold">
                 {stats?.sources?.length || 0} Active
               </Badge>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {stats?.sources?.map((src) => (
-                <div key={src.name} className={`rounded-lg border p-4 space-y-2 ${getSourceBgColor(src.name)}`}>
+                <div key={src.name} className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 space-y-2 shadow-xs">
                   <div className="flex items-center justify-between">
                     <h4 className={`text-sm font-bold font-mono ${getSourceColor(src.name)}`}>{src.name}</h4>
-                    <Badge variant="outline" className="text-[9px] bg-slate-900/50 text-slate-300 border-slate-700">
+                    <Badge variant="outline" className="text-[9px] bg-white text-slate-700 border-slate-200 font-bold">
                       {src.type?.toUpperCase()}
                     </Badge>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
                     <div>
-                      <p className="text-slate-500">Records</p>
-                      <p className="text-slate-200 font-bold">{src.count.toLocaleString("en-IN")}</p>
+                      <p className="text-slate-500 font-medium">Records</p>
+                      <p className="text-slate-900 font-bold">{src.count.toLocaleString("en-IN")}</p>
                     </div>
                     <div>
-                      <p className="text-slate-500">Avg Fare</p>
-                      <p className="text-slate-200 font-bold">₹{src.avgFare.toLocaleString("en-IN")}</p>
+                      <p className="text-slate-500 font-medium">Avg Fare</p>
+                      <p className="text-slate-900 font-bold">₹{src.avgFare.toLocaleString("en-IN")}</p>
                     </div>
                     <div>
-                      <p className="text-slate-500">Min Fare</p>
-                      <p className="text-emerald-400 font-bold">₹{src.minFare.toLocaleString("en-IN")}</p>
+                      <p className="text-slate-500 font-medium">Min Fare</p>
+                      <p className="text-emerald-700 font-bold">₹{src.minFare.toLocaleString("en-IN")}</p>
                     </div>
                     <div>
-                      <p className="text-slate-500">Max Fare</p>
-                      <p className="text-red-400 font-bold">₹{src.maxFare.toLocaleString("en-IN")}</p>
+                      <p className="text-slate-500 font-medium">Max Fare</p>
+                      <p className="text-red-600 font-bold">₹{src.maxFare.toLocaleString("en-IN")}</p>
                     </div>
                   </div>
-                  <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-emerald-500/70"
+                      className="h-full rounded-full bg-emerald-500"
                       style={{ width: `${Math.min(100, (src.count / (stats?.overview?.totalFares || 1)) * 100 * (stats?.sources?.length || 1))}%` }}
                     />
                   </div>
@@ -1174,15 +1174,15 @@ export default function LiveScraperTerminal() {
           </div>
 
           {/* Routes Grid */}
-          <div className="rounded-xl border border-slate-800 bg-slate-950 p-5 space-y-4">
+          <div className="rounded-3xl border border-white/90 bg-white/80 backdrop-blur-xl p-6 space-y-4 shadow-xl">
             <div className="flex items-center gap-2">
-              <Plane className="w-5 h-5 text-cyan-400" />
-              <h3 className="text-sm font-bold text-slate-100">DGCA Corridor Routes Breakdown</h3>
+              <Plane className="w-5 h-5 text-cyan-600" />
+              <h3 className="text-sm font-bold text-slate-900">DGCA Corridor Routes Breakdown</h3>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-slate-900/80 text-slate-400 text-[11px] uppercase tracking-wider border-b border-slate-800">
+                <thead className="bg-slate-100/80 text-slate-700 text-[11px] uppercase tracking-wider border-b border-slate-200 font-bold">
                   <tr>
                     <th className="px-4 py-2.5">Route</th>
                     <th className="px-4 py-2.5">Records</th>
@@ -1193,27 +1193,27 @@ export default function LiveScraperTerminal() {
                     <th className="px-4 py-2.5">Coverage</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                <tbody className="divide-y divide-slate-200/60 text-slate-800">
                   {stats?.routes?.map((route) => {
                     const maxCount = Math.max(...(stats?.routes?.map(r => r.count) || [1]));
                     const barWidth = (route.count / maxCount) * 100;
                     return (
-                      <tr key={route.pair} className="hover:bg-slate-900/60 transition-colors">
+                      <tr key={route.pair} className="hover:bg-slate-50/80 transition-colors">
                         <td className="px-4 py-3">
-                          <span className="font-bold text-emerald-400">{route.origin}</span>
-                          <span className="text-slate-600 mx-1">→</span>
-                          <span className="font-bold text-cyan-400">{route.destination}</span>
+                          <span className="font-bold text-emerald-700">{route.origin}</span>
+                          <span className="text-slate-400 mx-1">→</span>
+                          <span className="font-bold text-cyan-700">{route.destination}</span>
                         </td>
-                        <td className="px-4 py-3 font-bold text-slate-200">{route.count.toLocaleString("en-IN")}</td>
-                        <td className="px-4 py-3 text-slate-200">₹{route.avgFare.toLocaleString("en-IN")}</td>
-                        <td className="px-4 py-3 text-emerald-400">₹{route.minFare.toLocaleString("en-IN")}</td>
-                        <td className="px-4 py-3 text-red-400">₹{route.maxFare.toLocaleString("en-IN")}</td>
-                        <td className="px-4 py-3 text-slate-400 text-[10px]">
+                        <td className="px-4 py-3 font-bold text-slate-900">{route.count.toLocaleString("en-IN")}</td>
+                        <td className="px-4 py-3 text-slate-900 font-bold">₹{route.avgFare.toLocaleString("en-IN")}</td>
+                        <td className="px-4 py-3 text-emerald-700 font-bold">₹{route.minFare.toLocaleString("en-IN")}</td>
+                        <td className="px-4 py-3 text-red-600 font-bold">₹{route.maxFare.toLocaleString("en-IN")}</td>
+                        <td className="px-4 py-3 text-slate-500 text-[10px] font-medium">
                           ₹{(route.maxFare - route.minFare).toLocaleString("en-IN")} spread
                         </td>
                         <td className="px-4 py-3">
-                          <div className="w-24 bg-slate-900 rounded-full h-2 overflow-hidden">
-                            <div className="h-full rounded-full bg-emerald-500/70" style={{ width: `${barWidth}%` }} />
+                          <div className="w-24 bg-slate-200 rounded-full h-2 overflow-hidden">
+                            <div className="h-full rounded-full bg-emerald-500" style={{ width: `${barWidth}%` }} />
                           </div>
                         </td>
                       </tr>
@@ -1225,21 +1225,21 @@ export default function LiveScraperTerminal() {
           </div>
 
           {/* Latest Activity Feed */}
-          <div className="rounded-xl border border-slate-800 bg-slate-950 p-5 space-y-4">
+          <div className="rounded-3xl border border-white/90 bg-white/80 backdrop-blur-xl p-6 space-y-4 shadow-xl">
             <div className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-purple-400" />
-              <h3 className="text-sm font-bold text-slate-100">Latest Ingested Fares (Live Feed)</h3>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <Activity className="w-5 h-5 text-purple-600" />
+              <h3 className="text-sm font-bold text-slate-900">Latest Ingested Fares (Live Feed)</h3>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </div>
 
             <div className="space-y-2">
               {stats?.latestFares?.map((fare) => (
-                <div key={fare.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/60 hover:bg-slate-900 transition-colors">
+                <div key={fare.id} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:bg-white transition-all shadow-xs">
                   <AirlineLogo airline={fare.carrier} flightNumber={fare.flight_number} size="sm" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-200 truncate">{fare.carrier}</span>
-                      <span className="text-[10px] font-mono text-emerald-400">{fare.flight_number}</span>
+                      <span className="text-xs font-bold text-slate-900 truncate">{fare.carrier}</span>
+                      <span className="text-[10px] font-mono text-emerald-700 font-bold">{fare.flight_number}</span>
                     </div>
                     <div className="flex items-center gap-2 text-[10px] text-slate-500">
                       <span className="font-bold">{fare.route_origin}→{fare.route_destination}</span>
@@ -1248,8 +1248,8 @@ export default function LiveScraperTerminal() {
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-bold font-mono text-white">₹{fare.total_fare.toLocaleString("en-IN")}</p>
-                    <p className="text-[10px] text-slate-500">
+                    <p className="text-sm font-bold font-mono text-slate-950">₹{fare.total_fare.toLocaleString("en-IN")}</p>
+                    <p className="text-[10px] text-slate-500 font-mono">
                       {new Date(fare.scraped_at).toLocaleTimeString("en-IN", { hour12: false })}
                     </p>
                   </div>

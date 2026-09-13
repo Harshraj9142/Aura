@@ -71,42 +71,42 @@ export default function ScraperControlModal({ isOpen, onClose, onLaunch }: Scrap
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-slate-950 border border-slate-800 rounded-xl text-slate-100 font-sans shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
+      <div className="relative w-full max-w-2xl bg-white/95 border border-white/90 rounded-3xl text-slate-900 font-sans shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 p-4 bg-slate-900/50">
+        <div className="flex items-center justify-between border-b border-slate-200 p-5 bg-slate-50/90">
           <div>
-            <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs uppercase tracking-wider">
               <Terminal className="w-4 h-4" />
               <span>Interactive Scraper Probe Control</span>
             </div>
-            <h2 className="text-lg font-bold text-slate-100 mt-0.5">
+            <h2 className="text-lg font-bold text-slate-900 mt-0.5">
               Configure Live Scrape Engine Probe
             </h2>
-            <p className="text-slate-400 text-xs mt-0.5">
+            <p className="text-slate-500 text-xs mt-0.5">
               Select target platform, corridor route, and advance booking window (matching Terminal CLI Options).
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="p-5 space-y-4">
+        <div className="p-6 space-y-5">
           {/* STEP 1: Select Platform */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center justify-between">
               <span>STEP 1: Select Target Platform / OTA</span>
-              <span className="text-[10px] text-emerald-400 font-mono">Option {selectedSource}</span>
+              <span className="text-[10px] text-emerald-700 font-mono font-bold">Option {selectedSource}</span>
             </label>
             <select
               value={selectedSource}
               onChange={(e) => setSelectedSource(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono"
+              className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-emerald-500 font-mono shadow-xs font-medium"
             >
               {PLATFORMS.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -118,14 +118,14 @@ export default function ScraperControlModal({ isOpen, onClose, onLaunch }: Scrap
 
           {/* STEP 2: Select Corridor */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center justify-between">
               <span>STEP 2: Select DGCA Corridor / City-Pair Route</span>
-              <span className="text-[10px] text-emerald-400 font-mono">{selectedRoute}</span>
+              <span className="text-[10px] text-emerald-700 font-mono font-bold">{selectedRoute}</span>
             </label>
             <select
               value={selectedRoute}
               onChange={(e) => setSelectedRoute(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono"
+              className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-emerald-500 font-mono shadow-xs font-medium"
             >
               {CORRIDORS.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -137,14 +137,14 @@ export default function ScraperControlModal({ isOpen, onClose, onLaunch }: Scrap
 
           {/* STEP 3: Select Advance Window */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center justify-between">
               <span>STEP 3: Select Advance Purchase Booking Window</span>
-              <span className="text-[10px] text-emerald-400 font-mono">Option {selectedWindow}</span>
+              <span className="text-[10px] text-emerald-700 font-mono font-bold">Option {selectedWindow}</span>
             </label>
             <select
               value={selectedWindow}
               onChange={(e) => setSelectedWindow(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono"
+              className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-emerald-500 font-mono shadow-xs font-medium"
             >
               {WINDOWS.map((w) => (
                 <option key={w.id} value={w.id}>
@@ -155,26 +155,26 @@ export default function ScraperControlModal({ isOpen, onClose, onLaunch }: Scrap
           </div>
 
           {/* Target Preview Box */}
-          <div className="p-3 bg-slate-900/80 border border-slate-800/80 rounded-lg text-xs space-y-1 font-mono">
-            <div className="text-[10px] uppercase font-bold text-emerald-400">🚀 Target Probe Configuration Summary</div>
-            <div className="flex justify-between text-slate-300">
+          <div className="p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl text-xs space-y-1 font-mono shadow-xs">
+            <div className="text-[10px] uppercase font-bold text-emerald-800">🚀 Target Probe Configuration Summary</div>
+            <div className="flex justify-between text-slate-800 font-medium">
               <span>Target Source:</span>
-              <span className="text-cyan-400 font-bold">{PLATFORMS.find(p => p.id === selectedSource)?.name}</span>
+              <span className="text-cyan-800 font-bold">{PLATFORMS.find(p => p.id === selectedSource)?.name}</span>
             </div>
-            <div className="flex justify-between text-slate-300">
+            <div className="flex justify-between text-slate-800 font-medium">
               <span>Target Corridor:</span>
-              <span className="text-yellow-400 font-bold">{selectedRoute}</span>
+              <span className="text-amber-800 font-bold">{selectedRoute}</span>
             </div>
-            <div className="flex justify-between text-slate-300">
+            <div className="flex justify-between text-slate-800 font-medium">
               <span>Booking Window:</span>
-              <span className="text-pink-400 font-bold">{WINDOWS.find(w => w.id === selectedWindow)?.name}</span>
+              <span className="text-purple-800 font-bold">{WINDOWS.find(w => w.id === selectedWindow)?.name}</span>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end border-t border-slate-800 p-4 bg-slate-900/50 gap-2">
-          <Button variant="outline" onClick={onClose} size="sm" className="text-xs border-slate-800">
+        <div className="flex items-center justify-end border-t border-slate-200 p-4 bg-slate-50/90 gap-2">
+          <Button variant="outline" onClick={onClose} size="sm" className="text-xs border-slate-200 rounded-xl">
             Cancel
           </Button>
           <Button

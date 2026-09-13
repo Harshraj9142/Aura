@@ -11,45 +11,46 @@ interface PredictionHistoryTableProps {
 
 export function PredictionHistoryTable({ predictions }: PredictionHistoryTableProps) {
   return (
-    <div className="rounded-3xl bg-white/95 backdrop-blur-xl border border-white/90 p-6 sm:p-8 shadow-xl space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-700 border border-purple-200/80 shadow-xs">
-            <History className="h-4 w-4" />
+    <div className="rounded-3xl bg-white/95 backdrop-blur-2xl border border-white/95 p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.12)] space-y-6">
+      {/* Table Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-50 text-purple-700 border border-purple-200/80 shadow-xs">
+            <History className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-900">
+            <h3 className="text-lg sm:text-xl font-black tracking-tight text-slate-950">
               Database Logged Predictions Audit Feed
             </h3>
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
               Verified flight-level forecasts continuously evaluated against actual scraped airfare telemetry
             </p>
           </div>
         </div>
-        <span className="text-xs text-slate-500 font-mono font-medium">
+        <span className="text-xs font-mono font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
           Continuous Learning Pipeline Telemetry
         </span>
       </div>
 
       {predictions.length === 0 ? (
-        <div className="text-center py-8 text-xs text-slate-500">
+        <div className="text-center py-12 text-sm text-slate-500 font-medium">
           No past predictions recorded yet. Run simulations above or wait for continuous scraping cycles.
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-500 uppercase text-[10px] font-bold tracking-wider">
-                <th className="pb-3 font-bold">Prediction ID</th>
-                <th className="pb-3 font-bold">Flight Signature</th>
-                <th className="pb-3 font-bold">Horizon</th>
-                <th className="pb-3 font-bold text-right">Predicted Price</th>
-                <th className="pb-3 font-bold text-center">Model</th>
-                <th className="pb-3 font-bold text-right">Target Window</th>
-                <th className="pb-3 font-bold text-center">Ground Truth</th>
+              <tr className="border-b border-slate-200/80 text-slate-600 text-xs sm:text-sm font-extrabold uppercase tracking-wider">
+                <th className="px-4 py-4 font-extrabold">Prediction ID</th>
+                <th className="px-4 py-4 font-extrabold">Flight Signature</th>
+                <th className="px-4 py-4 font-extrabold">Horizon</th>
+                <th className="px-4 py-4 font-extrabold text-right">Predicted Price</th>
+                <th className="px-4 py-4 font-extrabold text-center">Model</th>
+                <th className="px-4 py-4 font-extrabold text-right">Target Window</th>
+                <th className="px-4 py-4 font-extrabold text-center">Ground Truth</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100/90">
               {predictions.map((p) => {
                 const parts = p.flightSignature.split("_");
                 const carrierFlight = parts[0] || p.flightSignature;
@@ -58,8 +59,8 @@ export function PredictionHistoryTable({ predictions }: PredictionHistoryTablePr
 
                 return (
                   <tr key={p.predictionId} className="hover:bg-slate-50/90 transition">
-                    <td className="py-3 font-mono text-slate-500 font-medium">{p.predictionId}</td>
-                    <td className="py-3">
+                    <td className="py-3 px-4 font-mono text-slate-500 font-medium">{p.predictionId}</td>
+                    <td className="py-3 px-4">
                       <div className="flex items-center gap-2.5">
                         <AirlineLogo airline={carrierFlight} flightNumber={carrierFlight} size="xs" />
                         <div>
@@ -70,21 +71,21 @@ export function PredictionHistoryTable({ predictions }: PredictionHistoryTablePr
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 font-mono text-slate-600 font-medium">
+                    <td className="py-3 px-4 font-mono text-slate-600 font-medium">
                       +{p.targetHorizonHours}h
                     </td>
-                    <td className="py-3 text-right font-mono font-black text-purple-700 text-sm">
+                    <td className="py-3 px-4 text-right font-mono font-black text-purple-700 text-sm">
                       ₹{p.predictedPrice.toLocaleString("en-IN")}
                     </td>
-                    <td className="py-3 text-center">
+                    <td className="py-3 px-4 text-center">
                       <span className="rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-mono font-bold text-purple-700 border border-purple-200">
                         {p.modelVersion}
                       </span>
                     </td>
-                    <td className="py-3 text-right font-mono text-slate-500">
+                    <td className="py-3 px-4 text-right font-mono text-slate-500">
                       {p.targetTime ? p.targetTime.substring(0, 16).replace("T", " ") : "—"}
                     </td>
-                    <td className="py-3 text-center">
+                    <td className="py-3 px-4 text-center">
                       {p.actualPrice !== null && p.actualPrice !== undefined ? (
                         <span className="inline-flex items-center gap-1 text-emerald-700 text-xs font-mono font-bold">
                           <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
