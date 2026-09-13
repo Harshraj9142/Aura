@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { StatutoryEntitlement, AirlineInfo, GrievanceAnswers } from '@/lib/grievance/types';
+import { AUTHORITY_TWITTER_HANDLES } from '@/lib/grievance/airline-contacts';
 import {
   RotateCcw,
   FileText,
@@ -136,7 +137,7 @@ export function StraightSolutionView({
             </div>
             <div>
               <h4 className="text-xs font-bold text-slate-900">
-                Public Escalation via @dmca_test
+                Public Escalation via {AUTHORITY_TWITTER_HANDLES.advocacy}
               </h4>
               <p className="text-[11px] text-slate-600">
                 Tag <span className="font-semibold text-slate-800">{airline.twitterHandle || airline.name}</span>, <span className="font-mono text-slate-700">@DGCAIndia</span> & <span className="font-mono text-slate-700">@MoCA_GoI</span> publicly on X to trigger rapid response.

@@ -341,12 +341,12 @@ export function TwitterEscalationModal({
               {loading ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  Publishing via @dmca_test...
+                  Publishing via {AUTHORITY_TWITTER_HANDLES.advocacy}...
                 </>
               ) : (
                 <>
                   <Send className="w-3.5 h-3.5" />
-                  Post Publicly via @dmca_test
+                  Post Publicly via {AUTHORITY_TWITTER_HANDLES.advocacy}
                 </>
               )}
             </button>

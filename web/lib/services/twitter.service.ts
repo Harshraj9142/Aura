@@ -128,11 +128,39 @@ import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
 
+function getAuthToken(): string | undefined {
+  if (process.env.TWITTER_AUTH_TOKEN) return process.env.TWITTER_AUTH_TOKEN;
+  try {
+    const envPath = path.resolve(process.cwd(), ".env.local");
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, "utf-8");
+      const match = content.match(/^TWITTER_AUTH_TOKEN=["']?([^"'\r\n]+)["']?/m);
+      if (match) return match[1];
+    }
+  } catch {}
+  return undefined;
+}
+
+function getAdvocacyHandle(): string {
+  const envHandle = process.env.NEXT_PUBLIC_TWITTER_HANDLE || process.env.TWITTER_HANDLE;
+  if (envHandle) return envHandle.replace("@", "");
+  try {
+    const envPath = path.resolve(process.cwd(), ".env.local");
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, "utf-8");
+      const match = content.match(/^(?:NEXT_PUBLIC_TWITTER_HANDLE|TWITTER_HANDLE)=["']?([^"'\r\n]+)["']?/m);
+      if (match) return match[1].replace("@", "");
+    }
+  } catch {}
+  return "dmca_test";
+}
+
 /**
  * Post tweet headlessly using Playwright and authenticated session cookie
  */
 async function postWithPlaywright(tweetText: string): Promise<TweetPublishResult> {
   const intentUrl = buildTwitterIntentUrl(tweetText);
+  const authToken = getAuthToken();
 
   return new Promise((resolve) => {
     let scriptPath = path.resolve(process.cwd(), "../scripts/post_tweet_playwright.py");
@@ -143,12 +171,45 @@ async function postWithPlaywright(tweetText: string): Promise<TweetPublishResult
     const pyProcess = spawn("python", [scriptPath], {
       env: {
         ...process.env,
-        TWITTER_AUTH_TOKEN: process.env.TWITTER_AUTH_TOKEN,
+        TWITTER_AUTH_TOKEN: authToken,
+        PYTHONIOENCODING: "utf-8",
+        NEXT_PUBLIC_TWITTER_HANDLE: process.env.NEXT_PUBLIC_TWITTER_HANDLE,
       },
     });
 
     let stdout = "";
     let stderr = "";
+    let settled = false;
+
+    const timeoutTimer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        try {
+          pyProcess.kill();
+        } catch {}
+        resolve({
+          success: false,
+          intentUrl,
+          tweetText,
+          error: "Playwright posting timed out after 60s",
+          diagnostic: "Ensure your Brave auth_token is valid and active",
+        });
+      }
+    }, 60000);
+
+    pyProcess.on("error", (err) => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timeoutTimer);
+        resolve({
+          success: false,
+          intentUrl,
+          tweetText,
+          error: `Failed to spawn Python process: ${err.message}`,
+          diagnostic: "Check that Python and Playwright are installed in PATH",
+        });
+      }
+    });
 
     pyProcess.stdin.write(tweetText);
     pyProcess.stdin.end();
@@ -162,6 +223,10 @@ async function postWithPlaywright(tweetText: string): Promise<TweetPublishResult
     });
 
     pyProcess.on("close", (code) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutTimer);
+
       try {
         const trimmed = stdout.trim();
         // Look for json substring in output
@@ -208,9 +273,10 @@ async function postWithPlaywright(tweetText: string): Promise<TweetPublishResult
  */
 export async function publishToTwitter(tweetText: string): Promise<TweetPublishResult> {
   const intentUrl = buildTwitterIntentUrl(tweetText);
+  const authToken = getAuthToken();
 
   // 1. If TWITTER_AUTH_TOKEN is configured, use the 100% Free Playwright poster
-  if (process.env.TWITTER_AUTH_TOKEN) {
+  if (authToken) {
     return postWithPlaywright(tweetText);
   }
 
@@ -260,7 +326,7 @@ export async function publishToTwitter(tweetText: string): Promise<TweetPublishR
       return {
         success: true,
         tweetId,
-        tweetUrl: `https://x.com/dmca_test/status/${tweetId}`,
+        tweetUrl: `https://x.com/${getAdvocacyHandle()}/status/${tweetId}`,
         intentUrl,
         tweetText,
       };

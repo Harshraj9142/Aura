@@ -154,7 +154,7 @@ export const AIRLINE_DIRECTORY: Record<AirlineId, AirlineInfo> = {
 };
 
 export const AUTHORITY_TWITTER_HANDLES = {
-  advocacy: '@dmca_test',
+  advocacy: process.env.NEXT_PUBLIC_TWITTER_HANDLE || '@dmca_test',
   dgca: '@DGCAIndia',
   moca: '@MoCA_GoI',
   airsewa: '@AirSewaMoCA',

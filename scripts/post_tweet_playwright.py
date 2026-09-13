@@ -38,7 +38,19 @@ def get_auth_token():
                     if val:
                         return val
 
-    return None
+def get_twitter_handle():
+    handle = os.getenv("NEXT_PUBLIC_TWITTER_HANDLE") or os.getenv("TWITTER_HANDLE")
+    if not handle:
+        env_local = Path(__file__).resolve().parent.parent / "web" / ".env.local"
+        if env_local.exists():
+            with open(env_local, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("NEXT_PUBLIC_TWITTER_HANDLE=") or line.startswith("TWITTER_HANDLE="):
+                        val = line.split("=", 1)[1].strip().strip('"').strip("'")
+                        if val:
+                            handle = val
+                            break
+    return (handle or "@dmca_test").lstrip("@")
 
 def post_tweet(tweet_text: str):
     auth_token = get_auth_token()
@@ -139,10 +151,21 @@ def post_tweet(tweet_text: str):
             }))
             sys.exit(1)
 
-        # Click and fill the text
-        editor.click()
+        # Focus and fill the text (bypass overlay/mask pointer intercept with force and focus)
+        try:
+            editor.focus()
+        except Exception:
+            pass
+        try:
+            editor.click(force=True)
+        except Exception:
+            pass
         time.sleep(0.5)
-        editor.fill(tweet_text)
+
+        try:
+            editor.fill(tweet_text)
+        except Exception:
+            page.keyboard.insert_text(tweet_text)
         time.sleep(1)
 
         # Submit tweet using Control+Enter or JS click (avoids overlay interception)
@@ -168,14 +191,15 @@ def post_tweet(tweet_text: str):
 
         browser.close()
 
-        tweet_url = f"https://x.com/dmca_test/status/{tweet_id}" if tweet_id else "https://x.com/dmca_test"
+        handle = get_twitter_handle()
+        tweet_url = f"https://x.com/{handle}/status/{tweet_id}" if tweet_id else f"https://x.com/{handle}"
 
         print(json.dumps({
             "success": True,
             "tweetId": tweet_id,
             "tweetUrl": tweet_url,
-            "message": "Tweet published successfully via @dmca_test!"
-        }))
+            "message": f"Tweet published successfully via @{handle}!"
+        }), flush=True)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Post a tweet using Playwright")
