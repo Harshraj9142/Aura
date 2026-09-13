@@ -33,23 +33,34 @@ export default function Login() {
   return (
     <div className="flex min-h-screen bg-white">
       {/* Left Panel - Brand Image */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gray-900">
-        <Image
-          src="/landing/sky_background.jpg"
-          alt="Sky Background"
-          fill
-          sizes="50vw"
-          className="object-cover opacity-60"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900 opacity-90" />
-        <div className="absolute bottom-12 left-12 right-12 z-10">
-          <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">
-            Clearer sky for a brighter India.
-          </h2>
-          <p className="text-gray-300 text-lg">
-            Empowering the nation with data-driven aviation insights.
-          </p>
+      <div className="hidden lg:flex lg:w-1/2 p-4 sm:p-8 bg-gray-900">
+        <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl">
+          <Image
+            src="/landing/airplane_window.png"
+            alt="Sky Background"
+            fill
+            sizes="50vw"
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/30" />
+          
+          <div className="absolute top-12 left-10 md:left-12 z-10 flex flex-col text-white font-bold tracking-[0.25em] text-xl md:text-2xl leading-loose">
+            <span>A</span>
+            <span>CLEARER</span>
+            <span>SKY</span>
+            <span>FOR A</span>
+            <span>BRIGHTER</span>
+            <span>INDIA</span>
+          </div>
+
+          <div className="absolute bottom-12 left-10 md:left-12 z-10">
+            <hr className="border-t border-white/40 w-48 mb-6" />
+            <div className="text-white font-bold tracking-widest text-sm md:text-base space-y-2">
+              <p>DATA TODAY.</p>
+              <p>A FAIRER TOMORROW.</p>
+            </div>
+          </div>
         </div>
       </div>
 
