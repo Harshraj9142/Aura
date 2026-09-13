@@ -33,7 +33,7 @@ export default async function PredictionsPage() {
         - Wide-angle cinematic aviation control tower image (/dashboard/predictions_hero.jpg)
         ========================================================================
       */}
-      <div className="relative w-full min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] flex flex-col justify-between pt-24 sm:pt-28 pb-20 sm:pb-24 px-6 sm:px-10 lg:px-14 xl:px-16">
+      <div className="relative w-full min-h-[480px] sm:min-h-[520px] lg:min-h-[560px] flex flex-col justify-between pt-36 sm:pt-40 lg:pt-44 pb-20 sm:pb-24 px-6 sm:px-10 lg:px-14 xl:px-16">
         
         {/* Masked Panorama Background Image */}
         <div

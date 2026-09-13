@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Calendar,
-  IndianRupee,
   Sliders,
   Sparkles,
   Layers,
@@ -155,30 +154,32 @@ export function PredictionSimulator({
   };
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-950 p-6 shadow-xl space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-950/60 text-purple-400 border border-purple-500/25">
+    <div className="rounded-3xl bg-white/95 backdrop-blur-xl border border-white/90 p-6 sm:p-8 shadow-xl space-y-6">
+      {/* Simulator Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-50 text-purple-700 border border-purple-200/80 shadow-xs">
             <Sliders className="h-4 w-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-slate-100">
+              <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-900">
                 Interactive ML Flight Simulator
               </h3>
-              <span className="rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-mono font-semibold text-emerald-400 border border-emerald-500/20">
+              <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
                 Live DB Connected
               </span>
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
               Simulate flight characteristics to forecast future pricing trajectories using 8,955 real observations
             </p>
           </div>
         </div>
 
         <button
+          type="button"
           onClick={() => setShowFeatures(!showFeatures)}
-          className="text-xs font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1 border border-purple-500/25 px-2.5 py-1 rounded bg-purple-950/30 transition"
+          className="text-xs font-mono font-bold text-purple-700 hover:text-purple-800 flex items-center gap-1.5 border border-purple-200 px-3 py-1.5 rounded-xl bg-purple-50/70 hover:bg-purple-100 transition shadow-xs"
         >
           <Layers className="h-3.5 w-3.5" />
           <span>{showFeatures ? "Hide Features" : "View 14 ML Features"}</span>
@@ -187,13 +188,13 @@ export function PredictionSimulator({
 
       {/* Real Live Flights in Database Picker */}
       {initialRealFlights && initialRealFlights.length > 0 && (
-        <div className="space-y-2 rounded-lg bg-slate-900/60 border border-slate-800/80 p-3.5">
+        <div className="space-y-2.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-              <Plane className="h-3.5 w-3.5 text-purple-400" />
+            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <Plane className="h-3.5 w-3.5 text-purple-600" />
               Real Scraped Flights from Database (Neon PostgreSQL):
             </span>
-            <span className="text-[10px] font-mono text-purple-400 bg-purple-950/40 border border-purple-500/20 px-2 py-0.5 rounded">
+            <span className="text-[10px] font-mono font-bold text-purple-700 bg-purple-100/60 border border-purple-200 px-2 py-0.5 rounded-full">
               Click to Simulate
             </span>
           </div>
@@ -227,19 +228,19 @@ export function PredictionSimulator({
                       f.durationMinutes || routeObj.durationMinutes
                     );
                   }}
-                  className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs transition border ${
+                  className={`flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs transition border ${
                     isSelected
-                      ? "bg-purple-600/30 text-purple-200 border-purple-500 shadow-sm font-semibold"
-                      : "bg-slate-950/80 text-slate-300 border-slate-800 hover:bg-slate-900 hover:border-slate-700"
+                      ? "bg-slate-950 text-white border-slate-950 shadow-md font-bold scale-[1.02]"
+                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100/80 hover:border-slate-300 shadow-xs font-medium"
                   }`}
                 >
                   <AirlineLogo airline={f.airline} size="xs" />
-                  <span className="font-semibold">{f.flightNumber}</span>
-                  <span className="text-slate-500 font-mono text-[11px]">
+                  <span className="font-bold">{f.flightNumber}</span>
+                  <span className={`font-mono text-[11px] ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
                     {f.origin}→{f.destination}
                   </span>
-                  <span className="font-mono font-bold text-emerald-400">
-                    ₹{f.price.toLocaleString()}
+                  <span className={`font-mono font-black ${isSelected ? "text-emerald-300" : "text-emerald-600"}`}>
+                    ₹{f.price.toLocaleString("en-IN")}
                   </span>
                 </button>
               );
@@ -249,10 +250,10 @@ export function PredictionSimulator({
       )}
 
       {/* Corridor Quick Select */}
-      <div className="space-y-2">
-        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+      <div className="space-y-2.5">
+        <label className="text-xs font-black text-slate-500 uppercase tracking-wider flex items-center justify-between">
           <span>Domestic Route Corridor (Live Database Benchmarks):</span>
-          <span className="text-[11px] font-mono text-purple-400 lowercase">
+          <span className="text-[11px] font-mono text-purple-700 lowercase font-bold">
             6 tracked corridors
           </span>
         </label>
@@ -264,16 +265,17 @@ export function PredictionSimulator({
             return (
               <button
                 key={`${r.origin}-${r.destination}`}
+                type="button"
                 onClick={() => handleRouteChange(r)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-mono transition border flex items-center gap-2 ${
+                className={`rounded-full px-4 py-2 text-xs font-mono transition border flex items-center gap-2 ${
                   isSelected
-                    ? "bg-purple-600 text-white border-purple-500 shadow-md shadow-purple-500/20 font-bold"
-                    : "bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800 hover:text-white"
+                    ? "bg-slate-950 text-white border-slate-950 shadow-md scale-[1.02] font-bold"
+                    : "bg-white text-slate-800 border-slate-200 hover:bg-slate-100 hover:border-slate-300 shadow-xs font-semibold"
                 }`}
               >
                 <span>{r.origin} → {r.destination}</span>
-                <span className={`text-[10px] px-1 rounded ${isSelected ? "bg-purple-700 text-white" : "bg-slate-800 text-purple-400"}`}>
-                  ₹{r.benchmark.toLocaleString()}
+                <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${isSelected ? "bg-slate-800 text-purple-300 font-bold" : "bg-slate-100 text-slate-700"}`}>
+                  ₹{r.benchmark.toLocaleString("en-IN")}
                 </span>
               </button>
             );
@@ -282,44 +284,44 @@ export function PredictionSimulator({
       </div>
 
       {/* Selected Corridor Live Database Ground Truth Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs rounded-lg bg-slate-900/50 border border-slate-800/80 p-3 font-mono">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs rounded-2xl bg-slate-50/80 border border-slate-200/80 p-4 font-mono">
         <div>
-          <span className="text-[10px] text-slate-400 uppercase block">Database Obs</span>
-          <span className="font-bold text-slate-100 flex items-center gap-1">
-            <Database className="h-3 w-3 text-purple-400" />
-            {selectedRoute.count ? selectedRoute.count.toLocaleString() : "1,000+"} records
+          <span className="text-[10px] text-slate-500 uppercase block font-semibold">Database Obs</span>
+          <span className="font-black text-slate-900 flex items-center gap-1 mt-0.5">
+            <Database className="h-3 w-3 text-purple-600" />
+            {selectedRoute.count ? selectedRoute.count.toLocaleString("en-IN") : "1,000+"} records
           </span>
         </div>
         <div>
-          <span className="text-[10px] text-slate-400 uppercase block">Live Avg Fare</span>
-          <span className="font-bold text-purple-300">
-            ₹{selectedRoute.benchmark.toLocaleString()}
+          <span className="text-[10px] text-slate-500 uppercase block font-semibold">Live Avg Fare</span>
+          <span className="font-black text-purple-700 text-sm mt-0.5 block">
+            ₹{selectedRoute.benchmark.toLocaleString("en-IN")}
           </span>
         </div>
         <div>
-          <span className="text-[10px] text-slate-400 uppercase block">Scraped Min / Max</span>
-          <span className="text-slate-300">
-            ₹{selectedRoute.minFare?.toLocaleString() || "1,000"} – ₹{selectedRoute.maxFare?.toLocaleString() || "25,000"}
+          <span className="text-[10px] text-slate-500 uppercase block font-semibold">Scraped Min / Max</span>
+          <span className="font-bold text-slate-800 mt-0.5 block">
+            ₹{selectedRoute.minFare?.toLocaleString("en-IN") || "1,000"} – ₹{selectedRoute.maxFare?.toLocaleString("en-IN") || "25,000"}
           </span>
         </div>
         <div>
-          <span className="text-[10px] text-slate-400 uppercase block">Route Base Value</span>
-          <span className="text-slate-300">
-            ₹{selectedRoute.baseFare?.toLocaleString() || selectedRoute.benchmark.toLocaleString()}
+          <span className="text-[10px] text-slate-500 uppercase block font-semibold">Route Base Value</span>
+          <span className="font-bold text-slate-800 mt-0.5 block">
+            ₹{selectedRoute.baseFare?.toLocaleString("en-IN") || selectedRoute.benchmark.toLocaleString("en-IN")}
           </span>
         </div>
       </div>
 
       {/* Airline and Flight Detail Grid (3 Columns: Carrier, Lead Days, Stops) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
         {/* Carrier */}
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+          <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
             <AirlineLogo airline={airline} size="xs" />
             Operating Carrier
           </label>
           <div className="relative flex items-center">
-            <div className="absolute left-2.5 pointer-events-none z-10">
+            <div className="absolute left-3 pointer-events-none z-10">
               <AirlineLogo airline={airline} size="xs" />
             </div>
             <select
@@ -329,7 +331,7 @@ export function PredictionSimulator({
                 setAirline(val);
                 runPrediction(selectedRoute, val, daysToDeparture, currentPrice, stops, durationMinutes);
               }}
-              className="w-full rounded-lg border border-slate-800 bg-slate-900 pl-9 pr-3 py-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+              className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 py-2 text-sm text-slate-900 font-medium focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 shadow-xs"
             >
               {AIRLINES.map((a) => (
                 <option key={a} value={a}>
@@ -343,31 +345,33 @@ export function PredictionSimulator({
         {/* Days to Departure */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center text-xs">
-            <label className="font-medium text-slate-300 flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 text-blue-400" />
+            <label className="font-bold text-slate-700 flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5 text-blue-600" />
               Lead Days (T-Minus)
             </label>
-            <span className="font-mono font-bold text-purple-400">
+            <span className="font-mono font-black text-purple-700">
               {daysToDeparture} {daysToDeparture === 1 ? "day" : "days"}
             </span>
           </div>
-          <input
-            type="range"
-            min="1"
-            max="60"
-            value={daysToDeparture}
-            onChange={(e) => {
-              const val = Number(e.target.value);
-              setDaysToDeparture(val);
-              runPrediction(selectedRoute, airline, val, currentPrice, stops, durationMinutes);
-            }}
-            className="w-full accent-purple-500 h-2 bg-slate-800 rounded-lg cursor-pointer"
-          />
+          <div className="pt-2">
+            <input
+              type="range"
+              min="1"
+              max="60"
+              value={daysToDeparture}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                setDaysToDeparture(val);
+                runPrediction(selectedRoute, airline, val, currentPrice, stops, durationMinutes);
+              }}
+              className="w-full accent-purple-600 h-2 bg-slate-200 rounded-lg cursor-pointer"
+            />
+          </div>
         </div>
 
         {/* Stops */}
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-slate-300">Stops</label>
+          <label className="text-xs font-bold text-slate-700">Stops</label>
           <div className="grid grid-cols-3 gap-1.5">
             {[
               { label: "Non-stop", val: 0 },
@@ -381,10 +385,10 @@ export function PredictionSimulator({
                   setStops(s.val);
                   runPrediction(selectedRoute, airline, daysToDeparture, currentPrice, s.val, durationMinutes);
                 }}
-                className={`py-2 text-xs font-medium rounded-lg border transition ${
+                className={`py-2 text-xs font-bold rounded-xl border transition ${
                   stops === s.val
-                    ? "bg-purple-600/20 text-purple-300 border-purple-500/50 font-semibold"
-                    : "bg-slate-900 text-slate-400 border-slate-800 hover:bg-slate-800"
+                    ? "bg-slate-950 text-white border-slate-950 shadow-xs"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-xs font-medium"
                 }`}
               >
                 {s.label}
@@ -396,10 +400,10 @@ export function PredictionSimulator({
 
       {/* Feature Inspector Tray */}
       {showFeatures && activeFeatures && (
-        <div className="rounded-lg bg-slate-900/90 border border-purple-500/30 p-4 space-y-3 animate-in fade-in duration-200">
+        <div className="rounded-2xl bg-purple-50/60 border border-purple-200/80 p-5 space-y-3 animate-in fade-in duration-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+            <span className="text-xs font-black text-purple-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-purple-600" />
               14-Dimensional Engineered Feature Vector (Passed to Gradient Boosting Regressor)
             </span>
             <span className="text-[10px] text-slate-500 font-mono">
@@ -409,11 +413,11 @@ export function PredictionSimulator({
 
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
             {Object.entries(activeFeatures).map(([k, v]) => (
-              <div key={k} className="rounded bg-slate-950 border border-slate-800 p-2">
-                <div className="text-[10px] text-slate-400 truncate" title={k}>
+              <div key={k} className="rounded-xl bg-white border border-purple-100 p-2.5 shadow-xs">
+                <div className="text-[10px] text-slate-500 font-medium truncate" title={k}>
                   {k}
                 </div>
-                <div className="text-xs font-mono font-bold text-slate-200 mt-0.5">
+                <div className="text-xs font-mono font-black text-slate-900 mt-0.5">
                   {typeof v === "number" ? v.toLocaleString() : String(v)}
                 </div>
               </div>
