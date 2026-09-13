@@ -63,7 +63,7 @@ export default function Header({ onRunScraper, scraperLoading }: HeaderProps) {
         Full Viewport Width Header:
         Spans 100% width across the entire viewport edge-to-edge.
       */}
-      <header className="fixed top-0 left-0 right-0 z-50 py-3.5 bg-slate-950/85 backdrop-blur-xl border-b border-white/10 font-body transition-all duration-300 shadow-lg">
+      <header className="fixed top-0 left-0 right-0 z-50 pt-5 pb-3 font-body transition-all duration-300">
         <div className="w-full max-w-[1600px] mx-auto flex items-center justify-between px-4 lg:px-6 xl:px-8">
           {/* Left: Brand Logo */}
           <Link href="/" className="group flex items-center gap-2 shrink-0 mr-4 xl:mr-8">
