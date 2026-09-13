@@ -50,11 +50,7 @@ export function PredictionForecastChart({ data, currentPrice }: PredictionForeca
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-purple-500" />
-            <span className="text-slate-400">ML Forecast</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-0.5 w-3 bg-amber-400 border-dashed" />
-            <span className="text-slate-400">Current Fare (₹{currentPrice.toLocaleString()})</span>
+            <span className="text-slate-300 font-semibold">ML Predicted Airfare</span>
           </div>
         </div>
       </div>

@@ -310,8 +310,8 @@ export function PredictionSimulator({
         </div>
       </div>
 
-      {/* Airline and Flight Detail Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Airline and Flight Detail Grid (3 Columns: Carrier, Lead Days, Stops) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Carrier */}
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
@@ -363,30 +363,6 @@ export function PredictionSimulator({
             }}
             className="w-full accent-purple-500 h-2 bg-slate-800 rounded-lg cursor-pointer"
           />
-        </div>
-
-        {/* Current Fare */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
-            <IndianRupee className="h-3.5 w-3.5 text-emerald-400" />
-            Current Live Fare (₹)
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-2 text-sm text-slate-500">₹</span>
-            <input
-              type="number"
-              step="100"
-              min="1000"
-              max="50000"
-              value={currentPrice}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                setCurrentPrice(val);
-                runPrediction(selectedRoute, airline, daysToDeparture, val, stops, durationMinutes);
-              }}
-              className="w-full rounded-lg border border-slate-800 bg-slate-900 pl-7 pr-3 py-2 text-sm text-slate-200 font-mono focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-            />
-          </div>
         </div>
 
         {/* Stops */}

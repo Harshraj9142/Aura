@@ -21,6 +21,7 @@ import {
   TrendingDown,
 } from "lucide-react";
 import AirlineLogo from "@/components/AirlineLogo";
+import { IndiaRouteMap } from "@/components/maps/IndiaRouteMap";
 
 // Default real baseline data from Neon PostgreSQL (Ep-quiet-dawn)
 const INITIAL_INDEX_CHART_DATA = [
@@ -152,6 +153,7 @@ export default function DashboardOverview() {
             src="/dashboard/airport_overview_hero.jpg"
             alt="Airport Runway Sunset"
             fill
+            sizes="100vw"
             className="object-cover object-center scale-[1.02]"
             priority
           />
@@ -415,80 +417,9 @@ export default function DashboardOverview() {
 
             {/* Inner Grid: Map Graphic Left + Route Feed List Right */}
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              {/* India Map Graphic Container with Pure White India Map Silhouette */}
-              <div className="sm:col-span-5 relative h-56 w-full flex items-center justify-center bg-slate-100/80 rounded-2xl border border-slate-200/60 p-2 overflow-hidden shadow-inner">
-                <svg
-                  viewBox="0 0 300 350"
-                  className="h-full w-full object-contain filter drop-shadow-sm"
-                >
-                  {/* Accurate White India Map Vector Silhouette */}
-                  <path
-                    d="M 152 20 Q 158 10 162 22 C 168 35 178 50 178 62 C 178 72 195 72 205 78 C 215 85 238 88 250 92 C 265 98 275 108 275 120 C 275 130 262 135 250 135 C 240 135 228 142 222 152 C 218 162 222 172 232 178 C 242 185 242 195 232 202 C 220 210 205 228 198 245 C 190 262 178 285 168 310 C 160 328 152 335 145 335 C 138 335 132 322 125 305 C 115 280 102 258 92 238 C 82 218 68 195 62 182 C 55 168 45 158 45 145 C 45 130 65 115 80 110 C 95 105 110 98 120 88 C 130 78 135 62 138 50 Z"
-                    fill="#FFFFFF"
-                    stroke="#CBD5E1"
-                    strokeWidth="1.5"
-                  />
-
-                  {/* Connected Flight Arcs */}
-                  <path
-                    d="M 150 90 Q 115 135 100 200"
-                    fill="none"
-                    stroke="#2563EB"
-                    strokeWidth="2.5"
-                    strokeDasharray="4 3"
-                  />
-                  <path
-                    d="M 150 90 Q 195 110 230 150"
-                    fill="none"
-                    stroke="#10B981"
-                    strokeWidth="2.5"
-                  />
-                  <path
-                    d="M 100 200 Q 115 235 140 260"
-                    fill="none"
-                    stroke="#EF4444"
-                    strokeWidth="2.5"
-                  />
-                  <path
-                    d="M 140 260 Q 155 235 160 210"
-                    fill="none"
-                    stroke="#2563EB"
-                    strokeWidth="2.5"
-                  />
-                  <path
-                    d="M 160 210 Q 165 145 150 90"
-                    fill="none"
-                    stroke="#10B981"
-                    strokeWidth="2"
-                    strokeDasharray="3 3"
-                  />
-
-                  {/* City Nodes */}
-                  <circle cx="150" cy="90" r="4.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5" />
-                  <text x="158" y="93" fontSize="10" fontWeight="800" fill="#0F172A">
-                    DEL
-                  </text>
-
-                  <circle cx="100" cy="200" r="4.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5" />
-                  <text x="73" y="204" fontSize="10" fontWeight="800" fill="#0F172A">
-                    BOM
-                  </text>
-
-                  <circle cx="140" cy="260" r="4.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5" />
-                  <text x="148" y="264" fontSize="10" fontWeight="800" fill="#0F172A">
-                    BLR
-                  </text>
-
-                  <circle cx="160" cy="210" r="4.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5" />
-                  <text x="168" y="214" fontSize="10" fontWeight="800" fill="#0F172A">
-                    HYD
-                  </text>
-
-                  <circle cx="230" cy="150" r="4.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5" />
-                  <text x="238" y="154" fontSize="10" fontWeight="800" fill="#0F172A">
-                    CCU
-                  </text>
-                </svg>
+              {/* India Map Graphic Container with D3 Accurate Mercator Projection & Real Coordinates */}
+              <div className="sm:col-span-5 relative h-56 sm:h-64 w-full flex items-center justify-center p-0">
+                <IndiaRouteMap width={320} height={360} />
               </div>
 
               {/* Route List Feed Right */}
@@ -548,6 +479,7 @@ export default function DashboardOverview() {
               src="/dashboard/airplane_wing_card.jpg"
               alt="Airplane Wing View"
               fill
+              sizes="(max-width: 1024px) 100vw, 25vw"
               className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-transparent to-slate-950/80 z-0" />

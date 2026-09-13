@@ -96,41 +96,34 @@ export function PredictionResultCard({ result, loading }: PredictionResultCardPr
           </div>
         </div>
 
-        {/* Pricing Comparison */}
-        <div className="grid grid-cols-2 gap-4 rounded-lg bg-slate-900/70 border border-slate-800/80 p-4 mb-5">
-          <div>
-            <span className="text-xs text-slate-400 font-medium">Current Price</span>
-            <div className="text-2xl font-mono font-bold text-slate-300 mt-0.5">
-              ₹{result.currentPrice.toLocaleString()}
-            </div>
-            <span className="text-[10px] text-slate-500">Benchmark baseline</span>
+        {/* Primary Predicted Fare Display (Direct ML Predicted Total Price) */}
+        <div className="rounded-2xl bg-slate-900/90 border border-purple-500/30 p-5 mb-5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black uppercase text-purple-300 tracking-wider">
+              PREDICTED TOTAL FARE
+            </span>
+            <span className="text-[11px] text-slate-400 font-mono">
+              24h Horizon Forecast
+            </span>
           </div>
 
-          <div className="border-l border-slate-800 pl-4">
-            <span className="text-xs text-slate-400 font-medium">Predicted (+24h)</span>
-            <div
-              className={`text-2xl font-mono font-bold mt-0.5 ${
-                result.priceDelta > 0
-                  ? "text-rose-400"
-                  : result.priceDelta < 0
-                  ? "text-emerald-400"
-                  : "text-slate-200"
-              }`}
-            >
-              ₹{result.predictedPrice.toLocaleString()}
+          <div className="flex items-baseline justify-between pt-1">
+            <div className="text-4xl sm:text-5xl font-black font-mono tracking-tight text-white">
+              ₹{result.predictedPrice.toLocaleString("en-IN")}
             </div>
-            <div className="flex items-center gap-1 text-[11px] font-mono mt-0.5">
+
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-400 block">Trajectory</span>
               <span
-                className={
+                className={`text-xs font-mono font-extrabold ${
                   result.priceDelta > 0
-                    ? "text-rose-400 font-semibold"
+                    ? "text-rose-400"
                     : result.priceDelta < 0
-                    ? "text-emerald-400 font-semibold"
-                    : "text-slate-400"
-                }
+                    ? "text-emerald-400"
+                    : "text-slate-300"
+                }`}
               >
-                {result.priceDelta > 0 ? `+₹${result.priceDelta}` : `₹${result.priceDelta}`}{" "}
-                ({result.percentChange > 0 ? `+${result.percentChange}%` : `${result.percentChange}%`})
+                {result.percentChange > 0 ? `+${result.percentChange}%` : `${result.percentChange}%`}
               </span>
             </div>
           </div>

@@ -86,27 +86,27 @@ export interface AirlineLogoProps {
 
 const SIZE_CLASSES = {
   xs: {
-    box: 'w-5 h-5 min-w-[20px] rounded p-0.5',
+    box: 'w-6 h-6 min-w-[24px] rounded-md p-0.5',
     img: 'max-h-full max-w-full',
     text: 'text-[10px]',
   },
   sm: {
-    box: 'w-7 h-7 min-w-[28px] rounded-md p-1',
+    box: 'w-9 h-9 min-w-[36px] rounded-lg p-0.5',
     img: 'max-h-full max-w-full',
     text: 'text-xs',
   },
   md: {
-    box: 'w-9 h-9 min-w-[36px] rounded-lg p-1',
+    box: 'w-12 h-12 min-w-[48px] rounded-xl p-1',
     img: 'max-h-full max-w-full',
     text: 'text-sm font-semibold',
   },
   lg: {
-    box: 'w-12 h-12 min-w-[48px] rounded-xl p-1.5',
+    box: 'w-14 h-14 min-w-[56px] rounded-xl p-1',
     img: 'max-h-full max-w-full',
     text: 'text-base font-bold',
   },
   xl: {
-    box: 'w-16 h-16 min-w-[64px] rounded-2xl p-2',
+    box: 'w-20 h-20 min-w-[80px] rounded-2xl p-1.5',
     img: 'max-h-full max-w-full',
     text: 'text-lg font-bold',
   },
@@ -124,14 +124,14 @@ export default function AirlineLogo({
 
   const logoNode = meta ? (
     <div
-      className={`inline-flex items-center justify-center bg-white shadow-xs border border-slate-200/80 overflow-hidden flex-shrink-0 transition-transform hover:scale-105 ${sizeConfig.box} ${className}`}
+      className={`inline-flex items-center justify-center bg-transparent flex-shrink-0 ${sizeConfig.box} ${className}`}
       title={`${meta.name} (${meta.code})`}
     >
       <img
         src={meta.logo}
         alt={meta.alt}
-        className={`object-contain pointer-events-none select-none ${sizeConfig.img}`}
-        loading="lazy"
+        className={`w-full h-full object-contain mix-blend-multiply pointer-events-none select-none ${sizeConfig.img}`}
+        loading="eager"
       />
     </div>
   ) : (
@@ -139,7 +139,7 @@ export default function AirlineLogo({
       className={`inline-flex items-center justify-center bg-slate-100 text-slate-700 font-bold border border-slate-200 flex-shrink-0 uppercase ${sizeConfig.box} ${className}`}
       title={airline || flightNumber || 'Flight'}
     >
-      <span className="text-[10px] leading-none tracking-tight truncate">
+      <span className="text-xs leading-none tracking-tight truncate">
         {(airline || flightNumber || 'FL').slice(0, 2).toUpperCase()}
       </span>
     </div>
@@ -147,9 +147,9 @@ export default function AirlineLogo({
 
   if (showName) {
     return (
-      <div className="inline-flex items-center gap-2">
+      <div className="inline-flex items-center gap-2.5">
         {logoNode}
-        <span className={`text-slate-900 font-medium ${sizeConfig.text}`}>
+        <span className={`text-slate-900 font-bold ${sizeConfig.text}`}>
           {meta ? meta.name : airline || flightNumber || 'Airline'}
         </span>
       </div>
