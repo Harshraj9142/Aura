@@ -45,6 +45,13 @@ export const PROBLEM_LIST: ProblemOption[] = [
     icon: '💳',
     quickDescription: 'Refund pending >7 days or airline deducted airport taxes',
   },
+  {
+    id: 'other',
+    title: 'Other / Explain Your Issue',
+    badge: 'AI Curated Redressal',
+    icon: '✨',
+    quickDescription: 'Flight schedule change, unfair charges, medical, disability, or custom grievance',
+  },
 ];
 
 export function getStatutoryEntitlement(
@@ -522,7 +529,129 @@ function calculateEntitlement(answers: GrievanceAnswers): StatutoryEntitlement {
     };
   }
 
-  // 5. REFUND
+  // 5. OTHER / CUSTOM GRIEVANCE (FALLBACK IF AI IS OFFLINE OR KEYS PENDING)
+  if (category === 'other') {
+    const issueSummary = answers.customIssueText
+      ? answers.customIssueText.length > 80
+        ? answers.customIssueText.slice(0, 77) + '...'
+        : answers.customIssueText
+      : 'Custom Aviation Dispute & Deficiency in Service';
+
+    return {
+      headline: `Statutory Dispute: ${issueSummary}`,
+      compensationAmount: `Full Restitution + Statutory Relief under Consumer Protection Act`,
+      cashHighlight: `Under DGCA CAR Section 3 and the Consumer Protection Act 2019, passengers are entitled to full restitution for unauthorized charges or service deficiencies.`,
+      careHighlight: `Airlines are obligated to provide courteous service, transparent disclosures, and prompt grievance resolution.`,
+      refundHighlight: `Disputed fees or unjustified deductions must be remitted back to the passenger's original payment mode.`,
+      isAiCurated: false,
+      aiProviderUsed: 'template',
+      primaryClauses: [
+        {
+          name: 'DGCA CAR Section 3, Series M, Part IV',
+          clause: 'Clause 3.9 (Passenger Grievance Redressal Mechanism)',
+          exactText:
+            'Para 3.9.1: Each airline shall have an Internal Grievance Redressal Mechanism with an appointed Nodal Officer and Appellate Authority to address all passenger grievances related to deficient service, arbitrary changes, or dispute resolution.',
+          url: 'https://www.civilaviation.gov.in/ministry-documents/passenger-charter-of-rights',
+        },
+        {
+          name: 'Consumer Protection Act, 2019',
+          clause: 'Section 2(11) & Section 35 (Deficiency in Service & Unfair Trade Practice)',
+          exactText:
+            'Deficiency means any fault, imperfection, shortcoming or inadequacy in the quality, nature and manner of performance which is required to be maintained by or under any law for the time being in force or has been undertaken to be performed by a person in pursuance of a contract or otherwise in relation to any service.',
+          url: 'https://edaakhil.nic.in',
+        },
+        {
+          name: `${airline.shortName} Conditions of Carriage`,
+          clause: 'General Conditions & Passenger Redressal',
+          exactText:
+            `${airline.shortName} is governed by statutory civil aviation regulations and must resolve passenger complaints through its designated Nodal Officer within statutory timeframes.`,
+          url: airline.officialCocUrl,
+        },
+      ],
+      steps: [
+        {
+          stepNumber: 1,
+          stage: 'Documentation (Immediate)',
+          timeframe: 'Day 1',
+          icon: '📍',
+          title: 'Preserve Booking Evidence & Incident Record',
+          shortAction: `Compile your PNR, ticket copy, payment receipt, and written communications with ${airline.shortName}.`,
+          clauseCitation: {
+            label: 'DGCA CAR Series M Part IV',
+            url: 'https://www.civilaviation.gov.in',
+            docName: 'DGCA Enforcement Regulations',
+            exactText:
+              'Passengers shall preserve all electronic and documentary records of booking, payment receipts, and communications with airline personnel to substantiate claims.',
+          },
+          contactInfo: {
+            label: `${airline.shortName} Customer Care`,
+            phone: airline.customerCare.phone,
+            email: airline.customerCare.email,
+          },
+        },
+        {
+          stepNumber: 2,
+          stage: 'Notice to Nodal Officer',
+          timeframe: 'Within 48 Hours',
+          icon: '✉️',
+          title: `Serve Formal Grievance Notice to ${airline.shortName} Nodal Officer`,
+          shortAction: `Email ${airline.nodalOfficer.email} with your detailed issue statement and demand written redressal within 10 days.`,
+          clauseCitation: {
+            label: 'DGCA CAR Clause 3.9.1 (Nodal Mechanism)',
+            url: airline.officialCharterUrl,
+            docName: `${airline.shortName} Charter`,
+            exactText:
+              'Airlines are obligated to designate a Nodal Officer to whom passengers can submit formal grievances, with a statutory resolution timeframe.',
+          },
+          contactInfo: {
+            label: `Nodal Officer (${airline.shortName})`,
+            email: airline.nodalOfficer.email,
+            phone: airline.nodalOfficer.phone,
+          },
+        },
+        {
+          stepNumber: 3,
+          stage: 'Appellate Escalation',
+          timeframe: 'Day 11 (If Unresolved)',
+          icon: '⚖️',
+          title: 'Escalate to Airline Appellate Authority',
+          shortAction: `Forward the unaddressed notice to ${airline.appellateAuthority.email} requesting executive intervention.`,
+          clauseCitation: {
+            label: 'DGCA CAR Issue I, Section 3',
+            url: 'https://www.civilaviation.gov.in',
+            docName: 'DGCA Regulations',
+            exactText:
+              'If the Nodal Officer fails to resolve the grievance within 10 days, the passenger may escalate to the Airline Appellate Authority.',
+          },
+          contactInfo: {
+            label: `Appellate Authority`,
+            email: airline.appellateAuthority.email,
+          },
+        },
+        {
+          stepNumber: 4,
+          stage: 'Regulatory Intervention & Court',
+          timeframe: 'Day 16+',
+          icon: '🏛️',
+          title: 'Lodge on Ministry AirSewa & National Consumer Court (e-Daakhil)',
+          shortAction: 'Submit complaint on AirSewa for direct MoCA oversight, or file on e-Daakhil for compensation and compensation for mental agony.',
+          clauseCitation: {
+            label: 'Consumer Protection Act 2019 Section 35 & AirSewa',
+            url: 'https://airsewa.gov.in',
+            docName: 'Ministry of Civil Aviation',
+            exactText:
+              'AirSewa connects passengers directly to civil aviation regulatory authorities for prompt escalation against non-responsive airline management.',
+          },
+          contactInfo: {
+            label: 'AirSewa Portal (MoCA)',
+            url: 'https://airsewa.gov.in',
+          },
+        },
+      ],
+    };
+  }
+
+  // 6. REFUND
   return {
     headline: `100% Full Refund + Zero Cancellation Fee Deduction`,
     compensationAmount: `100% Ticket Fare + 100% Taxes (UDF, PSF, ASF)`,

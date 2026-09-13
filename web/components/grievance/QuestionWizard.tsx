@@ -17,6 +17,10 @@ import {
   XCircle,
   Coffee,
   Building2,
+  Sparkles,
+  Loader2,
+  HelpCircle,
+  CheckCircle2,
 } from 'lucide-react';
 
 export function getCategoryIcon(id: GrievanceCategory) {
@@ -31,6 +35,8 @@ export function getCategoryIcon(id: GrievanceCategory) {
       return <Luggage className="h-5 w-5 text-amber-700" />;
     case 'refund':
       return <CreditCard className="h-5 w-5 text-emerald-600" />;
+    case 'other':
+      return <Sparkles className="h-5 w-5 text-purple-600" />;
     default:
       return <AlertCircle className="h-5 w-5 text-indigo-600" />;
   }
@@ -43,6 +49,15 @@ export interface QuestionWizardProps {
   durationOption: string | null;
   flightTimeOption: '<1hr' | '1-2hr' | '>2hr' | null;
   assistanceOption: 'none' | 'refreshments' | 'hotel_alternate' | null;
+  // Custom issue state
+  customIssueText: string;
+  pnr: string;
+  flightNumber: string;
+  travelDate: string;
+  isLoadingAi: boolean;
+  onUpdateCustomField: (field: 'customIssueText' | 'pnr' | 'flightNumber' | 'travelDate', val: string) => void;
+  onSubmitCustomIssue: () => void;
+  // Standard handlers
   onSelectAirline: (id: AirlineId) => void;
   onSelectCategory: (cat: GrievanceCategory) => void;
   onSelectDuration: (dur: string) => void;
@@ -51,6 +66,16 @@ export interface QuestionWizardProps {
   onBack: () => void;
 }
 
+const COMMON_ISSUE_CHIPS = [
+  'Flight rescheduled / preponed arbitrarily without consent',
+  'Forced fee for mandatory web check-in seat selection',
+  'Wheelchair / special assistance refused or extra charged',
+  'Medical emergency cancellation with doctor note refused refund',
+  'Tarmac delay exceeding 2 hours with no air conditioning',
+  'Excess baggage fee charged despite baggage allowance receipt',
+  'Lost personal item inside cabin not investigated by crew',
+];
+
 export function QuestionWizard({
   currentQuestion,
   airlineId,
@@ -58,6 +83,13 @@ export function QuestionWizard({
   durationOption,
   flightTimeOption,
   assistanceOption,
+  customIssueText,
+  pnr,
+  flightNumber,
+  travelDate,
+  isLoadingAi,
+  onUpdateCustomField,
+  onSubmitCustomIssue,
   onSelectAirline,
   onSelectCategory,
   onSelectDuration,
@@ -67,7 +99,7 @@ export function QuestionWizard({
 }: QuestionWizardProps) {
   const airline = airlineId ? AIRLINE_DIRECTORY[airlineId] : null;
 
-  // Helper for dynamic Duration options in Question 3
+  // Dynamic Duration options for Question 3 (standard flow only)
   const getDurationOptions = () => {
     if (category === 'delay') {
       return [
@@ -98,7 +130,6 @@ export function QuestionWizard({
         { id: 'alternate_quick', title: 'Alternate Flight Within 1 Hour', hint: 'Care provided, zero penalty' },
       ];
     }
-    // refund
     return [
       { id: 'pending_7_30', title: 'Pending 7 to 30 Days', hint: 'Breach of 7-day card refund rule' },
       { id: 'pending_over_30', title: 'Pending Over 30 Days', hint: 'Direct regulatory non-compliance' },
@@ -106,15 +137,18 @@ export function QuestionWizard({
     ];
   };
 
+  const isOtherFlow = category === 'other';
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       {/* Top Breadcrumb & Progress Bar */}
       <div className="flex items-center justify-between">
-        {currentQuestion > 1 ? (
+        {currentQuestion > 1 || isOtherFlow ? (
           <div className="flex items-center gap-2">
             <button
               onClick={onBack}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition shadow-xs"
+              disabled={isLoadingAi}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition shadow-xs disabled:opacity-50"
             >
               <span>←</span>
               <span>Back</span>
@@ -133,27 +167,40 @@ export function QuestionWizard({
         )}
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-extrabold text-indigo-700">
-            Question {currentQuestion} of 5
-          </span>
-          <div className="flex gap-1">
-            {[1, 2, 3, 4, 5].map((q) => (
-              <div
-                key={q}
-                className={`h-1.5 w-6 rounded-full transition-all ${
-                  q === currentQuestion
-                    ? 'bg-indigo-600'
-                    : q < currentQuestion
-                    ? 'bg-emerald-600'
-                    : 'bg-slate-200'
-                }`}
-              />
-            ))}
-          </div>
+          {isOtherFlow ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-extrabold text-purple-700">
+                AI Dispute Curation
+              </span>
+              <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800">
+                Gemini + Groq
+              </span>
+            </div>
+          ) : (
+            <>
+              <span className="text-xs font-extrabold text-indigo-700">
+                Question {currentQuestion} of 5
+              </span>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((q) => (
+                  <div
+                    key={q}
+                    className={`h-1.5 w-6 rounded-full transition-all ${
+                      q === currentQuestion
+                        ? 'bg-indigo-600'
+                        : q < currentQuestion
+                        ? 'bg-emerald-600'
+                        : 'bg-slate-200'
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {/* QUESTION 1: AIRLINE */}
+      {/* QUESTION 1: AIRLINE SELECTION */}
       {currentQuestion === 1 && (
         <div className="space-y-5 text-center animate-in fade-in duration-200">
           <div>
@@ -161,7 +208,7 @@ export function QuestionWizard({
               Which airline did you fly with?
             </h2>
             <p className="mt-1 text-xs text-slate-600 font-medium">
-              Select carrier to apply their exact Conditions of Carriage and Nodal contacts.
+              Select carrier to apply their exact Conditions of Carriage and statutory Nodal contacts.
             </p>
           </div>
 
@@ -196,47 +243,209 @@ export function QuestionWizard({
         </div>
       )}
 
-      {/* QUESTION 2: WHAT HAPPENED */}
-      {currentQuestion === 2 && (
+      {/* QUESTION 2: WHAT PROBLEM OCCURRED (MCQ SECTION WITH "OTHER / EXPLAIN YOUR ISSUE") */}
+      {currentQuestion === 2 && !isOtherFlow && (
         <div className="space-y-5 text-center animate-in fade-in duration-200">
           <div>
             <h2 className="text-2xl font-black text-slate-950 sm:text-3xl">
               What problem occurred?
             </h2>
             <p className="mt-1 text-xs text-slate-600 font-medium">
-              Select what went wrong with your flight with {airline?.shortName}.
+              Select your grievance with {airline?.shortName}, or choose &ldquo;Other&rdquo; to describe any custom issue.
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-            {PROBLEM_LIST.map((problem) => (
-              <button
-                key={problem.id}
-                onClick={() => onSelectCategory(problem.id)}
-                className="group flex items-center gap-3.5 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs transition-all hover:border-indigo-500 hover:shadow-md"
-              >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 border border-slate-200/80 shadow-2xs group-hover:bg-indigo-50 group-hover:border-indigo-200 transition-colors">
-                  {getCategoryIcon(problem.id)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-extrabold text-slate-950 truncate">
-                    {problem.title}
+            {PROBLEM_LIST.map((problem) => {
+              const isOther = problem.id === 'other';
+              return (
+                <button
+                  key={problem.id}
+                  onClick={() => onSelectCategory(problem.id)}
+                  className={`group flex items-center gap-3.5 rounded-xl border p-4 text-left shadow-xs transition-all ${
+                    isOther
+                      ? 'border-purple-300 bg-gradient-to-r from-purple-50/60 to-indigo-50/60 hover:border-purple-500 hover:shadow-md sm:col-span-2'
+                      : 'border-slate-200 bg-white hover:border-indigo-500 hover:shadow-md'
+                  }`}
+                >
+                  <div
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border shadow-2xs transition-colors ${
+                      isOther
+                        ? 'bg-purple-100/80 border-purple-200 group-hover:bg-purple-200/80'
+                        : 'bg-slate-100 border-slate-200/80 group-hover:bg-indigo-50 group-hover:border-indigo-200'
+                    }`}
+                  >
+                    {getCategoryIcon(problem.id)}
                   </div>
-                  <div className="text-[11px] font-bold text-emerald-700 mt-0.5">
-                    {problem.badge}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-extrabold text-slate-950 truncate">
+                        {problem.title}
+                      </span>
+                      {isOther && (
+                        <span className="rounded-full bg-purple-600 px-2 py-0.2 text-[9px] font-bold text-white uppercase tracking-wider">
+                          AI Powered
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      className={`text-[11px] font-bold mt-0.5 ${
+                        isOther ? 'text-purple-700' : 'text-emerald-700'
+                      }`}
+                    >
+                      {problem.badge}
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+                      {problem.quickDescription}
+                    </p>
                   </div>
-                </div>
-                <span className="text-xs font-bold text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all">
-                  →
-                </span>
-              </button>
-            ))}
+                  <span
+                    className={`text-xs font-bold transition-all group-hover:translate-x-0.5 ${
+                      isOther
+                        ? 'text-purple-700 group-hover:text-purple-900'
+                        : 'text-slate-400 group-hover:text-indigo-600'
+                    }`}
+                  >
+                    →
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* QUESTION 3: DURATION EXTRA */}
-      {currentQuestion === 3 && (
+      {/* DEDICATED OTHER / EXPLAIN YOUR ENTIRE ISSUE SCREEN (SKIPS Q3, Q4, Q5) */}
+      {isOtherFlow && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-100 border border-purple-200 px-3 py-1 text-xs font-bold text-purple-900 mb-2">
+              <Sparkles className="h-3.5 w-3.5 text-purple-700" />
+              <span>Full Issue Legal Assessment</span>
+            </div>
+            <h2 className="text-2xl font-black text-slate-950 sm:text-3xl">
+              Describe your entire issue with {airline?.shortName}
+            </h2>
+            <p className="mt-1 text-xs text-slate-600 font-medium max-w-lg mx-auto">
+              Provide complete details. Our AI will analyze DGCA Civil Aviation Requirements, verify airline liability, calculate compensation, and draft your legal notice.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
+            {/* Quick Inspiration Chips */}
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                <HelpCircle className="h-3 w-3" />
+                <span>Click a topic to auto-fill, or write your own below:</span>
+              </label>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {COMMON_ISSUE_CHIPS.map((chip, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      const updated = customIssueText
+                        ? `${customIssueText}\n• ${chip}`
+                        : `• ${chip}: `;
+                      onUpdateCustomField('customIssueText', updated);
+                    }}
+                    className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:border-purple-400 hover:bg-purple-50/60 hover:text-purple-900 transition text-left"
+                  >
+                    + {chip}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Main Description Textarea */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-extrabold text-slate-900">
+                  What happened? (Detailed Explanation) <span className="text-rose-500">*</span>
+                </label>
+                <span className="text-[10px] font-bold text-slate-400">
+                  {customIssueText.length} characters
+                </span>
+              </div>
+              <textarea
+                rows={5}
+                value={customIssueText}
+                onChange={(e) => onUpdateCustomField('customIssueText', e.target.value)}
+                placeholder="Explain what occurred in detail. For example: 'On 12th Oct, my flight was rescheduled 8 hours earlier without any prior notification. When I reached the airport, airline refused rebooking, demanded ₹4,000 date change fee, and declined refund...'"
+                className="w-full rounded-xl border border-slate-300 bg-white p-3 text-xs leading-relaxed text-slate-900 placeholder:text-slate-400 focus:border-purple-600 focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
+              />
+            </div>
+
+            {/* Optional particulars to enrich legal notice */}
+            <div className="pt-2 border-t border-slate-100">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Optional Travel Particulars (Pre-fills Legal Notice)
+              </span>
+              <div className="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-600">PNR Number</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 6E8XYZ"
+                    value={pnr}
+                    onChange={(e) => onUpdateCustomField('pnr', e.target.value.toUpperCase())}
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs uppercase text-slate-900 focus:border-purple-600 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-600">Flight Number</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 6E 402"
+                    value={flightNumber}
+                    onChange={(e) => onUpdateCustomField('flightNumber', e.target.value.toUpperCase())}
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs uppercase text-slate-900 focus:border-purple-600 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-600">Travel Date</label>
+                  <input
+                    type="date"
+                    value={travelDate}
+                    onChange={(e) => onUpdateCustomField('travelDate', e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-900 focus:border-purple-600 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons & AI Trigger */}
+            <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                <span>Analyzed under DGCA CAR & Consumer Protection Act 2019</span>
+              </div>
+
+              <button
+                type="button"
+                disabled={isLoadingAi || !customIssueText.trim()}
+                onClick={onSubmitCustomIssue}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 px-6 py-2.5 text-xs font-black text-white shadow-sm hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoadingAi ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Curating Statutory Legal Solution...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    <span>Curate Statutory Solution with AI →</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QUESTION 3: DURATION EXTRA (Standard flow only) */}
+      {currentQuestion === 3 && !isOtherFlow && (
         <div className="space-y-5 text-center animate-in fade-in duration-200">
           <div>
             <h2 className="text-2xl font-black text-slate-950 sm:text-3xl">
@@ -279,8 +488,8 @@ export function QuestionWizard({
         </div>
       )}
 
-      {/* QUESTION 4: SCHEDULED FLIGHT DURATION (BLOCK TIME) */}
-      {currentQuestion === 4 && (
+      {/* QUESTION 4: SCHEDULED FLIGHT DURATION (Standard flow only) */}
+      {currentQuestion === 4 && !isOtherFlow && (
         <div className="space-y-5 text-center animate-in fade-in duration-200">
           <div>
             <h2 className="text-2xl font-black text-slate-950 sm:text-3xl">
@@ -342,8 +551,8 @@ export function QuestionWizard({
         </div>
       )}
 
-      {/* QUESTION 5: ASSISTANCE PROVIDED */}
-      {currentQuestion === 5 && (
+      {/* QUESTION 5: ASSISTANCE PROVIDED (Standard flow only) */}
+      {currentQuestion === 5 && !isOtherFlow && (
         <div className="space-y-5 text-center animate-in fade-in duration-200">
           <div>
             <h2 className="text-2xl font-black text-slate-950 sm:text-3xl">

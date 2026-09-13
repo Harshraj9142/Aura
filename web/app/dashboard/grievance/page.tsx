@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AirlineId, GrievanceCategory, GrievanceAnswers } from '@/lib/grievance/types';
+import { AirlineId, GrievanceCategory, GrievanceAnswers, StatutoryEntitlement } from '@/lib/grievance/types';
 import { AIRLINE_DIRECTORY } from '@/lib/grievance/airline-contacts';
 import { getStraightSolution } from '@/lib/grievance/grievance-rules';
 import { QuestionWizard } from '@/components/grievance/QuestionWizard';
@@ -17,9 +17,18 @@ export default function GrievanceDashboardPage() {
   const [durationOption, setDurationOption] = useState<string | null>(null);
   const [flightTimeOption, setFlightTimeOption] = useState<'<1hr' | '1-2hr' | '>2hr' | null>(null);
   const [assistanceOption, setAssistanceOption] = useState<'none' | 'refreshments' | 'hotel_alternate' | null>(null);
+
+  // Custom issue state
+  const [customIssueText, setCustomIssueText] = useState<string>('');
+  const [pnr, setPnr] = useState<string>('');
+  const [flightNumber, setFlightNumber] = useState<string>('');
+  const [travelDate, setTravelDate] = useState<string>('');
+  const [isLoadingAi, setIsLoadingAi] = useState<boolean>(false);
+  const [customEntitlement, setCustomEntitlement] = useState<StatutoryEntitlement | null>(null);
+
   const [isDraftModalOpen, setIsDraftModalOpen] = useState<boolean>(false);
 
-  // Handlers for each question
+  // Handlers for question flow
   const handleSelectAirline = (id: AirlineId) => {
     setAirlineId(id);
     setCurrentQuestion(2);
@@ -27,7 +36,12 @@ export default function GrievanceDashboardPage() {
 
   const handleSelectCategory = (cat: GrievanceCategory) => {
     setCategory(cat);
-    setCurrentQuestion(3);
+    if (cat === 'other') {
+      // For "Other", stay on Question 2 view which displays the full description screen
+      // Do not show Question 3, 4, 5
+    } else {
+      setCurrentQuestion(3);
+    }
   };
 
   const handleSelectDuration = (dur: string) => {
@@ -45,8 +59,71 @@ export default function GrievanceDashboardPage() {
     setCurrentQuestion(6); // 6 is the Straight Solution!
   };
 
+  const handleUpdateCustomField = (
+    field: 'customIssueText' | 'pnr' | 'flightNumber' | 'travelDate',
+    val: string
+  ) => {
+    if (field === 'customIssueText') setCustomIssueText(val);
+    else if (field === 'pnr') setPnr(val);
+    else if (field === 'flightNumber') setFlightNumber(val);
+    else if (field === 'travelDate') setTravelDate(val);
+  };
+
+  const handleSubmitCustomIssue = async () => {
+    if (!airlineId || !customIssueText.trim()) return;
+
+    setIsLoadingAi(true);
+    try {
+      const response = await fetch('/api/grievance/ai-resolve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          airlineId,
+          userDescription: customIssueText.trim(),
+          pnr: pnr.trim(),
+          flightNumber: flightNumber.trim(),
+          travelDate: travelDate.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data?.entitlement) {
+        setCustomEntitlement(data.entitlement);
+        setCurrentQuestion(6);
+      }
+    } catch (err) {
+      console.error('Failed to curate AI solution, using statutory fallback:', err);
+      // Fall back gracefully to local rule generator
+      const fallback = getStraightSolution({
+        airlineId,
+        category: 'other',
+        customIssueText,
+        pnr,
+        flightNumber,
+        travelDate,
+      });
+      setCustomEntitlement(fallback);
+      setCurrentQuestion(6);
+    } finally {
+      setIsLoadingAi(false);
+    }
+  };
+
   const handleBack = () => {
+    if (category === 'other' && currentQuestion === 2) {
+      // Step back from "Other" description view to problem selection
+      setCategory(null);
+      return;
+    }
+
     if (currentQuestion > 1) {
+      if (currentQuestion === 3) {
+        setCategory(null);
+      }
       setCurrentQuestion((prev) => prev - 1);
     }
   };
@@ -58,27 +135,55 @@ export default function GrievanceDashboardPage() {
     setDurationOption(null);
     setFlightTimeOption(null);
     setAssistanceOption(null);
+    setCustomIssueText('');
+    setPnr('');
+    setFlightNumber('');
+    setTravelDate('');
+    setCustomEntitlement(null);
   };
 
-  const isSolutionReady =
+  // Check if standard solution is ready OR custom AI solution is ready
+  const isStandardReady =
     currentQuestion === 6 &&
     airlineId &&
     category &&
+    category !== 'other' &&
     durationOption &&
     flightTimeOption &&
     assistanceOption;
 
-  const answers: GrievanceAnswers | null = isSolutionReady
+  const isCustomReady =
+    currentQuestion === 6 &&
+    airlineId &&
+    category === 'other' &&
+    customEntitlement;
+
+  const answers: GrievanceAnswers | null = isStandardReady
     ? {
-        airlineId,
-        category,
+        airlineId: airlineId!,
+        category: category!,
         durationOption,
         flightTimeOption,
         assistanceOption,
       }
+    : isCustomReady
+    ? {
+        airlineId: airlineId!,
+        category: 'other',
+        customIssueText,
+        pnr,
+        flightNumber,
+        travelDate,
+      }
     : null;
 
-  const entitlement = answers ? getStraightSolution(answers) : null;
+  const entitlement: StatutoryEntitlement | null =
+    category === 'other' && customEntitlement
+      ? customEntitlement
+      : answers
+      ? getStraightSolution(answers)
+      : null;
+
   const activeAirline = airlineId ? AIRLINE_DIRECTORY[airlineId] : null;
 
   return (
@@ -98,20 +203,22 @@ export default function GrievanceDashboardPage() {
             </span>
           </div>
           <p className="mt-1 text-xs text-slate-600 font-medium">
-            Answer 5 quick questions to get an exact statutory solution and step-by-step enforcement plan.
+            {category === 'other'
+              ? 'AI-powered legal dispute synthesis enforcing DGCA CAR & Consumer Protection Act 2019.'
+              : 'Answer quick questions or explain your issue to get an exact statutory solution and step-by-step enforcement plan.'}
           </p>
         </div>
 
         {currentQuestion < 6 && (
           <div className="hidden sm:block text-right">
             <span className="text-xs font-bold text-slate-600">
-              Step {currentQuestion} of 5
+              {category === 'other' ? 'AI Legal Assessment' : `Step ${currentQuestion} of 5`}
             </span>
           </div>
         )}
       </div>
 
-      {/* 1 TO 5: ONLY ONE QUESTION IS SHOWN AT A TIME */}
+      {/* 1 TO 5: QUESTION WIZARD (MCQ OR DEDICATED OTHER VIEW) */}
       {currentQuestion <= 5 && (
         <QuestionWizard
           currentQuestion={currentQuestion}
@@ -120,6 +227,13 @@ export default function GrievanceDashboardPage() {
           durationOption={durationOption}
           flightTimeOption={flightTimeOption}
           assistanceOption={assistanceOption}
+          customIssueText={customIssueText}
+          pnr={pnr}
+          flightNumber={flightNumber}
+          travelDate={travelDate}
+          isLoadingAi={isLoadingAi}
+          onUpdateCustomField={handleUpdateCustomField}
+          onSubmitCustomIssue={handleSubmitCustomIssue}
           onSelectAirline={handleSelectAirline}
           onSelectCategory={handleSelectCategory}
           onSelectDuration={handleSelectDuration}
@@ -129,7 +243,7 @@ export default function GrievanceDashboardPage() {
         />
       )}
 
-      {/* 6: STRAIGHT SOLUTION (NO WALLS OF TEXT, CLEAR STEPS GRAPHIC + CLAUSE LINKS) */}
+      {/* 6: STRAIGHT SOLUTION (STATUTORY ENTITLEMENT + VISUAL STEPS + PRE-FILLED NOTICE) */}
       {currentQuestion === 6 && entitlement && activeAirline && answers && (
         <>
           <StraightSolutionView
@@ -145,6 +259,11 @@ export default function GrievanceDashboardPage() {
             onClose={() => setIsDraftModalOpen(false)}
             airlineId={activeAirline.id}
             category={answers.category}
+            entitlement={entitlement}
+            initialPnr={pnr}
+            initialFlightNumber={flightNumber}
+            initialTravelDate={travelDate}
+            customIssueText={customIssueText}
           />
         </>
       )}

@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { AirlineId, GrievanceCategory } from '@/lib/grievance/types';
+import React, { useState, useEffect } from 'react';
+import { AirlineId, GrievanceCategory, StatutoryEntitlement } from '@/lib/grievance/types';
 import { getStatutoryEntitlement } from '@/lib/grievance/grievance-rules';
 import { AIRLINE_DIRECTORY } from '@/lib/grievance/airline-contacts';
 
@@ -10,6 +10,11 @@ interface ComplaintDraftModalProps {
   onClose: () => void;
   airlineId: AirlineId;
   category: GrievanceCategory;
+  entitlement?: StatutoryEntitlement | null;
+  initialPnr?: string;
+  initialFlightNumber?: string;
+  initialTravelDate?: string;
+  customIssueText?: string;
 }
 
 export function ComplaintDraftModal({
@@ -17,17 +22,29 @@ export function ComplaintDraftModal({
   onClose,
   airlineId,
   category,
+  entitlement: providedEntitlement,
+  initialPnr = '',
+  initialFlightNumber = '',
+  initialTravelDate = '',
+  customIssueText = '',
 }: ComplaintDraftModalProps) {
   const [copied, setCopied] = useState(false);
   const [passengerName, setPassengerName] = useState('');
-  const [pnr, setPnr] = useState('');
-  const [flightNumber, setFlightNumber] = useState('');
-  const [travelDate, setTravelDate] = useState('');
+  const [pnr, setPnr] = useState(initialPnr);
+  const [flightNumber, setFlightNumber] = useState(initialFlightNumber);
+  const [travelDate, setTravelDate] = useState(initialTravelDate);
+
+  // Keep synced if initial props change
+  useEffect(() => {
+    if (initialPnr) setPnr(initialPnr);
+    if (initialFlightNumber) setFlightNumber(initialFlightNumber);
+    if (initialTravelDate) setTravelDate(initialTravelDate);
+  }, [initialPnr, initialFlightNumber, initialTravelDate]);
 
   if (!isOpen) return null;
 
   const airline = AIRLINE_DIRECTORY[airlineId] || AIRLINE_DIRECTORY.indigo;
-  const entitlement = getStatutoryEntitlement(airlineId, category);
+  const entitlement = providedEntitlement || getStatutoryEntitlement(airlineId, category);
 
   const passenger = passengerName.trim() || '[Passenger Name]';
   const pnrText = pnr.trim().toUpperCase() || '[PNR NUMBER]';
@@ -40,7 +57,16 @@ export function ComplaintDraftModal({
     year: 'numeric',
   });
 
-  const complaintDraft = `DATE: ${today}
+  // If AI generated a dedicated draft notice, customize it with passenger fields
+  let complaintDraft = '';
+  if (entitlement.customDraftNotice?.trim()) {
+    complaintDraft = entitlement.customDraftNotice
+      .replace(/\[Passenger Name\]/gi, passenger)
+      .replace(/\[PNR NUMBER\]|\[PNR\]/gi, pnrText)
+      .replace(/\[FLIGHT NUMBER\]|\[Flight\]/gi, flightText)
+      .replace(/\[DATE OF TRAVEL\]|\[TRAVEL DATE\]/gi, dateText);
+  } else {
+    complaintDraft = `DATE: ${today}
 
 TO:
 The Nodal Grievance Officer,
@@ -63,23 +89,23 @@ I am writing this formal grievance to place on record a serious deficiency of se
 
 2. FACTS OF THE GRIEVANCE:
 On the date of travel, I experienced the following grievance:
-- Nature of Disruption: ${entitlement.headline}
+- Nature of Disruption: ${entitlement.headline}${customIssueText ? `\n- Detailed Statement of Facts: ${customIssueText}` : ''}
 - Governing Regulation: ${entitlement.primaryClauses.map((c) => `${c.name} (${c.clause})`).join(', ')}
 - Pertinent Airline Contract: ${airline.name} Conditions of Carriage & Passenger Charter
 
 3. STATUTORY ENTITLEMENTS & LEGAL PROVISIONS:
 As per the Directorate General of Civil Aviation (DGCA) Civil Aviation Requirements (CAR) and statutory airline contracts:
 - Statutory Remedy / Demand: ${entitlement.compensationAmount}
-- Legal Basis: ${entitlement.compensationBasis}
-- Refund Rights: ${entitlement.refundSummary}
-- Care & Facilities Mandate: ${entitlement.freeCareSummary}
+- Legal Basis: ${entitlement.compensationBasis || entitlement.cashHighlight}
+- Refund Rights: ${entitlement.refundSummary || entitlement.refundHighlight}
+- Care & Facilities Mandate: ${entitlement.freeCareSummary || entitlement.careHighlight}
 
 EXACT STATUTORY PROVISIONS QUOTED:
 ${entitlement.primaryClauses.map((c) => `• ${c.name} [${c.clause}]:\n  "${c.exactText}"`).join('\n\n')}
 
 4. FORMAL DEMAND:
 In view of the aforementioned facts and clear statutory mandates, I hereby call upon ${airline.name} to:
-a) Remit the statutory compensation of ${entitlement.compensationAmount} directly to my bank account / original payment mode within 10 business days of this notice.
+a) Remit the statutory compensation/restitution of ${entitlement.compensationAmount} directly to my bank account / original payment mode within 10 business days of this notice.
 b) Confirm resolution in writing to my email address.
 
 5. NOTICE OF LEGAL INTENT (15 DAYS NOTICE):
@@ -95,6 +121,7 @@ Yours sincerely,
 ${passenger}
 Contact Email: [Your Email]
 Contact Phone: [Your Mobile Number]`;
+  }
 
   const handleCopy = () => {
     navigator.clipboard.writeText(complaintDraft);
@@ -160,7 +187,7 @@ Contact Phone: [Your Mobile Number]`;
               type="text"
               placeholder="e.g. W9Q7KL"
               value={pnr}
-              onChange={(e) => setPnr(e.target.value)}
+              onChange={(e) => setPnr(e.target.value.toUpperCase())}
               className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs uppercase text-slate-900 focus:border-indigo-500 focus:outline-none"
             />
           </div>
@@ -172,7 +199,7 @@ Contact Phone: [Your Mobile Number]`;
               type="text"
               placeholder="e.g. 6E 502"
               value={flightNumber}
-              onChange={(e) => setFlightNumber(e.target.value)}
+              onChange={(e) => setFlightNumber(e.target.value.toUpperCase())}
               className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs uppercase text-slate-900 focus:border-indigo-500 focus:outline-none"
             />
           </div>

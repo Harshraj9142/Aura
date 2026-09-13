@@ -12,14 +12,19 @@ export type GrievanceCategory =
   | 'denied_boarding'
   | 'baggage'
   | 'refund'
-  | 'downgrade';
+  | 'downgrade'
+  | 'other';
 
 export interface GrievanceAnswers {
   airlineId: AirlineId;
   category: GrievanceCategory;
-  durationOption: string;
-  flightTimeOption: '<1hr' | '1-2hr' | '>2hr';
-  assistanceOption: 'none' | 'refreshments' | 'hotel_alternate';
+  durationOption?: string | null;
+  flightTimeOption?: '<1hr' | '1-2hr' | '>2hr' | null;
+  assistanceOption?: 'none' | 'refreshments' | 'hotel_alternate' | null;
+  customIssueText?: string;
+  pnr?: string;
+  flightNumber?: string;
+  travelDate?: string;
 }
 
 export interface ActionStep {
@@ -61,6 +66,9 @@ export interface StatutoryEntitlement {
   compensationBasis?: string;
   refundSummary?: string;
   freeCareSummary?: string;
+  isAiCurated?: boolean;
+  aiProviderUsed?: 'gemini' | 'groq' | 'template';
+  customDraftNotice?: string;
 }
 
 export interface AirlineInfo {

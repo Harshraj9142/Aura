@@ -45,13 +45,19 @@ export function StraightSolutionView({
             </div>
             <span>{airline.shortName}</span>
           </span>
-          <span className="rounded-lg bg-indigo-50 border border-indigo-200 px-2.5 py-1 text-xs font-bold text-indigo-800">
-            {answers.flightTimeOption === '<1hr'
-              ? '< 1 Hr Flight'
-              : answers.flightTimeOption === '1-2hr'
-              ? '1–2 Hr Flight'
-              : '> 2 Hr Flight'}
-          </span>
+          {answers.category === 'other' ? (
+            <span className="rounded-lg bg-purple-50 border border-purple-200 px-2.5 py-1 text-xs font-bold text-purple-800 flex items-center gap-1">
+              <span>✨ Custom Issue Redressal</span>
+            </span>
+          ) : answers.flightTimeOption ? (
+            <span className="rounded-lg bg-indigo-50 border border-indigo-200 px-2.5 py-1 text-xs font-bold text-indigo-800">
+              {answers.flightTimeOption === '<1hr'
+                ? '< 1 Hr Flight'
+                : answers.flightTimeOption === '1-2hr'
+                ? '1–2 Hr Flight'
+                : '> 2 Hr Flight'}
+            </span>
+          ) : null}
         </div>
 
         <button
@@ -59,7 +65,7 @@ export function StraightSolutionView({
           className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 transition shadow-xs"
         >
           <RotateCcw className="h-3.5 w-3.5 text-slate-600" />
-          <span>Retake Quiz</span>
+          <span>Start Over</span>
         </button>
       </div>
 
@@ -71,13 +77,25 @@ export function StraightSolutionView({
               <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-black text-emerald-900">
                 STATUTORY ENTITLEMENT
               </span>
-              <span className="text-xs font-bold text-slate-600">
-                Under DGCA CAR Rules
-              </span>
+              {entitlement.isAiCurated ? (
+                <span className="rounded-full bg-purple-100 border border-purple-200 px-2.5 py-0.5 text-[10px] font-bold text-purple-900 flex items-center gap-1">
+                  <span>✨ AI Curated ({entitlement.aiProviderUsed === 'gemini' ? 'Google Gemini' : 'Groq Llama-3'})</span>
+                </span>
+              ) : (
+                <span className="text-xs font-bold text-slate-600">
+                  Under DGCA CAR Rules
+                </span>
+              )}
             </div>
             <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
               {entitlement.headline}
             </h2>
+            {answers.customIssueText && (
+              <div className="mt-2 text-xs text-slate-600 italic bg-white/70 p-2.5 rounded-lg border border-indigo-100/80">
+                <span className="font-semibold text-slate-700 not-italic">Dispute Summary: </span>
+                &ldquo;{answers.customIssueText}&rdquo;
+              </div>
+            )}
           </div>
 
           <button
