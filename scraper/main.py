@@ -524,6 +524,22 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(json.dumps({"success": False, "error": str(e)}).encode("utf-8"))
+        elif self.path in ("/scrape", "/api/scrape"):
+            try:
+                # Trigger batch scraping run in background thread
+                def run_in_bg():
+                    asyncio.run(run_batch())
+                threading.Thread(target=run_in_bg, daemon=True).start()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"success": true, "message": "Airfare scraping batch triggered successfully in background"}')
+            except Exception as e:
+                logger.error(f"Error triggering scrape batch: {e}")
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(f'{{"success": false, "error": "{str(e)}"}}'.encode("utf-8"))
         else:
             self.send_response(404)
             self.end_headers()
