@@ -33,6 +33,8 @@ model Fare {
   @@map("fares")
 }
 
+
+
 model ScrapeRun {
   run_id          String          @id @default(uuid()) @db.Uuid
   started_at      DateTime        @default(now()) @db.Timestamptz(6)

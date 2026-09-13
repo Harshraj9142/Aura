@@ -164,6 +164,7 @@ async def run_single(
 async def run_batch(
     route_filter: str | None = None,
     source_filter: str | None = None,
+    advance_days: int | None = None,
 ) -> None:
     """
     Run a full batch: all active routes × all active sources × all windows.
@@ -172,7 +173,7 @@ async def run_batch(
     """
     routes_config = get_enabled_routes()
     sources_config = get_enabled_sources()
-    windows = get_advance_windows()
+    windows = [advance_days] if advance_days else get_advance_windows()
 
     # Apply filters
     if route_filter:
@@ -410,7 +411,6 @@ Examples:
         action="store_true",
         help="Initialize database tables (development only — use Alembic in production)",
     )
-
     return parser
 
 
@@ -480,12 +480,15 @@ def main() -> None:
         if args.route and args.source:
             # Single route/source
             asyncio.run(
-                run_single(args.route, args.source, args.advance_days)
+                run_single(
+                    args.route,
+                    args.source,
+                    advance_days=args.advance_days,
+                )
             )
         else:
-            # Full or filtered batch
             asyncio.run(
-                run_batch(args.route, args.source)
+                run_batch(args.route, args.source, advance_days=args.advance_days)
             )
 
     elif args.schedule:

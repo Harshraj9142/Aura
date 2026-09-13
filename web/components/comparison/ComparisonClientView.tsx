@@ -4,7 +4,8 @@ import React, { useState, useMemo } from "react";
 import type { ComparisonDataResponse, FlightComparisonGroup } from "@/types/comparison";
 import FlightSearchHero, { AIRPORT_OPTIONS } from "./FlightSearchHero";
 import SimpleFlightCard from "./SimpleFlightCard";
-import { Plane, Search, ArrowUpDown, Filter, RotateCcw } from "lucide-react";
+import { Plane, Search, ArrowUpDown, Filter, RotateCcw, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface ComparisonClientViewProps {
   initialData: ComparisonDataResponse;
@@ -22,7 +23,7 @@ export default function ComparisonClientView({ initialData }: ComparisonClientVi
   const [sortBy, setSortBy] = useState<"price" | "spread" | "flight">("price");
 
   const [hasSearched, setHasSearched] = useState<boolean>(false);
-  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const router = useRouter();
 
   // Swap origin & destination
   const handleSwap = () => {
@@ -31,11 +32,7 @@ export default function ComparisonClientView({ initialData }: ComparisonClientVi
   };
 
   const handleSearch = () => {
-    setIsSearching(true);
-    setTimeout(() => {
-      setHasSearched(true);
-      setIsSearching(false);
-    }, 200);
+    setHasSearched(true);
   };
 
   // Filter flights based on search inputs
@@ -138,7 +135,7 @@ export default function ComparisonClientView({ initialData }: ComparisonClientVi
         onTimeChange={setTimeOfDay}
         onSwap={handleSwap}
         onSearch={handleSearch}
-        isSearching={isSearching}
+        isSearching={false}
       />
 
       {/* 2. Results Section: Only shown after user clicks search */}

@@ -92,20 +92,21 @@ class Deduplicator:
             return 0
 
         inserted = 0
+        TargetModel = Fare
 
         # Batch pre-fetch existing records for this route/source/date in 1 single query
         scraped_date = fares[0].scraped_at.date()
         first = fares[0]
         existing_records = (
-            session.query(Fare)
+            session.query(TargetModel)
             .filter(
                 and_(
-                    Fare.route_origin == first.route_origin,
-                    Fare.route_destination == first.route_destination,
-                    Fare.source == first.source,
-                    Fare.travel_date == first.travel_date,
-                    Fare.advance_purchase_days == first.advance_purchase_days,
-                    func.date(Fare.scraped_at) == scraped_date,
+                    TargetModel.route_origin == first.route_origin,
+                    TargetModel.route_destination == first.route_destination,
+                    TargetModel.source == first.source,
+                    TargetModel.travel_date == first.travel_date,
+                    TargetModel.advance_purchase_days == first.advance_purchase_days,
+                    func.date(TargetModel.scraped_at) == scraped_date,
                 )
             )
             .all()
@@ -132,7 +133,7 @@ class Deduplicator:
                     )
                 else:
                     # Insert new record
-                    db_fare = Fare(
+                    db_fare = TargetModel(
                         route_origin=fare.route_origin,
                         route_destination=fare.route_destination,
                         travel_date=fare.travel_date,
