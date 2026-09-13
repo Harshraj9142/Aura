@@ -1,16 +1,17 @@
 services:
-  # 1. Background Worker for the Scraper
-  - type: worker
-    name: aura-scraper-worker
+  # 1. Web Service for Scraper Engine & Twitter Escalation API
+  - type: web
+    name: aura-scraper-service
     env: python
-    buildCommand: |
-      cd scraper
-      pip install -r requirements.txt
-      playwright install chromium
+    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
     startCommand: cd scraper && python main.py --schedule
     envVars:
       - key: DATABASE_URL
         sync: false # Set this in the Render Dashboard
+      - key: TWITTER_AUTH_TOKEN
+        sync: false
+      - key: NEXT_PUBLIC_TWITTER_HANDLE
+        sync: false
       - key: BROWSERBASE_API_KEY
         sync: false
       - key: BROWSERBASE_PROJECT_ID

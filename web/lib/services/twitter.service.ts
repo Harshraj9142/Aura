@@ -269,14 +269,59 @@ async function postWithPlaywright(tweetText: string): Promise<TweetPublishResult
 }
 
 /**
- * Post tweet directly to Twitter API v2 or via Playwright
+ * Post tweet directly to Twitter API v2, remote Render service, or local Playwright
  */
 export async function publishToTwitter(tweetText: string): Promise<TweetPublishResult> {
   const intentUrl = buildTwitterIntentUrl(tweetText);
   const authToken = getAuthToken();
 
-  // 1. If TWITTER_AUTH_TOKEN is configured, use the 100% Free Playwright poster
-  if (authToken) {
+  // 1. If SCRAPER_SERVICE_URL is configured (e.g. deployed on Render & Vercel), delegate to Render
+  const remoteScraperUrl = process.env.SCRAPER_SERVICE_URL || process.env.NEXT_PUBLIC_SCRAPER_URL;
+  if (remoteScraperUrl) {
+    try {
+      const cleanUrl = remoteScraperUrl.replace(/\/$/, "");
+      const res = await fetch(`${cleanUrl}/tweet`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: tweetText,
+          authToken,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        return {
+          success: true,
+          tweetId: data.tweetId,
+          tweetUrl: data.tweetUrl,
+          intentUrl,
+          tweetText,
+        };
+      } else {
+        return {
+          success: false,
+          intentUrl,
+          tweetText,
+          error: data.error || "Remote Twitter posting failed on Render service",
+          diagnostic: "Verify TWITTER_AUTH_TOKEN in Render service environment",
+        };
+      }
+    } catch (err: any) {
+      console.error("[Twitter Service] Remote scraper call failed:", err);
+      if (process.env.VERCEL) {
+        return {
+          success: false,
+          intentUrl,
+          tweetText,
+          error: `Failed to connect to Render scraper service at ${remoteScraperUrl}`,
+          diagnostic: "Ensure your Render scraper service is live and reachable",
+        };
+      }
+    }
+  }
+
+  // 2. If TWITTER_AUTH_TOKEN is configured locally, use local Playwright poster
+  if (authToken && !process.env.VERCEL) {
     return postWithPlaywright(tweetText);
   }
 

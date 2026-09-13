@@ -479,14 +479,55 @@ def cmd_init_db() -> None:
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
+        self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(b"OK")
+        self.wfile.write(b'{"status":"healthy","service":"aura-scraper-and-twitter"}')
+
+    def do_POST(self):
+        if self.path in ("/tweet", "/api/tweet"):
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length).decode("utf-8")
+            try:
+                import json
+                data = json.loads(body) if body else {}
+                text = data.get("text") or data.get("tweetText")
+                auth_token = data.get("authToken") or data.get("auth_token")
+
+                if not text:
+                    self.send_response(400)
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"success": False, "error": "Missing tweet text"}).encode("utf-8"))
+                    return
+
+                # Invoke Twitter Playwright bot
+                try:
+                    from twitter_bot import publish_tweet
+                except ImportError:
+                    from scraper.twitter_bot import publish_tweet
+
+                res = publish_tweet(text, custom_auth_token=auth_token)
+
+                self.send_response(200 if res.get("success") else 500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps(res).encode("utf-8"))
+            except Exception as e:
+                import json
+                logger.error(f"Error handling /tweet request: {e}")
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "error": str(e)}).encode("utf-8"))
+        else:
+            self.send_response(404)
+            self.end_headers()
         
 def start_health_server():
     port = int(os.environ.get("PORT", 8080))
     server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    logger.info(f"Health check web server started on port {port}")
+    logger.info(f"Health check and API server started on port {port}")
 
 def main() -> None:
     """Main entry point for the APIx scraper CLI."""
