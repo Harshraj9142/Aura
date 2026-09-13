@@ -36,7 +36,7 @@ async function _getElasticityData(
     orderBy: { advance_purchase_days: "asc" },
   });
 
-  return results.map((r: any) => ({
+  return results.map((r) => ({
     advance_purchase_days: r.advance_purchase_days,
     avg_fare: Math.round(Number(r._avg.total_fare ?? 0)),
     min_fare: Math.round(Number(r._min.total_fare ?? 0)),
@@ -46,10 +46,10 @@ async function _getElasticityData(
 }
 
 /**
- * Cached version — revalidates every hour.
+ * Cached version — revalidates every 30 seconds.
  */
 export const getElasticityData = unstable_cache(
   _getElasticityData,
   ["elasticity"],
-  { revalidate: 3600, tags: ["elasticity"] }
+  { revalidate: 30, tags: ["elasticity"] }
 );

@@ -3,6 +3,15 @@ import Link from "next/link";
 import { getElasticityData } from "@/lib/services/elasticity.service";
 import { getTrackedRoutes } from "@/lib/services/routes.service";
 import { ElasticityCurveChart } from "@/components/charts/ElasticityCurveChart";
+import { prisma } from "@/lib/db/prisma";
+import { Database } from "lucide-react";
+
+export const metadata = {
+  title: "Lead-Time Fare Elasticity | AURA",
+  description: "Analyze how ticket prices escalate as the advance purchase booking window narrows prior to departure.",
+};
+
+export const revalidate = 30; // Refresh every 30s
 
 interface ElasticityPageProps {
   searchParams: Promise<{
@@ -11,27 +20,41 @@ interface ElasticityPageProps {
   }>;
 }
 
+const CITY_NAMES: Record<string, string> = {
+  DEL: "Delhi",
+  BOM: "Mumbai",
+  BLR: "Bengaluru",
+  CCU: "Kolkata",
+  HYD: "Hyderabad",
+  MAA: "Chennai",
+};
+
 export default async function ElasticityPage({ searchParams }: ElasticityPageProps) {
   const params = await searchParams;
   const routes = await getTrackedRoutes();
 
   // Default to first route if none specified
-  const selectedOrigin = params.origin || (routes.length > 0 ? routes[0].origin : "DEL");
-  const selectedDestination = params.destination || (routes.length > 0 ? routes[0].destination : "BOM");
+  const selectedOrigin = params.origin || (routes.length > 0 ? routes[0].origin : "BLR");
+  const selectedDestination = params.destination || (routes.length > 0 ? routes[0].destination : "HYD");
 
-  const elasticityData = await getElasticityData(selectedOrigin, selectedDestination);
+  const [elasticityData, benchmarkRecord] = await Promise.all([
+    getElasticityData(selectedOrigin, selectedDestination),
+    prisma.route_base_values.findFirst({
+      where: { route_origin: selectedOrigin, route_destination: selectedDestination },
+    }),
+  ]);
+
+  const baseBenchmark = benchmarkRecord ? Math.round(Number(benchmarkRecord.base_avg_fare)) : undefined;
 
   return (
     <div className="relative w-full overflow-hidden space-y-0 font-sans">
-      
       {/* 
         ========================================================================
-        1. HERO PANORAMA BANNER (Identical layout & typography across all tabs)
+        1. HERO PANORAMA BANNER (Proper top breathing room below frosted header)
         - Wide-angle cinematic aviation horizon image (/dashboard/elasticity_hero.jpg)
         ========================================================================
       */}
-      <div className="relative w-full min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] flex flex-col justify-between pt-24 sm:pt-28 pb-20 sm:pb-24 px-6 sm:px-10 lg:px-14 xl:px-16">
-        
+      <div className="relative w-full min-h-[480px] sm:min-h-[520px] lg:min-h-[560px] flex flex-col justify-between pt-36 sm:pt-40 lg:pt-44 pb-20 sm:pb-24 px-6 sm:px-10 lg:px-14 xl:px-16">
         {/* Masked Panorama Background Image */}
         <div
           className="absolute inset-0 z-0 bg-slate-950 pointer-events-none"
@@ -63,7 +86,6 @@ export default async function ElasticityPage({ searchParams }: ElasticityPagePro
 
         {/* Hero Content */}
         <div className="relative z-20 w-full flex flex-col lg:flex-row items-start lg:items-center justify-between h-full gap-8">
-          
           {/* Left Text Block */}
           <div className="max-w-3xl space-y-4 pt-2">
             <h1 className="text-5xl sm:text-7xl lg:text-[84px] font-bold tracking-tight text-white drop-shadow-xl leading-[1.02]">
@@ -90,7 +112,6 @@ export default async function ElasticityPage({ searchParams }: ElasticityPagePro
               <div className="pt-2 text-white/90">—</div>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -100,12 +121,17 @@ export default async function ElasticityPage({ searchParams }: ElasticityPagePro
         ========================================================================
       */}
       <div className="w-full px-6 sm:px-10 lg:px-14 xl:px-16 -mt-14 sm:-mt-20 relative z-30 space-y-8 pb-16">
-        
         {/* Corridor Selector Card */}
-        <div className="rounded-3xl bg-white/80 backdrop-blur-xl border border-white/90 p-6 shadow-xl space-y-3">
-          <span className="text-xs font-black uppercase tracking-widest text-slate-500 block">
-            Select Route Corridor:
-          </span>
+        <div className="rounded-3xl bg-white/95 backdrop-blur-xl border border-white/90 p-6 shadow-xl space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black uppercase tracking-widest text-slate-500 block">
+              Select Route Corridor:
+            </span>
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+              <Database className="h-3 w-3" /> Live DB Aggregations
+            </span>
+          </div>
+
           <div className="flex flex-wrap items-center gap-2.5">
             {routes.map((r) => {
               const isSelected = selectedOrigin === r.origin && selectedDestination === r.destination;
@@ -115,11 +141,16 @@ export default async function ElasticityPage({ searchParams }: ElasticityPagePro
                   href={`/dashboard/elasticity?origin=${r.origin}&destination=${r.destination}`}
                   className={`rounded-full px-4 py-2 text-xs font-mono font-bold transition border ${
                     isSelected
-                      ? "bg-slate-950 text-white border-slate-950 shadow-md"
-                      : "bg-slate-50/90 text-slate-800 border-slate-200 hover:bg-slate-100"
+                      ? "bg-slate-950 text-white border-slate-950 shadow-md scale-[1.02]"
+                      : "bg-slate-50/90 text-slate-800 border-slate-200 hover:bg-slate-100 hover:border-slate-300"
                   }`}
                 >
-                  {r.origin} ➔ {r.destination}
+                  <span>
+                    {r.origin} &rarr; {r.destination}
+                  </span>
+                  <span className="ml-1.5 opacity-70 font-sans text-[10px] font-normal">
+                    ({CITY_NAMES[r.origin] || r.origin} &rarr; {CITY_NAMES[r.destination] || r.destination})
+                  </span>
                 </Link>
               );
             })}
@@ -127,20 +158,43 @@ export default async function ElasticityPage({ searchParams }: ElasticityPagePro
         </div>
 
         {/* Elasticity Chart Card */}
-        <div className="rounded-3xl bg-white/80 backdrop-blur-xl border border-white/90 p-6 sm:p-8 shadow-xl space-y-6">
-          <div>
-            <h2 className="text-xl font-bold text-slate-950 tracking-tight font-mono">
-              {selectedOrigin} ➔ {selectedDestination} Price Elasticity Curve
-            </h2>
-            <p className="text-xs text-slate-500 font-semibold mt-1">
-              Average, minimum, and maximum fares (INR) grouped by advance purchase booking days prior to departure
-            </p>
+        <div className="rounded-3xl bg-white/95 backdrop-blur-xl border border-white/90 p-6 sm:p-8 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-100">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs font-black bg-blue-600 text-white px-2.5 py-1 rounded-md">
+                  {selectedOrigin} &rarr; {selectedDestination}
+                </span>
+                <h2 className="text-xl font-black text-slate-950 tracking-tight">
+                  {CITY_NAMES[selectedOrigin] || selectedOrigin} &rarr;{" "}
+                  {CITY_NAMES[selectedDestination] || selectedDestination} Price Elasticity Curve
+                </h2>
+              </div>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                Average, lowest, and peak fares (INR) evaluated across booking horizons prior to departure
+              </p>
+            </div>
+
+            {baseBenchmark && (
+              <div className="text-right">
+                <span className="text-[11px] font-semibold text-slate-400 block uppercase">
+                  Historical Route Base
+                </span>
+                <span className="text-lg font-black text-slate-900 font-mono">
+                  ₹{baseBenchmark.toLocaleString("en-IN")}
+                </span>
+              </div>
+            )}
           </div>
-          <ElasticityCurveChart data={elasticityData} />
+
+          <ElasticityCurveChart
+            data={elasticityData}
+            origin={selectedOrigin}
+            destination={selectedDestination}
+            baseBenchmark={baseBenchmark}
+          />
         </div>
-
       </div>
-
     </div>
   );
 }
