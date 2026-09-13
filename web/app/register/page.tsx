@@ -68,22 +68,17 @@ export default function Register() {
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-white/40" />
           
-          <div className="absolute top-12 left-10 md:left-12 z-10 flex flex-col text-white font-bold tracking-[0.25em] text-xl md:text-2xl leading-loose">
-            <span>A</span>
-            <span>CLEARER</span>
-            <span>SKY</span>
-            <span>FOR A</span>
-            <span>BRIGHTER</span>
-            <span>INDIA</span>
+          <div className="absolute top-12 left-10 md:left-12 right-4 z-10">
+            <h1 className="text-slate-800 font-black tracking-tighter text-5xl md:text-6xl lg:text-7xl leading-[0.9] uppercase opacity-90">
+              A MORE CONNECTED<br />INDIA.
+            </h1>
           </div>
 
-          <div className="absolute bottom-12 left-10 md:left-12 z-10">
-            <hr className="border-t border-white/40 w-48 mb-6" />
-            <div className="text-white font-bold tracking-widest text-sm md:text-base space-y-2">
-              <p>DATA TODAY.</p>
-              <p>A FAIRER TOMORROW.</p>
+          <div className="absolute bottom-12 left-10 md:left-12 right-4 z-10">
+            <div className="text-slate-700 font-bold tracking-[0.15em] text-[0.65rem] md:text-xs uppercase opacity-90">
+              <p>REAL-TIME AIRFARE INTELLIGENCE &bull; TIME-SERIES CORRIDOR INDICES &bull; AURA API</p>
             </div>
           </div>
         </div>
