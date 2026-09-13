@@ -6,6 +6,9 @@ import {
 import { publishToTwitter } from "@/lib/services/twitter.service";
 import { AirlineId, GrievanceCategory } from "@/lib/grievance/types";
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 30;
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const airlineId = (searchParams.get("airlineId") || "indigo") as AirlineId;

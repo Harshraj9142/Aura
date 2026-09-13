@@ -191,11 +191,11 @@ async function postWithPlaywright(tweetText: string): Promise<TweetPublishResult
           success: false,
           intentUrl,
           tweetText,
-          error: "Playwright posting timed out after 60s",
+          error: "Playwright posting timed out after 20s",
           diagnostic: "Ensure your Brave auth_token is valid and active",
         });
       }
-    }, 60000);
+    }, 20000);
 
     pyProcess.on("error", (err) => {
       if (!settled) {
@@ -287,6 +287,7 @@ export async function publishToTwitter(tweetText: string): Promise<TweetPublishR
           text: tweetText,
           authToken,
         }),
+        signal: AbortSignal.timeout(20000), // 20s timeout limit
       });
       const data = await res.json();
       if (data.success) {
@@ -308,13 +309,18 @@ export async function publishToTwitter(tweetText: string): Promise<TweetPublishR
       }
     } catch (err: any) {
       console.error("[Twitter Service] Remote scraper call failed:", err);
+      const isTimeout = err.name === "TimeoutError" || err.message?.includes("timeout");
       if (process.env.VERCEL) {
         return {
           success: false,
           intentUrl,
           tweetText,
-          error: `Failed to connect to Render scraper service at ${remoteScraperUrl}`,
-          diagnostic: "Ensure your Render scraper service is live and reachable",
+          error: isTimeout
+            ? "Render scraper service timed out after 20s (it may be waking up from sleep)"
+            : `Failed to connect to Render scraper service at ${remoteScraperUrl}`,
+          diagnostic: isTimeout
+            ? "Render free instances spin down after inactivity and take ~30s to boot. Please retry in a moment!"
+            : "Ensure your Render scraper service is live and reachable",
         };
       }
     }
