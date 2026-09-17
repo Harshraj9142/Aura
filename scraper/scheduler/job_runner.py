@@ -56,23 +56,25 @@ def start_scheduler() -> None:
 
     Runs until interrupted (Ctrl+C or SIGTERM).
     """
-    logger.info(
-        f"📅 Starting scheduler — daily run at "
-        f"{settings.scrape_hour:02d}:{settings.scrape_minute:02d}"
-    )
+    if settings.scrape_frequency.lower() == "hourly":
+        trigger = CronTrigger(minute=settings.scrape_minute)
+        logger.info(f"📅 Starting scheduler — HOURLY run at minute :{settings.scrape_minute:02d}")
+    else:
+        trigger = CronTrigger(hour=settings.scrape_hour, minute=settings.scrape_minute)
+        logger.info(
+            f"📅 Starting scheduler — DAILY run at "
+            f"{settings.scrape_hour:02d}:{settings.scrape_minute:02d}"
+        )
 
     # Create the async scheduler
     scheduler = AsyncIOScheduler()
 
-    # Add the daily scraping job
+    # Add the scraping job
     scheduler.add_job(
         scheduled_batch_job,
-        trigger=CronTrigger(
-            hour=settings.scrape_hour,
-            minute=settings.scrape_minute,
-        ),
-        id="daily_scrape",
-        name="Daily Airfare Scrape & APIx Index",
+        trigger=trigger,
+        id="automated_scrape",
+        name=f"Automated Airfare Scrape ({settings.scrape_frequency})",
         replace_existing=True,
         max_instances=1,  # Don't run concurrent batch jobs
         misfire_grace_time=3600,  # Allow 1 hour grace period for misfires
@@ -97,7 +99,7 @@ def start_scheduler() -> None:
 
     logger.info(
         "✅ Scheduler running. Next job: "
-        f"{scheduler.get_job('daily_scrape').next_run_time}"
+        f"{scheduler.get_job('automated_scrape').next_run_time}"
     )
     logger.info("Press Ctrl+C to stop.")
 

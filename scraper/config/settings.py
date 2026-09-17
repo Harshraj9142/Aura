@@ -47,7 +47,8 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
 
-    # Scheduling (24h format)
+    # Scheduling
+    scrape_frequency: str = "hourly"  # "hourly" or "daily"
     scrape_hour: int = 6
     scrape_minute: int = 0
 
