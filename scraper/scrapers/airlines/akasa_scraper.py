@@ -83,55 +83,10 @@ class AkasaScraper(BaseScraper):
                     flight_code_prefix="QP",
                 )
 
-        if len(fares) <= 1:
-            logger.debug("Akasa Air: Direct portal returned <= 1 flight, querying live scheduled feed...")
-            agg_fares = await self._extract_from_aggregator_feed(route, travel_date, advance_days)
-            if agg_fares:
-                fares = agg_fares
-
         if not fares:
             raise NoFlightsFoundError("Akasa Air: No valid fare records extracted")
 
         return fares
-
-    async def _extract_from_aggregator_feed(
-        self, route: Route, travel_date: date, advance_days: int
-    ) -> list[FareRecord]:
-        """Look for Akasa Air flights via the live multi-carrier feed."""
-        try:
-            from scrapers.otas.easemytrip_scraper import EaseMyTripScraper
-            emt = EaseMyTripScraper()
-            res = await emt.scrape(route, travel_date, advance_days)
-            if res.fares:
-                qp_fares = []
-                for f in res.fares:
-                    carrier_lower = (f.carrier or "").lower()
-                    flt_lower = (f.flight_number or "").lower()
-                    if "akasa" in carrier_lower or "qp" in flt_lower:
-                        qp_fares.append(
-                            FareRecord(
-                                route_origin=route.origin,
-                                route_destination=route.destination,
-                                travel_date=travel_date,
-                                advance_purchase_days=advance_days,
-                                source=self.source_name,
-                                source_type=self.source_type,
-                                carrier="Akasa Air",
-                                flight_number=f.flight_number or "QP-Direct",
-                                fare_class="Economy",
-                                base_fare=f.base_fare,
-                                taxes_and_fees=f.taxes_and_fees,
-                                total_fare=f.total_fare,
-                                currency="INR",
-                                scraped_at=datetime.utcnow(),
-                            )
-                        )
-                if qp_fares:
-                    logger.info(f"Akasa Air: Extracted {len(qp_fares)} live scheduled flights from multi-carrier feed for {route.pair}")
-                    return qp_fares
-        except Exception as e:
-            logger.debug(f"Akasa Air aggregator fallback notice: {e}")
-        return []
 
     async def _extract_from_dom(
         self, page: Page, route: Route, travel_date: date, advance_days: int

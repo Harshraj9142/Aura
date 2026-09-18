@@ -40,7 +40,7 @@ from config.settings import (
     get_source_by_name,
     settings,
 )
-from db.models import ScrapeRun, ScrapeRunStatus
+from db.models import ScrapeRun, ScrapeRunStatus, ScrapeErrorLog
 from db.session import create_all_tables, get_session
 from pipeline.cleaner import FareCleaner
 from pipeline.deduplicator import Deduplicator
@@ -164,6 +164,35 @@ async def run_single(
         logger.info(f"Result: {result}")
 
 
+def log_scrape_error(
+    source: str,
+    route: Route,
+    travel_date: date,
+    advance_days: int,
+    status: str,
+    error_type: str | None = None,
+    error_message: str | None = None,
+    duration: float | None = None,
+) -> None:
+    """Persist a granular scraping error or anti-bot block to Neon DB for telemetry."""
+    try:
+        with get_session() as session:
+            err = ScrapeErrorLog(
+                source=source,
+                route_origin=route.origin,
+                route_destination=route.destination,
+                travel_date=travel_date,
+                advance_purchase_days=advance_days,
+                status=status,
+                error_type=error_type,
+                error_message=str(error_message)[:1000] if error_message else None,
+                duration_seconds=round(duration, 2) if duration is not None else None,
+            )
+            session.add(err)
+    except Exception as e:
+        logger.debug(f"Telemetry log write failed: {e}")
+
+
 async def run_batch(
     route_filter: str | None = None,
     source_filter: str | None = None,
@@ -260,8 +289,8 @@ async def run_batch(
             for route_config in routes_config
         ]
 
-        # Process with configurable concurrency (default 2, safe for EC2 2GB RAM)
-        concurrency = int(os.getenv("SCRAPER_CONCURRENCY", "2"))
+        # Process with configurable concurrency (default 3, optimal for EC2 Mumbai)
+        concurrency = int(os.getenv("SCRAPER_CONCURRENCY", "3"))
         semaphore = asyncio.Semaphore(concurrency)
 
         async def _scrape_single(route: Route, window: int):
@@ -326,6 +355,16 @@ async def run_batch(
                             f"🛑 BLOCKED: {route.pair}/{source_name}/T+{window}d | "
                             f"Remaining: {total_tasks - completed_tasks}"
                         )
+                        log_scrape_error(
+                            source=source_name,
+                            route=route,
+                            travel_date=travel_date,
+                            advance_days=window,
+                            status="blocked",
+                            error_type="rate_limited" if "rate" in str(result.error_message).lower() else "anti_bot_block",
+                            error_message=result.error_message,
+                            duration=getattr(result, "duration_seconds", None),
+                        )
 
                     else:
                         consecutive_empty_or_fail += 1
@@ -335,6 +374,16 @@ async def run_batch(
                         else:
                             failed_count += 1
                             source_summary[source_name]["failed"] += 1
+                            log_scrape_error(
+                                source=source_name,
+                                route=route,
+                                travel_date=travel_date,
+                                advance_days=window,
+                                status=result.status.value,
+                                error_type="scrape_failed",
+                                error_message=result.error_message,
+                                duration=getattr(result, "duration_seconds", None),
+                            )
                         logger.info(
                             f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
                             f"⚠️ {route.pair}/{source_name}/T+{window}d: {result.status.value} | "
@@ -359,6 +408,16 @@ async def run_batch(
                         f"⏱️ TIMEOUT (120s): {route.pair}/{source_name}/T+{window}d | "
                         f"Remaining: {total_tasks - completed_tasks}"
                     )
+                    log_scrape_error(
+                        source=source_name,
+                        route=route,
+                        travel_date=travel_date,
+                        advance_days=window,
+                        status="timeout",
+                        error_type="asyncio_timeout",
+                        error_message="Search exceeded timeout limit (120s)",
+                        duration=120.0,
+                    )
                     if consecutive_empty_or_fail >= 3 and not skip_remaining:
                         skip_remaining = True
                         logger.warning(
@@ -376,6 +435,16 @@ async def run_batch(
                         f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
                         f"❌ ERROR: {route.pair}/{source_name}/T+{window}d: {e} | "
                         f"Remaining: {total_tasks - completed_tasks}"
+                    )
+                    log_scrape_error(
+                        source=source_name,
+                        route=route,
+                        travel_date=travel_date,
+                        advance_days=window,
+                        status="error",
+                        error_type=type(e).__name__,
+                        error_message=str(e),
+                        duration=None,
                     )
                     if consecutive_empty_or_fail >= 3 and not skip_remaining:
                         skip_remaining = True
@@ -643,9 +712,12 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
         
 def start_health_server():
     port = int(os.environ.get("PORT", 8080))
-    server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
-    threading.Thread(target=server.serve_forever, daemon=True).start()
-    logger.info(f"Health check and API server started on port {port}")
+    try:
+        server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        logger.info(f"Health check and API server started on port {port}")
+    except OSError as e:
+        logger.warning(f"Port {port} already in use; health check server skipped for this CLI process ({e})")
 
 def main() -> None:
     """Main entry point for the APIx scraper CLI."""

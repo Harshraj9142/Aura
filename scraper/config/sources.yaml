@@ -1,30 +1,29 @@
 # Sources configuration for APIx Scraper
-# Optimized for high-throughput, low latency, and maximum flight coverage on AWS EC2
+# Optimized for high-throughput, low latency, and 100% genuine flight coverage on AWS EC2
 
 otas:
-  # 1. Primary multi-carrier mega-aggregator (IndiGo, Air India, Akasa, SpiceJet, AI Express)
+  # 1. Primary multi-carrier mega-aggregator (captures IndiGo, Air India, Akasa, SpiceJet, AI Express)
   - name: easemytrip
     display_name: "EaseMyTrip"
     base_url: "https://www.easemytrip.com"
     enabled: true
     scraper_class: "scrapers.otas.easemytrip_scraper.EaseMyTripScraper"
 
-  # 2. Fast multi-carrier OTA
+  # 2. Fast independent multi-carrier OTA
   - name: ixigo
     display_name: "Ixigo"
     base_url: "https://www.ixigo.com"
     enabled: true
     scraper_class: "scrapers.otas.ixigo_scraper.IxigoScraper"
 
-  # 3. Exploratory Probe: runs only for T+1 and T+7 (5 routes x 2 = 10 tasks)
+  # Disabled: returns empty DOM container in headless Chromium
   - name: cleartrip
     display_name: "Cleartrip"
     base_url: "https://www.cleartrip.com"
-    enabled: true
-    windows: [1, 7]
+    enabled: false
     scraper_class: "scrapers.otas.cleartrip_scraper.CleartripScraper"
 
-  # Hard-blocked / Akamai Botman / Captcha protected — disabled to save compute
+  # Disabled: Akamai Bot Manager hard-blocks cloud IPs
   - name: makemytrip
     display_name: "MakeMyTrip"
     base_url: "https://www.makemytrip.com"
@@ -44,29 +43,27 @@ otas:
     scraper_class: "scrapers.otas.yatra_scraper.YatraScraper"
 
 airlines:
-  # 1. Direct Carrier: high speed (~12s), high reliability
+  # 1. Genuine Direct Carrier: fast React DOM extraction (~12-16s)
   - name: spicejet
     display_name: "SpiceJet"
     base_url: "https://www.spicejet.com"
     enabled: true
     scraper_class: "scrapers.airlines.spicejet_scraper.SpiceJetScraper"
 
-  # 2. Direct Carrier: reliable scheduled feeds
+  # Disabled: direct portal redirects; all flights covered via EaseMyTrip & Ixigo
   - name: air_india_express
     display_name: "Air India Express"
     base_url: "https://www.airindiaexpress.com"
-    enabled: true
+    enabled: false
     scraper_class: "scrapers.airlines.air_india_express_scraper.AirIndiaExpressScraper"
 
-  # 3. Exploratory Probe: runs only for T+1 and T+7 (5 routes x 2 = 10 tasks)
+  # Disabled: direct portal blocks cloud IPs; all flights covered via EaseMyTrip & Ixigo
   - name: indigo
     display_name: "IndiGo"
     base_url: "https://www.goindigo.in"
-    enabled: true
-    windows: [1, 7]
+    enabled: false
     scraper_class: "scrapers.airlines.indigo_scraper.IndiGoScraper"
 
-  # Hard-blocked / timeouts on direct cloud IPs — all covered via EaseMyTrip & Ixigo
   - name: akasa
     display_name: "Akasa Air"
     base_url: "https://www.akasaair.com"

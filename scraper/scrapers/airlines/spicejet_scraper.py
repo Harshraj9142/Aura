@@ -82,11 +82,6 @@ class SpiceJetScraper(BaseScraper):
         if not fares:
             fares = await self._extract_from_calendar_bar(page, route, travel_date, advance_days)
 
-        # Strategy 4: Fallback to live aggregator feed for SpiceJet-operated flights
-        if not fares:
-            logger.debug("SpiceJet: Portal returned no direct flights. Checking multi-carrier feed for SpiceJet...")
-            fares = await self._extract_from_aggregator_feed(route, travel_date, advance_days)
-
         if not fares:
             raise NoFlightsFoundError(f"SpiceJet: No operating direct flights found on {route.pair} for {travel_date}")
 
@@ -142,45 +137,6 @@ class SpiceJetScraper(BaseScraper):
                 ]
         except Exception as e:
             logger.debug(f"SpiceJet calendar extraction error: {e}")
-        return []
-
-    async def _extract_from_aggregator_feed(
-        self, route: Route, travel_date: date, advance_days: int
-    ) -> list[FareRecord]:
-        """Look for SpiceJet flights via the multi-carrier domestic aggregator feed."""
-        try:
-            from scrapers.otas.easemytrip_scraper import EaseMyTripScraper
-            emt = EaseMyTripScraper()
-            res = await emt.scrape(route, travel_date, advance_days)
-            if res.fares:
-                sg_fares = []
-                for f in res.fares:
-                    carrier_lower = (f.carrier or "").lower()
-                    flt_lower = (f.flight_number or "").lower()
-                    if "spice" in carrier_lower or "sg" in flt_lower or carrier_lower == "spicejet":
-                        sg_fares.append(
-                            FareRecord(
-                                route_origin=route.origin,
-                                route_destination=route.destination,
-                                travel_date=travel_date,
-                                advance_purchase_days=advance_days,
-                                source=self.source_name,
-                                source_type=self.source_type,
-                                carrier="SpiceJet",
-                                flight_number=f.flight_number or "SG-Domestic",
-                                fare_class="Economy",
-                                base_fare=f.base_fare,
-                                taxes_and_fees=f.taxes_and_fees,
-                                total_fare=f.total_fare,
-                                currency="INR",
-                                scraped_at=datetime.utcnow(),
-                            )
-                        )
-                if sg_fares:
-                    logger.info(f"SpiceJet: Ingested {len(sg_fares)} SpiceJet flights from live multi-carrier feed for {route.pair}")
-                    return sg_fares
-        except Exception as e:
-            logger.debug(f"SpiceJet aggregator fallback notice: {e}")
         return []
 
     async def _extract_from_dom(

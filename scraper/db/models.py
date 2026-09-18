@@ -273,3 +273,61 @@ class IndexValueRecord(Base):
     __table_args__ = (
         Index("ix_index_values_freq_period", "frequency", "period_date", unique=True),
     )
+
+
+# ---------------------------------------------------------------------------
+# Scrape Error & Telemetry Logs model
+# ---------------------------------------------------------------------------
+class ScrapeErrorLog(Base):
+    """
+    Stores granular error logs, anti-bot blocks, rate-limits, and timeouts 
+    from scraping attempts for historical telemetry and auto-diagnosis.
+    """
+
+    __tablename__ = "scrape_error_logs"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        comment="Unique error log identifier",
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        comment="Timestamp when the error occurred",
+    )
+    source: Mapped[str] = mapped_column(
+        String(50), nullable=False, comment="Source identifier (e.g. 'spicejet', 'cleartrip')"
+    )
+    route_origin: Mapped[str] = mapped_column(
+        String(3), nullable=False, comment="Origin airport code"
+    )
+    route_destination: Mapped[str] = mapped_column(
+        String(3), nullable=False, comment="Destination airport code"
+    )
+    travel_date: Mapped[date] = mapped_column(
+        Date, nullable=False, comment="Date of travel attempted"
+    )
+    advance_purchase_days: Mapped[int] = mapped_column(
+        Integer, nullable=False, comment="Advance purchase days window"
+    )
+    status: Mapped[str] = mapped_column(
+        String(30), nullable=False, comment="Error category: 'blocked', 'failed', 'timeout', 'no_flights'"
+    )
+    error_type: Mapped[Optional[str]] = mapped_column(
+        String(50), nullable=True, comment="Specific subtype: 'rate_limited', 'akamai_bot', 'target_closed'"
+    )
+    error_message: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True, comment="Detailed error message or indicator snippet"
+    )
+    duration_seconds: Mapped[Optional[float]] = mapped_column(
+        Float, nullable=True, comment="Time elapsed before error/timeout"
+    )
+
+    __table_args__ = (
+        Index("ix_error_logs_source_status", "source", "status"),
+        Index("ix_error_logs_created_at", "created_at"),
+    )
+
