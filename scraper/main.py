@@ -264,201 +264,215 @@ async def run_batch(
 
     cleaner = FareCleaner()
 
-    # Iterate: sources → routes → windows
-    for source_config in sources_config:
-        source_name = source_config["name"]
-        source_windows = source_config.get("windows") or windows
-        source_summary[source_name] = {"success": 0, "failed": 0, "blocked": 0, "fares": 0}
-        consecutive_empty_or_fail = 0
-        skip_remaining = False
-
+    # Preload scrapers and initialize per-source circuit breakers & summaries
+    scrapers: dict[str, BaseScraper] = {}
+    circuit_breakers: dict[str, dict] = {}
+    for s_cfg in sources_config:
+        s_name = s_cfg["name"]
+        source_summary[s_name] = {"success": 0, "failed": 0, "blocked": 0, "fares": 0}
+        circuit_breakers[s_name] = {"consecutive_fails": 0, "skipped": False}
         try:
-            scraper = load_scraper(source_config)
+            scrapers[s_name] = load_scraper(s_cfg)
         except Exception as e:
-            logger.error(f"Cannot load scraper for {source_name}: {e}")
-            failed_count += len(routes_config) * len(source_windows)
-            source_summary[source_name]["failed"] = len(routes_config) * len(source_windows)
-            continue
+            logger.error(f"Cannot load scraper for {s_name}: {e}")
 
-        route_objs = [
-            Route(
-                origin=route_config["origin"],
-                destination=route_config["destination"],
-                name=route_config.get("name"),
-            )
-            for route_config in routes_config
-        ]
+    route_objs = [
+        Route(
+            origin=route_config["origin"],
+            destination=route_config["destination"],
+            name=route_config.get("name"),
+        )
+        for route_config in routes_config
+    ]
 
-        # Process with configurable concurrency (default 3, optimal for EC2 Mumbai)
-        concurrency = int(os.getenv("SCRAPER_CONCURRENCY", "3"))
-        semaphore = asyncio.Semaphore(concurrency)
+    # Build interleaved round-robin task queue:
+    # Route 1: Source A -> Source B -> Source C
+    # Route 2: Source A -> Source B -> Source C
+    # This prevents hammering any single source consecutively and gives each site breathing room
+    task_specs: list[tuple[str, Route, int]] = []
+    for route in route_objs:
+        for window in windows:
+            for s_cfg in sources_config:
+                s_name = s_cfg["name"]
+                s_windows = s_cfg.get("windows") or windows
+                if window in s_windows and s_name in scrapers:
+                    task_specs.append((s_name, route, window))
 
-        async def _scrape_single(route: Route, window: int):
-            nonlocal success_count, failed_count, blocked_count, total_fares, completed_tasks
-            nonlocal consecutive_empty_or_fail, skip_remaining
+    total_tasks = len(task_specs)
+    logger.info(f"🔄 Interleaved task queue created: {total_tasks} tasks scheduled across {len(scrapers)} sources")
 
-            if skip_remaining:
+    # Process with configurable concurrency (default 3, optimal for EC2 Mumbai)
+    concurrency = int(os.getenv("SCRAPER_CONCURRENCY", "3"))
+    semaphore = asyncio.Semaphore(concurrency)
+
+    async def _scrape_single(source_name: str, route: Route, window: int):
+        nonlocal success_count, failed_count, blocked_count, total_fares, completed_tasks
+
+        cb = circuit_breakers[source_name]
+        if cb["skipped"]:
+            completed_tasks += 1
+            return
+
+        scraper = scrapers[source_name]
+        travel_date = date.today() + timedelta(days=window)
+
+        async with semaphore:
+            if cb["skipped"]:
                 completed_tasks += 1
                 return
 
-            travel_date = date.today() + timedelta(days=window)
-            async with semaphore:
-                if skip_remaining:
-                    completed_tasks += 1
-                    return
-                try:
-                    result = await asyncio.wait_for(
-                        scraper.scrape(route, travel_date, window),
-                        timeout=120.0,
-                    )
+            try:
+                result = await asyncio.wait_for(
+                    scraper.scrape(route, travel_date, window),
+                    timeout=120.0,
+                )
 
-                    completed_tasks += 1
-                    pct = (completed_tasks / total_tasks) * 100
+                completed_tasks += 1
+                pct = (completed_tasks / total_tasks) * 100
 
-                    if result.is_success:
-                        if result.fares:
-                            consecutive_empty_or_fail = 0
-                            success_count += 1
-                            source_summary[source_name]["success"] += 1
-                            cleaned = cleaner.clean_batch(result.fares)
-                            deduped = Deduplicator.deduplicate_in_memory(cleaned)
+                if result.is_success:
+                    if result.fares:
+                        cb["consecutive_fails"] = 0
+                        success_count += 1
+                        source_summary[source_name]["success"] += 1
+                        cleaned = cleaner.clean_batch(result.fares)
+                        deduped = Deduplicator.deduplicate_in_memory(cleaned)
 
-                            try:
-                                with get_session() as session:
-                                    count = Deduplicator.upsert_fares(session, deduped)
-                                    total_fares += count
-                                    source_summary[source_name]["fares"] += count
-                                logger.info(
-                                    f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
-                                    f"✅ {route.pair}/{source_name}/T+{window}d: "
-                                    f"+{count} fares saved | Total DB: {total_fares} | "
-                                    f"Remaining: {total_tasks - completed_tasks}"
-                                )
-                            except Exception as e:
-                                logger.error(f"❌ DB insert failed for {route.pair}/{source_name}: {e}")
-                        else:
-                            consecutive_empty_or_fail += 1
-                            success_count += 1
-                            source_summary[source_name]["success"] += 1
+                        try:
+                            with get_session() as session:
+                                count = Deduplicator.upsert_fares(session, deduped)
+                                total_fares += count
+                                source_summary[source_name]["fares"] += count
                             logger.info(
                                 f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
-                                f"✈️ {route.pair}/{source_name}/T+{window}d: 0 flights found | "
+                                f"✅ {route.pair}/{source_name}/T+{window}d: "
+                                f"+{count} fares saved | Total DB: {total_fares} | "
                                 f"Remaining: {total_tasks - completed_tasks}"
                             )
-
-                    elif result.is_blocked:
-                        consecutive_empty_or_fail += 1
-                        blocked_count += 1
-                        source_summary[source_name]["blocked"] += 1
-                        logger.warning(
+                        except Exception as e:
+                            logger.error(f"❌ DB insert failed for {route.pair}/{source_name}: {e}")
+                    else:
+                        cb["consecutive_fails"] += 1
+                        success_count += 1
+                        source_summary[source_name]["success"] += 1
+                        logger.info(
                             f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
-                            f"🛑 BLOCKED: {route.pair}/{source_name}/T+{window}d | "
+                            f"✈️ {route.pair}/{source_name}/T+{window}d: 0 flights found | "
                             f"Remaining: {total_tasks - completed_tasks}"
                         )
+
+                elif result.is_blocked:
+                    cb["consecutive_fails"] += 1
+                    blocked_count += 1
+                    source_summary[source_name]["blocked"] += 1
+                    logger.warning(
+                        f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
+                        f"🛑 BLOCKED: {route.pair}/{source_name}/T+{window}d | "
+                        f"Remaining: {total_tasks - completed_tasks}"
+                    )
+                    log_scrape_error(
+                        source=source_name,
+                        route=route,
+                        travel_date=travel_date,
+                        advance_days=window,
+                        status="blocked",
+                        error_type="rate_limited" if "rate" in str(result.error_message).lower() else "anti_bot_block",
+                        error_message=result.error_message,
+                        duration=getattr(result, "duration_seconds", None),
+                    )
+
+                else:
+                    cb["consecutive_fails"] += 1
+                    if result.status in (ScrapeStatus.NO_FLIGHTS, ScrapeStatus.SOLD_OUT):
+                        success_count += 1
+                        source_summary[source_name]["success"] += 1
+                    else:
+                        failed_count += 1
+                        source_summary[source_name]["failed"] += 1
                         log_scrape_error(
                             source=source_name,
                             route=route,
                             travel_date=travel_date,
                             advance_days=window,
-                            status="blocked",
-                            error_type="rate_limited" if "rate" in str(result.error_message).lower() else "anti_bot_block",
+                            status=result.status.value,
+                            error_type="scrape_failed",
                             error_message=result.error_message,
                             duration=getattr(result, "duration_seconds", None),
                         )
+                    logger.info(
+                        f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
+                        f"⚠️ {route.pair}/{source_name}/T+{window}d: {result.status.value} | "
+                        f"Remaining: {total_tasks - completed_tasks}"
+                    )
 
-                    else:
-                        consecutive_empty_or_fail += 1
-                        if result.status in (ScrapeStatus.NO_FLIGHTS, ScrapeStatus.SOLD_OUT):
-                            success_count += 1
-                            source_summary[source_name]["success"] += 1
-                        else:
-                            failed_count += 1
-                            source_summary[source_name]["failed"] += 1
-                            log_scrape_error(
-                                source=source_name,
-                                route=route,
-                                travel_date=travel_date,
-                                advance_days=window,
-                                status=result.status.value,
-                                error_type="scrape_failed",
-                                error_message=result.error_message,
-                                duration=getattr(result, "duration_seconds", None),
-                            )
-                        logger.info(
-                            f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
-                            f"⚠️ {route.pair}/{source_name}/T+{window}d: {result.status.value} | "
-                            f"Remaining: {total_tasks - completed_tasks}"
-                        )
-
-                    if consecutive_empty_or_fail >= 3 and not skip_remaining:
-                        skip_remaining = True
-                        logger.warning(
-                            f"⚡ Circuit breaker triggered for {source_name}: "
-                            f"3 consecutive empty/failed attempts. Skipping remaining tasks for {source_name}."
-                        )
-
-                except asyncio.TimeoutError:
-                    consecutive_empty_or_fail += 1
-                    completed_tasks += 1
-                    pct = (completed_tasks / total_tasks) * 100
-                    failed_count += 1
-                    source_summary[source_name]["failed"] += 1
+                if cb["consecutive_fails"] >= 3 and not cb["skipped"]:
+                    cb["skipped"] = True
                     logger.warning(
-                        f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
-                        f"⏱️ TIMEOUT (120s): {route.pair}/{source_name}/T+{window}d | "
-                        f"Remaining: {total_tasks - completed_tasks}"
+                        f"⚡ Circuit breaker triggered for {source_name}: "
+                        f"3 consecutive empty/failed attempts. Skipping remaining tasks for {source_name}."
                     )
-                    log_scrape_error(
-                        source=source_name,
-                        route=route,
-                        travel_date=travel_date,
-                        advance_days=window,
-                        status="timeout",
-                        error_type="asyncio_timeout",
-                        error_message="Search exceeded timeout limit (120s)",
-                        duration=120.0,
-                    )
-                    if consecutive_empty_or_fail >= 3 and not skip_remaining:
-                        skip_remaining = True
-                        logger.warning(
-                            f"⚡ Circuit breaker triggered for {source_name}: "
-                            f"3 consecutive timeouts/failures. Skipping remaining tasks for {source_name}."
-                        )
 
-                except Exception as e:
-                    consecutive_empty_or_fail += 1
-                    completed_tasks += 1
-                    pct = (completed_tasks / total_tasks) * 100
-                    failed_count += 1
-                    source_summary[source_name]["failed"] += 1
-                    logger.error(
-                        f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
-                        f"❌ ERROR: {route.pair}/{source_name}/T+{window}d: {e} | "
-                        f"Remaining: {total_tasks - completed_tasks}"
+            except asyncio.TimeoutError:
+                cb["consecutive_fails"] += 1
+                completed_tasks += 1
+                pct = (completed_tasks / total_tasks) * 100
+                failed_count += 1
+                source_summary[source_name]["failed"] += 1
+                logger.warning(
+                    f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
+                    f"⏱️ TIMEOUT (120s): {route.pair}/{source_name}/T+{window}d | "
+                    f"Remaining: {total_tasks - completed_tasks}"
+                )
+                log_scrape_error(
+                    source=source_name,
+                    route=route,
+                    travel_date=travel_date,
+                    advance_days=window,
+                    status="timeout",
+                    error_type="asyncio_timeout",
+                    error_message="Search exceeded timeout limit (120s)",
+                    duration=120.0,
+                )
+                if cb["consecutive_fails"] >= 3 and not cb["skipped"]:
+                    cb["skipped"] = True
+                    logger.warning(
+                        f"⚡ Circuit breaker triggered for {source_name}: "
+                        f"3 consecutive timeouts/failures. Skipping remaining tasks for {source_name}."
                     )
-                    log_scrape_error(
-                        source=source_name,
-                        route=route,
-                        travel_date=travel_date,
-                        advance_days=window,
-                        status="error",
-                        error_type=type(e).__name__,
-                        error_message=str(e),
-                        duration=None,
-                    )
-                    if consecutive_empty_or_fail >= 3 and not skip_remaining:
-                        skip_remaining = True
-                        logger.warning(
-                            f"⚡ Circuit breaker triggered for {source_name}: "
-                            f"3 consecutive errors. Skipping remaining tasks for {source_name}."
-                        )
 
-        coros = [
-            _scrape_single(route, window)
-            for route in route_objs
-            for window in source_windows
-        ]
-        await asyncio.gather(*coros)
+            except Exception as e:
+                cb["consecutive_fails"] += 1
+                completed_tasks += 1
+                pct = (completed_tasks / total_tasks) * 100
+                failed_count += 1
+                source_summary[source_name]["failed"] += 1
+                logger.error(
+                    f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
+                    f"❌ ERROR: {route.pair}/{source_name}/T+{window}d: {e} | "
+                    f"Remaining: {total_tasks - completed_tasks}"
+                )
+                log_scrape_error(
+                    source=source_name,
+                    route=route,
+                    travel_date=travel_date,
+                    advance_days=window,
+                    status="error",
+                    error_type=type(e).__name__,
+                    error_message=str(e),
+                    duration=None,
+                )
+                if cb["consecutive_fails"] >= 3 and not cb["skipped"]:
+                    cb["skipped"] = True
+                    logger.warning(
+                        f"⚡ Circuit breaker triggered for {source_name}: "
+                        f"3 consecutive errors. Skipping remaining tasks for {source_name}."
+                    )
+
+    coros = [
+        _scrape_single(source_name, route, window)
+        for source_name, route, window in task_specs
+    ]
+    await asyncio.gather(*coros)
 
     # Update scrape run record
     completed_at = datetime.utcnow()
