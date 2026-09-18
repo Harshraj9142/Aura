@@ -228,6 +228,7 @@ async def run_batch(
     failed_count = 0
     blocked_count = 0
     total_fares = 0
+    completed_tasks = 0
     source_summary: dict[str, dict] = {}
 
     cleaner = FareCleaner()
@@ -254,18 +255,21 @@ async def run_batch(
             for route_config in routes_config
         ]
 
-        # Process with safe concurrency = 2 (optimal for Render 512MB RAM)
+        # Process with safe concurrency = 2 (optimal for EC2 2GB RAM)
         semaphore = asyncio.Semaphore(2)
 
         async def _scrape_single(route: Route, window: int):
-            nonlocal success_count, failed_count, blocked_count, total_fares
+            nonlocal success_count, failed_count, blocked_count, total_fares, completed_tasks
             travel_date = date.today() + timedelta(days=window)
             async with semaphore:
                 try:
                     result = await asyncio.wait_for(
                         scraper.scrape(route, travel_date, window),
-                        timeout=60.0,
+                        timeout=120.0,
                     )
+
+                    completed_tasks += 1
+                    pct = (completed_tasks / total_tasks) * 100
 
                     if result.is_success:
                         success_count += 1
@@ -276,38 +280,69 @@ async def run_batch(
                             deduped = Deduplicator.deduplicate_in_memory(cleaned)
 
                             try:
-                                logger.info(
-                                    f"💾 Pushing {len(deduped)} fares to Neon DB for {route.pair}/{source_name}..."
-                                )
                                 with get_session() as session:
                                     count = Deduplicator.upsert_fares(session, deduped)
                                     total_fares += count
                                     source_summary[source_name]["fares"] += count
                                 logger.info(
-                                    f"✅ Successfully pushed {count} fares to DB for {route.pair}/{source_name} (Total run fares: {total_fares})"
+                                    f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
+                                    f"✅ {route.pair}/{source_name}/T+{window}d: "
+                                    f"+{count} fares saved | Total DB: {total_fares} | "
+                                    f"Remaining: {total_tasks - completed_tasks}"
                                 )
                             except Exception as e:
                                 logger.error(f"❌ DB insert failed for {route.pair}/{source_name}: {e}")
+                        else:
+                            logger.info(
+                                f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
+                                f"✈️ {route.pair}/{source_name}/T+{window}d: 0 flights found | "
+                                f"Remaining: {total_tasks - completed_tasks}"
+                            )
 
                     elif result.is_blocked:
                         blocked_count += 1
                         source_summary[source_name]["blocked"] += 1
+                        logger.warning(
+                            f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
+                            f"🛑 BLOCKED: {route.pair}/{source_name}/T+{window}d | "
+                            f"Remaining: {total_tasks - completed_tasks}"
+                        )
 
                     else:
                         # FAILED, NO_FLIGHTS, SOLD_OUT, DISALLOWED
                         if result.status in (ScrapeStatus.NO_FLIGHTS, ScrapeStatus.SOLD_OUT):
-                            success_count += 1  # Not a failure — just no data
+                            success_count += 1
                             source_summary[source_name]["success"] += 1
                         else:
                             failed_count += 1
                             source_summary[source_name]["failed"] += 1
+                        logger.info(
+                            f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
+                            f"⚠️ {route.pair}/{source_name}/T+{window}d: {result.status.value} | "
+                            f"Remaining: {total_tasks - completed_tasks}"
+                        )
 
-                except Exception as e:
-                    logger.error(
-                        f"Unhandled error for {route.pair}/{source_name}/T+{window}d: {e}"
-                    )
+                except asyncio.TimeoutError:
+                    completed_tasks += 1
+                    pct = (completed_tasks / total_tasks) * 100
                     failed_count += 1
                     source_summary[source_name]["failed"] += 1
+                    logger.warning(
+                        f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
+                        f"⏱️ TIMEOUT (120s): {route.pair}/{source_name}/T+{window}d | "
+                        f"Remaining: {total_tasks - completed_tasks}"
+                    )
+
+                except Exception as e:
+                    completed_tasks += 1
+                    pct = (completed_tasks / total_tasks) * 100
+                    failed_count += 1
+                    source_summary[source_name]["failed"] += 1
+                    logger.error(
+                        f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
+                        f"❌ ERROR: {route.pair}/{source_name}/T+{window}d: {e} | "
+                        f"Remaining: {total_tasks - completed_tasks}"
+                    )
 
         coros = [
             _scrape_single(route, window)
