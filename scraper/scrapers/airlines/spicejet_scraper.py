@@ -42,16 +42,6 @@ class SpiceJetScraper(BaseScraper):
     async def _navigate_and_search(
         self, page: Page, route: Route, travel_date: date, advance_days: int
     ) -> None:
-        """URL-based navigation with homepage cookie warmup."""
-        # Step 1: Visit homepage to acquire cookies/session
-        try:
-            logger.debug("SpiceJet: Initializing session at homepage...")
-            await page.goto(self.base_url, wait_until="domcontentloaded", timeout=15000)
-            await asyncio.sleep(1.5)
-        except Exception as e:
-            logger.debug(f"SpiceJet homepage init notice: {e}")
-
-        # Step 2: Navigate to search URL
         url = self._build_search_url(route, travel_date, advance_days)
         logger.debug(f"SpiceJet: Navigating to: {url}")
 

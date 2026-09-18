@@ -45,14 +45,6 @@ class AirIndiaExpressScraper(BaseScraper):
     async def _navigate_and_search(
         self, page: Page, route: Route, travel_date: date, advance_days: int
     ) -> None:
-        """URL-based navigation with homepage cookie warmup."""
-        try:
-            logger.debug("Air India Express: Initializing session at homepage...")
-            await page.goto(self.base_url, wait_until="commit", timeout=15000)
-            await asyncio.sleep(2)
-        except Exception as e:
-            logger.debug(f"Air India Express homepage init notice: {e}")
-
         url = self._build_search_url(route, travel_date, advance_days)
         logger.debug(f"Air India Express: Navigating to: {url}")
 

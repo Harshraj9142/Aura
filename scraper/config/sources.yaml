@@ -1,70 +1,80 @@
 # Sources configuration for APIx Scraper
-# Enable/disable individual sources without code changes
+# Optimized for high-throughput, low latency, and maximum flight coverage on AWS EC2
 
 otas:
+  # 1. Primary multi-carrier mega-aggregator (IndiGo, Air India, Akasa, SpiceJet, AI Express)
   - name: easemytrip
     display_name: "EaseMyTrip"
     base_url: "https://www.easemytrip.com"
     enabled: true
     scraper_class: "scrapers.otas.easemytrip_scraper.EaseMyTripScraper"
 
-  - name: cleartrip
-    display_name: "Cleartrip"
-    base_url: "https://www.cleartrip.com"
-    enabled: true
-    scraper_class: "scrapers.otas.cleartrip_scraper.CleartripScraper"
-
+  # 2. Fast multi-carrier OTA
   - name: ixigo
     display_name: "Ixigo"
     base_url: "https://www.ixigo.com"
     enabled: true
     scraper_class: "scrapers.otas.ixigo_scraper.IxigoScraper"
 
+  # 3. Exploratory Probe: runs only for T+1 and T+7 (5 routes x 2 = 10 tasks)
+  - name: cleartrip
+    display_name: "Cleartrip"
+    base_url: "https://www.cleartrip.com"
+    enabled: true
+    windows: [1, 7]
+    scraper_class: "scrapers.otas.cleartrip_scraper.CleartripScraper"
+
+  # Hard-blocked / Akamai Botman / Captcha protected — disabled to save compute
   - name: makemytrip
     display_name: "MakeMyTrip"
     base_url: "https://www.makemytrip.com"
-    enabled: true
+    enabled: false
     scraper_class: "scrapers.otas.makemytrip_scraper.MakeMyTripScraper"
-
-  - name: yatra
-    display_name: "Yatra"
-    base_url: "https://www.yatra.com"
-    enabled: true
-    scraper_class: "scrapers.otas.yatra_scraper.YatraScraper"
 
   - name: goibibo
     display_name: "Goibibo"
     base_url: "https://www.goibibo.com"
-    enabled: true
+    enabled: false
     scraper_class: "scrapers.otas.goibibo_scraper.GoibiboScraper"
 
+  - name: yatra
+    display_name: "Yatra"
+    base_url: "https://www.yatra.com"
+    enabled: false
+    scraper_class: "scrapers.otas.yatra_scraper.YatraScraper"
+
 airlines:
-  - name: indigo
-    display_name: "IndiGo"
-    base_url: "https://www.goindigo.in"
-    enabled: true
-    scraper_class: "scrapers.airlines.indigo_scraper.IndiGoScraper"
-
-  - name: air_india_express
-    display_name: "Air India Express"
-    base_url: "https://www.airindiaexpress.com"
-    enabled: true
-    scraper_class: "scrapers.airlines.air_india_express_scraper.AirIndiaExpressScraper"
-
-  - name: akasa
-    display_name: "Akasa Air"
-    base_url: "https://www.akasaair.com"
-    enabled: true
-    scraper_class: "scrapers.airlines.akasa_scraper.AkasaScraper"
-
+  # 1. Direct Carrier: high speed (~12s), high reliability
   - name: spicejet
     display_name: "SpiceJet"
     base_url: "https://www.spicejet.com"
     enabled: true
     scraper_class: "scrapers.airlines.spicejet_scraper.SpiceJetScraper"
 
+  # 2. Direct Carrier: reliable scheduled feeds
+  - name: air_india_express
+    display_name: "Air India Express"
+    base_url: "https://www.airindiaexpress.com"
+    enabled: true
+    scraper_class: "scrapers.airlines.air_india_express_scraper.AirIndiaExpressScraper"
+
+  # 3. Exploratory Probe: runs only for T+1 and T+7 (5 routes x 2 = 10 tasks)
+  - name: indigo
+    display_name: "IndiGo"
+    base_url: "https://www.goindigo.in"
+    enabled: true
+    windows: [1, 7]
+    scraper_class: "scrapers.airlines.indigo_scraper.IndiGoScraper"
+
+  # Hard-blocked / timeouts on direct cloud IPs — all covered via EaseMyTrip & Ixigo
+  - name: akasa
+    display_name: "Akasa Air"
+    base_url: "https://www.akasaair.com"
+    enabled: false
+    scraper_class: "scrapers.airlines.akasa_scraper.AkasaScraper"
+
   - name: air_india
     display_name: "Air India"
     base_url: "https://www.airindia.com"
-    enabled: false  # Direct site blocks cloud IPs with 30s timeout; Air India fares are captured via EaseMyTrip & Cleartrip
+    enabled: false
     scraper_class: "scrapers.airlines.air_india_scraper.AirIndiaScraper"

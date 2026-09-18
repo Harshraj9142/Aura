@@ -199,12 +199,14 @@ async def run_batch(
         logger.error("No sources to scrape (check filter or config)")
         return
 
-    total_tasks = len(routes_config) * len(sources_config) * len(windows)
+    total_tasks = sum(
+        len(routes_config) * len(s.get("windows") or windows)
+        for s in sources_config
+    )
 
     logger.info(
         f"🚀 Batch scrape starting | "
-        f"{len(routes_config)} routes × {len(sources_config)} sources × "
-        f"{len(windows)} windows = {total_tasks} tasks"
+        f"{len(routes_config)} routes × {len(sources_config)} sources = {total_tasks} total tasks"
     )
 
     # Create scrape run record
@@ -236,14 +238,17 @@ async def run_batch(
     # Iterate: sources → routes → windows
     for source_config in sources_config:
         source_name = source_config["name"]
+        source_windows = source_config.get("windows") or windows
         source_summary[source_name] = {"success": 0, "failed": 0, "blocked": 0, "fares": 0}
+        consecutive_empty_or_fail = 0
+        skip_remaining = False
 
         try:
             scraper = load_scraper(source_config)
         except Exception as e:
             logger.error(f"Cannot load scraper for {source_name}: {e}")
-            failed_count += len(routes_config) * len(windows)
-            source_summary[source_name]["failed"] = len(routes_config) * len(windows)
+            failed_count += len(routes_config) * len(source_windows)
+            source_summary[source_name]["failed"] = len(routes_config) * len(source_windows)
             continue
 
         route_objs = [
@@ -255,13 +260,23 @@ async def run_batch(
             for route_config in routes_config
         ]
 
-        # Process with safe concurrency = 2 (optimal for EC2 2GB RAM)
-        semaphore = asyncio.Semaphore(2)
+        # Process with configurable concurrency (default 2, safe for EC2 2GB RAM)
+        concurrency = int(os.getenv("SCRAPER_CONCURRENCY", "2"))
+        semaphore = asyncio.Semaphore(concurrency)
 
         async def _scrape_single(route: Route, window: int):
             nonlocal success_count, failed_count, blocked_count, total_fares, completed_tasks
+            nonlocal consecutive_empty_or_fail, skip_remaining
+
+            if skip_remaining:
+                completed_tasks += 1
+                return
+
             travel_date = date.today() + timedelta(days=window)
             async with semaphore:
+                if skip_remaining:
+                    completed_tasks += 1
+                    return
                 try:
                     result = await asyncio.wait_for(
                         scraper.scrape(route, travel_date, window),
@@ -272,10 +287,10 @@ async def run_batch(
                     pct = (completed_tasks / total_tasks) * 100
 
                     if result.is_success:
-                        success_count += 1
-                        source_summary[source_name]["success"] += 1
-
                         if result.fares:
+                            consecutive_empty_or_fail = 0
+                            success_count += 1
+                            source_summary[source_name]["success"] += 1
                             cleaned = cleaner.clean_batch(result.fares)
                             deduped = Deduplicator.deduplicate_in_memory(cleaned)
 
@@ -293,6 +308,9 @@ async def run_batch(
                             except Exception as e:
                                 logger.error(f"❌ DB insert failed for {route.pair}/{source_name}: {e}")
                         else:
+                            consecutive_empty_or_fail += 1
+                            success_count += 1
+                            source_summary[source_name]["success"] += 1
                             logger.info(
                                 f"📊 [{completed_tasks}/{total_tasks}] ({pct:.1f}%) | "
                                 f"✈️ {route.pair}/{source_name}/T+{window}d: 0 flights found | "
@@ -300,6 +318,7 @@ async def run_batch(
                             )
 
                     elif result.is_blocked:
+                        consecutive_empty_or_fail += 1
                         blocked_count += 1
                         source_summary[source_name]["blocked"] += 1
                         logger.warning(
@@ -309,7 +328,7 @@ async def run_batch(
                         )
 
                     else:
-                        # FAILED, NO_FLIGHTS, SOLD_OUT, DISALLOWED
+                        consecutive_empty_or_fail += 1
                         if result.status in (ScrapeStatus.NO_FLIGHTS, ScrapeStatus.SOLD_OUT):
                             success_count += 1
                             source_summary[source_name]["success"] += 1
@@ -322,7 +341,15 @@ async def run_batch(
                             f"Remaining: {total_tasks - completed_tasks}"
                         )
 
+                    if consecutive_empty_or_fail >= 3 and not skip_remaining:
+                        skip_remaining = True
+                        logger.warning(
+                            f"⚡ Circuit breaker triggered for {source_name}: "
+                            f"3 consecutive empty/failed attempts. Skipping remaining tasks for {source_name}."
+                        )
+
                 except asyncio.TimeoutError:
+                    consecutive_empty_or_fail += 1
                     completed_tasks += 1
                     pct = (completed_tasks / total_tasks) * 100
                     failed_count += 1
@@ -332,8 +359,15 @@ async def run_batch(
                         f"⏱️ TIMEOUT (120s): {route.pair}/{source_name}/T+{window}d | "
                         f"Remaining: {total_tasks - completed_tasks}"
                     )
+                    if consecutive_empty_or_fail >= 3 and not skip_remaining:
+                        skip_remaining = True
+                        logger.warning(
+                            f"⚡ Circuit breaker triggered for {source_name}: "
+                            f"3 consecutive timeouts/failures. Skipping remaining tasks for {source_name}."
+                        )
 
                 except Exception as e:
+                    consecutive_empty_or_fail += 1
                     completed_tasks += 1
                     pct = (completed_tasks / total_tasks) * 100
                     failed_count += 1
@@ -343,11 +377,17 @@ async def run_batch(
                         f"❌ ERROR: {route.pair}/{source_name}/T+{window}d: {e} | "
                         f"Remaining: {total_tasks - completed_tasks}"
                     )
+                    if consecutive_empty_or_fail >= 3 and not skip_remaining:
+                        skip_remaining = True
+                        logger.warning(
+                            f"⚡ Circuit breaker triggered for {source_name}: "
+                            f"3 consecutive errors. Skipping remaining tasks for {source_name}."
+                        )
 
         coros = [
             _scrape_single(route, window)
             for route in route_objs
-            for window in windows
+            for window in source_windows
         ]
         await asyncio.gather(*coros)
 

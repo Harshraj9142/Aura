@@ -68,27 +68,7 @@ class IndiGoScraper(BaseScraper):
     async def _navigate_and_search(
         self, page: Page, route: Route, travel_date: date, advance_days: int
     ) -> None:
-        """Direct URL navigation with cookie warmup."""
-        # Step 1: Visit homepage to establish session
-        try:
-            logger.debug("IndiGo: Initializing session at homepage...")
-            await page.goto(self.base_url, wait_until="commit", timeout=15000)
-            await asyncio.sleep(2)
-        except Exception as e:
-            logger.debug(f"IndiGo homepage init notice: {e}")
-
-        # Dismiss popups/cookies
-        for selector in [self.SEL_COOKIE_ACCEPT, self.SEL_POPUP_CLOSE]:
-            for sel in selector.split(", "):
-                try:
-                    el = await page.query_selector(sel)
-                    if el and await el.is_visible():
-                        await el.click()
-                        await asyncio.sleep(0.5)
-                except Exception:
-                    pass
-
-        # Step 2: Navigate to search results URL
+        """Direct URL navigation (fast path)."""
         url = self._build_search_url(route, travel_date, advance_days)
         logger.debug(f"IndiGo: Navigating to: {url}")
 

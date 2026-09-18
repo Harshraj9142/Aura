@@ -41,14 +41,6 @@ class GoibiboScraper(BaseScraper):
     async def _navigate_and_search(
         self, page: Page, route: Route, travel_date: date, advance_days: int
     ) -> None:
-        # Step 1: Homepage warmup
-        try:
-            logger.debug("Goibibo: Initializing session at homepage...")
-            await page.goto(self.base_url, wait_until="commit", timeout=15000)
-            await asyncio.sleep(2)
-        except Exception as e:
-            logger.debug(f"Goibibo homepage init notice: {e}")
-
         url = self._build_search_url(route, travel_date, advance_days)
         logger.debug(f"Goibibo: Navigating to: {url}")
 

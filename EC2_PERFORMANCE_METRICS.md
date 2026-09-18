@@ -81,3 +81,39 @@ Based on the measured footprint of **~200 MiB to 250 MiB per active Chromium tab
 * **Deduplication Ratio**: ~99 raw fares → 90 unique fares (~9% duplicates removed).
 * **Upsert Latency**: **~1.2 seconds** for 90 fare records via `Deduplicator.upsert_fares`.
 * **Table Growth**: ~3.2 kB per 100 fares stored. Total database footprint is currently **~14 MB** out of Neon's 512 MB free tier allowance.
+
+---
+
+## 🧪 7. Empirical Source Audit & Yield Benchmark (DEL-BOM, T+7d)
+
+Tested across all configured sources under headless Playwright execution:
+
+| Source | Category | Status | Yield | Duration | Operational Assessment |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **`easemytrip`** | OTA | ✅ **PASS** | **100 fares** | 26.6s *(12s direct)* | **Primary Workhorse**: Captures IndiGo, Air India, Akasa, SpiceJet across all routes. |
+| **`ixigo`** | OTA | ✅ **PASS** | **3–15 fares** | **16.1s** *(8s direct)* | **Fast Multi-carrier**: Low latency, smooth parsing. |
+| **`spicejet`** | Airline | ✅ **PASS** | **26 fares** | **12.6s** | **High-speed Direct Carrier**: Fastest execution, reliable DOM structure. |
+| **`air_india_express`**| Airline | ✅ **PASS** | **18 fares** | 31.3s | **Reliable Direct Carrier**: Scheduled feed integration. |
+| **`cleartrip`** | OTA | ⚠️ **PROBE** | 0 fares | 14.5s | Skeleton DOM / Flipkart anti-bot; reduced to exploratory probe (`T+1, T+7`). |
+| **`indigo`** | Airline | ⚠️ **PROBE** | 0 fares | 19.7s | Direct portal session challenge; reduced to exploratory probe (`T+1, T+7`). |
+| **`makemytrip`** | OTA | ❌ **DISABLED**| 0 fares | >35.0s (Timeout) | Akamai Bot Manager hard-block; disabled to prevent CPU starvation. |
+| **`goibibo`** | OTA | ❌ **DISABLED**| 0 fares | >35.0s (Timeout) | Shares MakeMyTrip Akamai stack; disabled. |
+| **`yatra`** | OTA | ❌ **DISABLED**| 0 fares | >35.0s (Timeout) | Anti-bot challenge loops; disabled. |
+| **`akasa`** | Airline | ❌ **DISABLED**| 0 fares | >35.0s (Timeout) | Direct cloud IP timeout; disabled (all flights captured via EaseMyTrip). |
+| **`air_india`** | Airline | ❌ **DISABLED**| 0 fares | >30.0s (Timeout) | Direct cloud IP block; disabled (all flights captured via EaseMyTrip). |
+
+---
+
+## 🛡️ 8. High-Throughput Pipeline Strategy
+
+To maximize database growth while maintaining near-zero wasted compute:
+
+1. **Prioritized Execution Order**:
+   * **Stage 1 (Guaranteed Multi-Carrier Aggregators)**: `easemytrip` ➜ `ixigo`
+   * **Stage 2 (Fast Direct Airlines)**: `spicejet` ➜ `air_india_express`
+   * **Stage 3 (Exploratory Probing)**: `cleartrip` ➜ `indigo` (reduced to `windows: [1, 7]`)
+2. **Dynamic Circuit Breaker**:
+   * If any source records **3 consecutive empty or failed searches**, the engine immediately logs a warning and skips the remaining routes for that source for the current hour.
+3. **Configurable Concurrency**:
+   * Controllable via `SCRAPER_CONCURRENCY=2` (or `3`) in `.env` without modifying codebase.
+

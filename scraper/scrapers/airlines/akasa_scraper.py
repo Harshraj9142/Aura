@@ -45,16 +45,6 @@ class AkasaScraper(BaseScraper):
     async def _navigate_and_search(
         self, page: Page, route: Route, travel_date: date, advance_days: int
     ) -> None:
-        """URL-based navigation with homepage cookie warmup."""
-        # Step 1: Visit homepage for cookies
-        try:
-            logger.debug("Akasa Air: Initializing session at homepage...")
-            await page.goto(self.base_url, wait_until="commit", timeout=15000)
-            await asyncio.sleep(2)
-        except Exception as e:
-            logger.debug(f"Akasa homepage init notice: {e}")
-
-        # Step 2: Navigate to search URL
         url = self._build_search_url(route, travel_date, advance_days)
         logger.debug(f"Akasa Air: Navigating to: {url}")
 

@@ -42,16 +42,9 @@ class IxigoScraper(BaseScraper):
     async def _navigate_and_search(
         self, page: Page, route: Route, travel_date: date, advance_days: int
     ) -> None:
-        try:
-            logger.debug("Ixigo: Initializing session at homepage...")
-            await page.goto(self.base_url, wait_until="domcontentloaded", timeout=15000)
-            await asyncio.sleep(1)
-        except Exception as e:
-            logger.debug(f"Ixigo: Homepage session notice: {e}")
-
         url = self._build_search_url(route, travel_date, advance_days)
         logger.debug(f"Ixigo: Navigating to: {url}")
-        await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+        await page.goto(url, wait_until="domcontentloaded", timeout=25000)
 
         # Dismiss popups
         for sel in self.SEL_POPUP_CLOSE.split(", "):
