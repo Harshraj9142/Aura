@@ -262,7 +262,10 @@ async def run_batch(
             travel_date = date.today() + timedelta(days=window)
             async with semaphore:
                 try:
-                    result = await scraper.scrape(route, travel_date, window)
+                    result = await asyncio.wait_for(
+                        scraper.scrape(route, travel_date, window),
+                        timeout=60.0,
+                    )
 
                     if result.is_success:
                         success_count += 1
@@ -273,12 +276,18 @@ async def run_batch(
                             deduped = Deduplicator.deduplicate_in_memory(cleaned)
 
                             try:
+                                logger.info(
+                                    f"💾 Pushing {len(deduped)} fares to Neon DB for {route.pair}/{source_name}..."
+                                )
                                 with get_session() as session:
                                     count = Deduplicator.upsert_fares(session, deduped)
                                     total_fares += count
                                     source_summary[source_name]["fares"] += count
+                                logger.info(
+                                    f"✅ Successfully pushed {count} fares to DB for {route.pair}/{source_name} (Total run fares: {total_fares})"
+                                )
                             except Exception as e:
-                                logger.error(f"DB insert failed for {route.pair}/{source_name}: {e}")
+                                logger.error(f"❌ DB insert failed for {route.pair}/{source_name}: {e}")
 
                     elif result.is_blocked:
                         blocked_count += 1

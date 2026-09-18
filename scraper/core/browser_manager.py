@@ -214,6 +214,10 @@ class BrowserManager:
 
         # Fallback / Local: Launch local Chromium
         launch_args = [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
             "--disable-blink-features=AutomationControlled",
             "--disable-features=IsolateOrigins,site-per-process",
             "--disable-http2",
