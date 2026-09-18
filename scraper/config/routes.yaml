@@ -32,6 +32,26 @@ routes:
     name: "Chennai–Delhi"
     enabled: true
 
+  - origin: BOM
+    destination: DEL
+    name: "Mumbai–Delhi"
+    enabled: true
+
+  - origin: BLR
+    destination: DEL
+    name: "Bangalore–Delhi"
+    enabled: true
+
+  - origin: DEL
+    destination: HYD
+    name: "Delhi–Hyderabad"
+    enabled: true
+
+  - origin: BOM
+    destination: GOI
+    name: "Mumbai–Goa"
+    enabled: true
+
 # Advance-purchase windows (days from today)
 advance_purchase_windows:
   - 1
