@@ -16,7 +16,6 @@ from __future__ import annotations
 
 from typing import Optional
 
-import pandas as pd
 from loguru import logger
 
 from config.settings import settings
@@ -132,30 +131,37 @@ class FareCleaner:
 
     def get_summary_stats(self, fares: list[FareRecord]) -> dict:
         """
-        Generate summary statistics for a batch of fares using pandas.
+        Generate summary statistics for a batch of fares using pure Python.
 
         Useful for logging and monitoring.
         """
         if not fares:
             return {"count": 0}
 
-        df = pd.DataFrame([f.model_dump() for f in fares])
+        total_fares = [f.total_fare for f in fares]
+        outlier_count = sum(1 for f in fares if f.is_outlier)
+        warning_count = sum(1 for f in fares if f.validation_warnings)
+        unique_sources = len({f.source for f in fares})
+        unique_carriers = len({f.carrier for f in fares if f.carrier})
+        unique_routes = len({f"{f.route_origin}-{f.route_destination}" for f in fares})
 
-        stats = {
-            "count": len(df),
-            "outlier_count": int(df["is_outlier"].sum()),
-            "min_fare": float(df["total_fare"].min()),
-            "max_fare": float(df["total_fare"].max()),
-            "mean_fare": float(df["total_fare"].mean()),
-            "median_fare": float(df["total_fare"].median()),
-            "sources": df["source"].nunique(),
-            "carriers": df["carrier"].nunique(),
-            "routes": df.apply(
-                lambda r: f"{r['route_origin']}-{r['route_destination']}", axis=1
-            ).nunique(),
-            "records_with_warnings": int(
-                df["validation_warnings"].apply(lambda w: len(w) > 0).sum()
-            ),
+        sorted_fares = sorted(total_fares)
+        n = len(sorted_fares)
+        median_fare = (
+            sorted_fares[n // 2]
+            if n % 2 != 0
+            else (sorted_fares[n // 2 - 1] + sorted_fares[n // 2]) / 2.0
+        )
+
+        return {
+            "count": n,
+            "outlier_count": outlier_count,
+            "min_fare": min(total_fares),
+            "max_fare": max(total_fares),
+            "mean_fare": sum(total_fares) / n,
+            "median_fare": float(median_fare),
+            "sources": unique_sources,
+            "carriers": unique_carriers,
+            "routes": unique_routes,
+            "records_with_warnings": warning_count,
         }
-
-        return stats
