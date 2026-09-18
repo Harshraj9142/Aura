@@ -72,7 +72,7 @@ interface HealthData {
 export default function HealthDashboardPage() {
   const [data, setData] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchHealth = async () => {
@@ -145,7 +145,10 @@ export default function HealthDashboardPage() {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono font-semibold bg-white border border-slate-200 hover:border-slate-300 text-slate-700 shadow-xs hover:shadow-sm transition-all"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin text-[#08080D]" : ""}`} />
-                Last ping: {lastRefreshed.toLocaleTimeString()}
+                Last ping:{" "}
+                <span suppressHydrationWarning>
+                  {lastRefreshed ? lastRefreshed.toLocaleTimeString() : "—"}
+                </span>
               </button>
             </div>
           </div>
