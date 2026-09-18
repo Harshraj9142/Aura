@@ -1,11 +1,11 @@
 # 🚀 Aura Airfare Scraper — AWS EC2 (Mumbai) Deployment Guide
 
-This guide details how to deploy the Aura airfare scraping engine from scratch to **100% automated 24/7 background execution** on an Amazon Web Services (AWS) EC2 instance.
+This guide provides a battle-tested, foolproof roadmap to deploy the Aura airfare scraper from scratch to **100% automated 24/7 background execution** on an Amazon Web Services (AWS) EC2 instance in Mumbai (`ap-south-1`).
 
 ---
 
 ## 📌 Why AWS Mumbai (`ap-south-1`)?
-* **Zero Geo-blocking**: Indian airline and OTA websites (EaseMyTrip, MakeMyTrip, Cleartrip, Ixigo, IndiGo) serve pages with <10ms latency to Mumbai IP addresses without blocking or tarpitting.
+* **Zero Geo-blocking**: Indian airline and OTA sites (EaseMyTrip, MakeMyTrip, Cleartrip, Ixigo, IndiGo) serve pages with <10ms latency to Mumbai IP addresses without blocking or tarpitting.
 * **Adequate Hardware**: 2 vCPUs and 2 GB RAM ensure headless Chromium launches in 1–2 seconds without crashing.
 * **Cost**: ~$15–$16/month on a `t3.small` instance, covered for 6 months by AWS $100 promotional credits.
 
@@ -19,6 +19,7 @@ This guide details how to deploy the Aura airfare scraping engine from scratch t
 4. **Configure the Instance**:
    * **Name**: `aura-scraper`
    * **OS (AMI)**: **Ubuntu Server 24.04 LTS (HVM)**, SSD Volume Type.
+     *(Avoid daily/experimental preview releases like 26.04 "Resolute" which ship with unstable alpha Python 3.14).*
    * **Instance type**: `t3.small` (2 vCPU, 2 GiB RAM) *(or `t3.micro` for free tier)*.
    * **Key pair**: Create a new key pair or select existing (e.g. `aura-key.pem`).
    * **Network Settings**: Leave default, check **"Allow SSH traffic from Anywhere"**.
@@ -35,29 +36,36 @@ This guide details how to deploy the Aura airfare scraping engine from scratch t
 
 ---
 
-## 3. One-Command Complete Setup Script
+## 3. Universal 1-Click Bootstrap Script (Zero Compilation)
 
-Once inside the EC2 terminal, copy and paste this entire block to install all system dependencies, clone the repo, set up Python, install Chromium, and configure the database:
+This script installs `git`, installs official standalone **Python 3.12** (via Astral `uv`), clones the repository, installs all pre-built `.whl` dependencies (zero C++ compilation), installs Chromium with system dependencies, and writes the `.env` database configuration:
+
+Copy and paste this entire block into the EC2 terminal:
 
 ```bash
-# 1. Update OS and install system libraries
-sudo apt update && sudo apt install -y python3-pip python3-venv git
+# 1. Install git & system utilities
+sudo apt update && sudo apt install -y git curl
 
-# 2. Clone the repository
+# 2. Install Astral uv (guarantees clean standalone Python 3.12 on any Linux distribution)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+
+# 3. Clone the repository
 cd ~
 git clone https://github.com/Harshraj9142/Aura.git
 cd Aura/scraper
 
-# 3. Create virtual environment and install dependencies (takes 5 seconds)
-python3 -m venv venv
+# 4. Create an isolated Python 3.12 virtual environment
+uv venv --python 3.12 venv
 source venv/bin/activate
-pip install --upgrade pip
+
+# 5. Install all scraper dependencies (all pre-built wheels, takes 5 seconds!)
 pip install -r requirements.txt
 
-# 4. Install Chromium and all Linux browser dependencies
-python3 -m playwright install --with-deps chromium
+# 6. Install Chromium browser & required Linux graphics libraries
+python -m playwright install --with-deps chromium
 
-# 5. Create .env configuration with Neon PostgreSQL DB URL
+# 7. Create .env configuration with your Neon PostgreSQL DB URL
 cat << 'EOF' > .env
 DATABASE_URL="postgresql://neondb_owner:npg_2fJs9BIdQGLF@ep-quiet-dawn-a5axks35-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
 EOF
@@ -67,7 +75,7 @@ EOF
 
 ## 4. Test a Single Live Scrape
 
-Verify that Playwright and the database connection work properly:
+Verify that Chromium and the Neon DB upsert pipeline execute cleanly:
 
 ```bash
 cd ~/Aura/scraper
@@ -75,14 +83,19 @@ source venv/bin/activate
 python main.py --run-now --source easemytrip --route DEL-BOM --advance-days 1
 ```
 
-*Expected output*: Finds ~100 flights in 5–10 seconds and outputs:
-`✅ Successfully pushed 99 fares to DB for DEL-BOM/easemytrip`.
+*Expected output*:
+```text
+🔍 Scraping easemytrip | DEL-BOM | T+1d | 2026-09-20
+✅ easemytrip | DEL-BOM | T+1d | 100 fares found | 6.2s
+💾 Pushing 99 fares to Neon DB for DEL-BOM/easemytrip...
+✅ Successfully pushed 99 fares to DB for DEL-BOM/easemytrip (Total run fares: 99)
+```
 
 ---
 
 ## 5. Setting Up 24/7 Background Automation (systemd)
 
-To ensure the scraper runs continuously in the background, automatically starts on server reboots, and automatically restarts if an error occurs, create a **systemd service**.
+To ensure the scraper runs automatically on server reboots, never stops when you close your browser, and restarts automatically in case of any transient crash, set up a **systemd service**.
 
 ### Step 5.1: Create the service file
 
@@ -98,7 +111,7 @@ After=network.target
 Type=simple
 User=ubuntu
 WorkingDirectory=/home/ubuntu/Aura/scraper
-Environment="PATH=/home/ubuntu/Aura/scraper/venv/bin:/usr/bin"
+Environment="PATH=/home/ubuntu/Aura/scraper/venv/bin:/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
 ExecStart=/home/ubuntu/Aura/scraper/venv/bin/python main.py
 Restart=always
 RestartSec=10
@@ -120,10 +133,10 @@ sudo chown ubuntu:ubuntu /var/log/aura-scraper.log
 ### Step 5.3: Enable and Start the Service
 
 ```bash
-# Reload systemd to detect the new service
+# Reload systemd daemon
 sudo systemctl daemon-reload
 
-# Enable service to start automatically on system boot
+# Enable service on boot
 sudo systemctl enable aura-scraper
 
 # Start the scraper service now
@@ -132,33 +145,20 @@ sudo systemctl start aura-scraper
 
 ---
 
-## 6. Daily Operations & Management Commands
+## 6. Daily Operations & Monitoring Commands
 
-### Check if the scraper is running:
-```bash
-sudo systemctl status aura-scraper
-```
-
-### View live scraper logs in real time:
-```bash
-tail -f /var/log/aura-scraper.log
-```
-
-### Restart the scraper (e.g. after updating code via `git pull`):
-```bash
-sudo systemctl restart aura-scraper
-```
-
-### Stop the scraper:
-```bash
-sudo systemctl stop aura-scraper
-```
+| Action | Command |
+| :--- | :--- |
+| **Check service status** | `sudo systemctl status aura-scraper` |
+| **View live logs in real time** | `tail -f /var/log/aura-scraper.log` |
+| **Restart the service** | `sudo systemctl restart aura-scraper` |
+| **Stop the service** | `sudo systemctl stop aura-scraper` |
 
 ---
 
 ## 7. Updating Code in the Future
 
-Whenever you make changes to the scraper and push to GitHub, update your EC2 server in 3 commands:
+Whenever you push updates to GitHub `main`, update your running EC2 service in 3 commands:
 
 ```bash
 cd ~/Aura
@@ -168,11 +168,10 @@ sudo systemctl restart aura-scraper
 
 ---
 
-## 8. AWS Cost Safety Tips
+## 8. AWS Budget Safety Alert (Prevents Overages)
 
-1. **Set an AWS Budget**:
-   * Go to **AWS Billing & Cost Management** → **Budgets** → **Create Budget**.
-   * Set a monthly budget of **$20.00**.
-   * Enter your email to receive an alert if your monthly forecast ever reaches 85% ($17).
-2. **Instance State**:
-   * If you ever want to pause scraping to save credits, simply select the instance in the EC2 Console and choose **Instance state** → **Stop instance**. You can restart it anytime with 1 click.
+1. In AWS Console search bar, type **Billing** and select **Budgets**.
+2. Click **Create budget** → choose **Zero spend budget** or **Cost budget**.
+3. Set amount to **$20.00 / month**.
+4. Enter your email address for threshold alerts (e.g. at 80% = $16).
+5. This ensures you never exceed your $100 promotional credit.
