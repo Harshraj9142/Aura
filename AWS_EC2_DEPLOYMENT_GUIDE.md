@@ -40,15 +40,15 @@ This guide details how to deploy the Aura airfare scraping engine from scratch t
 Once inside the EC2 terminal, copy and paste this entire block to install all system dependencies, clone the repo, set up Python, install Chromium, and configure the database:
 
 ```bash
-# 1. Update OS and install system libraries + C compiler tools
-sudo apt update && sudo apt install -y python3-pip python3-venv git build-essential python3-dev
+# 1. Update OS and install system libraries
+sudo apt update && sudo apt install -y python3-pip python3-venv git
 
 # 2. Clone the repository
 cd ~
 git clone https://github.com/Harshraj9142/Aura.git
 cd Aura/scraper
 
-# 3. Create virtual environment and install dependencies
+# 3. Create virtual environment and install dependencies (takes 5 seconds)
 python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
