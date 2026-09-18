@@ -110,6 +110,13 @@ As mandated by MoSPI SIH26056, the representative basket mirrors the **Directora
 * **Problem:** Running all routes sequentially on a single platform (e.g. 50 consecutive queries to `spicejet.com`) caused Akamai/Cloudflare WAFs to detect an automated burst from our EC2 IP and trigger rate-limits (`"please try again later"`).
 * **Solution:** Refactored `run_batch()` to schedule tasks in an **interleaved round-robin sequence** (`Route 1: EaseMyTrip ➔ Ixigo ➔ SpiceJet`, `Route 2: EaseMyTrip ➔ Ixigo ➔ SpiceJet`). With concurrency = 3, at any single second at most **1 browser** connects to any single website, providing a natural 20–30s breathing room between queries to the same domain. Total batch runtime remains ~5 minutes while WAF rate-limiting drops to near zero.
 
+### Decision 7: Triple-Layered Process & Browser Lifecycle Cleanup
+* **Problem:** Unhandled browser crashes or service restarts could leave orphaned Chromium (`headless_shell`) or Node driver processes consuming memory and file descriptors on the EC2 instance.
+* **Solution:** Enforced strict cleanup across 3 independent layers:
+  1. **Python Async Context Manager (`__aexit__`)**: Explicitly awaits `context.close()`, `browser.close()`, and `playwright.stop()` on every search completion, timeout, cancellation, or error.
+  2. **OS Broken-Pipe Tethering**: Headless Chromium is tethered via `--remote-debugging-pipe`; if the parent Python process terminates, the OS breaks the pipe and Chromium exits automatically.
+  3. **Linux Systemd CGroup Isolation**: `aura-scraper.service` runs under systemd with `KillMode=control-group`, broadcasting `SIGTERM`/`SIGKILL` to all child PIDs upon service stop or restart.
+
 ---
 
 ## 5. WOW Factors for MoSPI / SIH Evaluators
