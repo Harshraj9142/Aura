@@ -106,6 +106,10 @@ As mandated by MoSPI SIH26056, the representative basket mirrors the **Directora
 * **Requirement:** Telemetry dashboard needed to inspect system health, database latency, and rate-limit breakdowns without adding buttons or links to the public navigation.
 * **Solution:** Created `/health` in Next.js (`web/app/health/page.tsx`) with dark-mode glassmorphism and real-time refresh, accessible **strictly by typing the direct URL**.
 
+### Decision 6: Interleaved Round-Robin Source Scheduling (Domain Jittering)
+* **Problem:** Running all routes sequentially on a single platform (e.g. 50 consecutive queries to `spicejet.com`) caused Akamai/Cloudflare WAFs to detect an automated burst from our EC2 IP and trigger rate-limits (`"please try again later"`).
+* **Solution:** Refactored `run_batch()` to schedule tasks in an **interleaved round-robin sequence** (`Route 1: EaseMyTrip ➔ Ixigo ➔ SpiceJet`, `Route 2: EaseMyTrip ➔ Ixigo ➔ SpiceJet`). With concurrency = 3, at any single second at most **1 browser** connects to any single website, providing a natural 20–30s breathing room between queries to the same domain. Total batch runtime remains ~5 minutes while WAF rate-limiting drops to near zero.
+
 ---
 
 ## 5. WOW Factors for MoSPI / SIH Evaluators
