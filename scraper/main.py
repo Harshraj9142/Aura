@@ -245,16 +245,22 @@ async def run_batch(
             source_summary[source_name]["failed"] = len(routes_config) * len(windows)
             continue
 
-        for route_config in routes_config:
-            route = Route(
+        route_objs = [
+            Route(
                 origin=route_config["origin"],
                 destination=route_config["destination"],
                 name=route_config.get("name"),
             )
+            for route_config in routes_config
+        ]
 
-            for window in windows:
-                travel_date = date.today() + timedelta(days=window)
+        # Process with safe concurrency = 2 (optimal for Render 512MB RAM)
+        semaphore = asyncio.Semaphore(2)
 
+        async def _scrape_single(route: Route, window: int):
+            nonlocal success_count, failed_count, blocked_count, total_fares
+            travel_date = date.today() + timedelta(days=window)
+            async with semaphore:
                 try:
                     result = await scraper.scrape(route, travel_date, window)
 
@@ -293,6 +299,13 @@ async def run_batch(
                     )
                     failed_count += 1
                     source_summary[source_name]["failed"] += 1
+
+        coros = [
+            _scrape_single(route, window)
+            for route in route_objs
+            for window in windows
+        ]
+        await asyncio.gather(*coros)
 
     # Update scrape run record
     completed_at = datetime.utcnow()

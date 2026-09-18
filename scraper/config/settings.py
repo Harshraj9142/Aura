@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     max_delay: float = 8.0
 
     # Retry configuration
-    max_retries: int = 3
+    max_retries: int = 1
 
     # Fare validation thresholds (INR)
     fare_min_threshold: float = 500.0
@@ -68,7 +68,7 @@ class Settings(BaseSettings):
 
     # Browser settings
     headless: bool = True
-    browser_timeout: int = 30000  # milliseconds
+    browser_timeout: int = 15000  # 15 seconds max to fail fast on unresponsive sites
 
     # Browserbase Cloud Browser integration
     browserbase_api_key: Optional[str] = None
@@ -140,19 +140,19 @@ def get_advance_windows() -> list[int]:
 
 
 def get_enabled_sources() -> list[dict]:
-    """Return all enabled sources (airlines + OTAs) from the config."""
+    """Return all enabled sources (OTAs first for fast high-yield aggregation, then direct airlines)."""
     config = load_sources_config()
     sources = []
-
-    for airline in config.get("airlines", []):
-        if airline.get("enabled", True):
-            airline["source_type"] = "airline"
-            sources.append(airline)
 
     for ota in config.get("otas", []):
         if ota.get("enabled", True):
             ota["source_type"] = "ota"
             sources.append(ota)
+
+    for airline in config.get("airlines", []):
+        if airline.get("enabled", True):
+            airline["source_type"] = "airline"
+            sources.append(airline)
 
     return sources
 
