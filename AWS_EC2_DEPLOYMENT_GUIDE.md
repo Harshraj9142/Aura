@@ -112,7 +112,7 @@ Type=simple
 User=ubuntu
 WorkingDirectory=/home/ubuntu/Aura/scraper
 Environment="PATH=/home/ubuntu/Aura/scraper/venv/bin:/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
-ExecStart=/home/ubuntu/Aura/scraper/venv/bin/python main.py
+ExecStart=/home/ubuntu/Aura/scraper/venv/bin/python main.py --schedule
 Restart=always
 RestartSec=10
 StandardOutput=append:/var/log/aura-scraper.log
