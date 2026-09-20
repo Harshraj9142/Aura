@@ -334,10 +334,10 @@ export default function GrievanceDashboardPage() {
             />
           </>
         )}
-
-        {/* Closing Quote Banner */}
-        <DashboardClosingBanner quote="EVERY FARE HAS A STORY. EVERY COMPLAINT HAS A SIGNAL." />
       </div>
+
+      {/* Closing Quote Banner */}
+      <DashboardClosingBanner quote="EVERY FARE HAS A STORY. EVERY COMPLAINT HAS A SIGNAL." />
     </div>
   );
 }

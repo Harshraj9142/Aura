@@ -122,10 +122,10 @@ export default async function HeatmapPage({ searchParams }: HeatmapPageProps) {
         </div>
 
         <HeatmapGrid data={heatmapData} />
-
-        {/* Closing Quote Banner */}
-        <DashboardClosingBanner quote="SEE WHERE INDIA MOVES. SEE WHERE PRICES MOVE." />
       </div>
+
+      {/* Closing Quote Banner */}
+      <DashboardClosingBanner quote="SEE WHERE INDIA MOVES. SEE WHERE PRICES MOVE." />
     </div>
   );
 }

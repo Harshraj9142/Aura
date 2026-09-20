@@ -195,10 +195,10 @@ export default async function ElasticityPage({ searchParams }: ElasticityPagePro
             baseBenchmark={baseBenchmark}
           />
         </div>
-
-        {/* Closing Quote Banner */}
-        <DashboardClosingBanner quote="TIME CHANGES THE FARE. WE MEASURE WHEN." />
       </div>
+
+      {/* Closing Quote Banner */}
+      <DashboardClosingBanner quote="TIME CHANGES THE FARE. WE MEASURE WHEN." />
     </div>
   );
 }
