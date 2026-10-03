@@ -14,7 +14,7 @@
 **Problem Statement ID: SIH26056** — *Developing a Real-Time Airfare Price Index for Headline CPI Integration*
 **Submitted to:** Ministry of Statistics & Programme Implementation (MoSPI) / National Statistical Office (NSO)
 
-[Live Dashboard](https://aura-jet-three.vercel.app/) · [API Docs](https://aura-jet-three.vercel.app/dashboard/api-docs#description/introduction) · [Mathematical Specification](README_AIRFARE_INDEX.md) · [Project Status](PROJECT_STATUS.md)
+[Live Dashboard](https://aura-jet-three.vercel.app/) · [API Docs](https://aura-jet-three.vercel.app/dashboard/api-docs#description/introduction) · [Mathematical Specification](README_AIRFARE_INDEX.md)
 
 </div>
 
@@ -182,7 +182,6 @@ Operating on EC2 + Neon keeps recurring infrastructure cost **under $20/month** 
 ## 📚 Documentation
 
 - [`README_AIRFARE_INDEX.md`](README_AIRFARE_INDEX.md) — mathematical specification, economic methodology, axiomatic proofs
-- [`PROJECT_STATUS.md`](PROJECT_STATUS.md) — architecture, live deployment status, and all recorded engineering decisions
 - [`AWS_EC2_DEPLOYMENT_GUIDE.md`](AWS_EC2_DEPLOYMENT_GUIDE.md) — production deployment runbook
 - [`EC2_PERFORMANCE_METRICS.md`](EC2_PERFORMANCE_METRICS.md) — resource benchmarks
 
