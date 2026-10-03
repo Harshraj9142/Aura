@@ -14,7 +14,7 @@
 **Problem Statement ID: SIH26056** — *Developing a Real-Time Airfare Price Index for Headline CPI Integration*
 **Submitted to:** Ministry of Statistics & Programme Implementation (MoSPI) / National Statistical Office (NSO)
 
-[Live Dashboard](https://aura-jet-three.vercel.app/) · [API Docs](https://aura-jet-three.vercel.app/api/docs) · [Mathematical Specification](README_AIRFARE_INDEX.md) · [Project Status](PROJECT_STATUS.md)
+[Live Dashboard](https://aura-jet-three.vercel.app/) · [API Docs](https://aura-jet-three.vercel.app/dashboard/api-docs#description/introduction) · [Mathematical Specification](README_AIRFARE_INDEX.md) · [Project Status](PROJECT_STATUS.md)
 
 </div>
 
