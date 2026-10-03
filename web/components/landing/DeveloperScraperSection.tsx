@@ -18,7 +18,7 @@ export function DeveloperScraperSection() {
 
       <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
         <Link
-          href="/dashboard/scrape"
+          href="/dashboard/console"
           className="inline-flex items-center gap-2.5 rounded-full bg-[#08080D] hover:bg-slate-800 text-white px-6 py-3 text-xs sm:text-sm font-bold transition shadow-lg cursor-pointer active:scale-95"
         >
           <Terminal className="h-4 w-4 text-purple-400" />
@@ -27,7 +27,7 @@ export function DeveloperScraperSection() {
         </Link>
 
         <Link
-          href="/api-docs"
+          href="/dashboard/api-docs#description/introduction"
           className="inline-flex items-center gap-2.5 rounded-full bg-white hover:bg-slate-50 text-[#08080D] border border-slate-200 shadow-sm px-6 py-3 text-xs sm:text-sm font-bold transition cursor-pointer active:scale-95"
         >
           <Code2 className="h-4 w-4 text-purple-600" />
